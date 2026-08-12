@@ -23,7 +23,6 @@ const importCommon = require('./import-common');
 const vault = require('./vault');
 const backup = require('./backup');
 const account = require('./account');
-const serverSync = require('./server-sync');
 const monitor = require('./monitor');
 const cloudSnapshot = require('./cloud-snapshot');
 const activity = require('./activity');
@@ -181,11 +180,6 @@ function register(getWindow) {
     };
 
     transfers.setNotifier(notify);
-
-    // Schedules the launch sync and the interval behind it. Safe to call while
-    // signed out or locked: it settles into doing nothing and retries when the
-    // vault is unlocked.
-    serverSync.start(notify);
 
     // The reachability poller. Given the window as well as the notifier because
     // it raises Windows notifications of its own, and a toast that is clicked
@@ -379,7 +373,7 @@ function register(getWindow) {
      */
     handle('create-hello-key', async (event, { name, comment } = {}) => {
         const id = `key-${Date.now()}`;
-        const credential = `cloudblast-${id}`;
+        const credential = `reefterm-${id}`;
         const enrolled = await hello.create(credential, comment || 'windows-hello');
 
         try {
@@ -939,8 +933,8 @@ function register(getWindow) {
         const stamp = new Date().toISOString().slice(0, 10);
         const { canceled, filePath } = await dialog.showSaveDialog(getWindow(), {
             title: 'Save encrypted backup',
-            defaultPath: `cloudblast-backup-${stamp}.cbbackup`,
-            filters: [{ name: 'CloudBlast backup', extensions: ['cbbackup'] }],
+            defaultPath: `reefterm-backup-${stamp}.reefbackup`,
+            filters: [{ name: 'Reef Terminal backup', extensions: ['reefbackup'] }],
         });
         if (canceled || !filePath) return { success: false, canceled: true };
 
@@ -987,7 +981,7 @@ function register(getWindow) {
                 title: 'Open encrypted backup',
                 properties: ['openFile'],
                 filters: [
-                    { name: 'CloudBlast backup', extensions: ['cbbackup'] },
+                    { name: 'Reef Terminal backup', extensions: ['reefbackup'] },
                     { name: 'All Files', extensions: ['*'] },
                 ],
             });
@@ -1112,8 +1106,7 @@ function register(getWindow) {
              * events when they land.
              */
             cloudSnapshot.pull({ force: true })
-                .catch(error => console.error('Post sign-in restore failed:', error.message))
-                .finally(() => serverSync.sync());
+                .catch(error => console.error('Post sign-in restore failed:', error.message));
 
             return { success: true, status };
         } catch (error) {
@@ -1165,25 +1158,6 @@ function register(getWindow) {
         } catch (error) {
             return { success: false, message: error.message, status: account.status() };
         }
-    });
-
-    handle('account-servers', async () => {
-        try {
-            return { success: true, servers: await account.servers() };
-        } catch (error) {
-            return { success: false, message: error.message, servers: [] };
-        }
-    });
-
-    /* ---------------- CloudBlast server sync ---------------- */
-
-    handle('server-sync-status', () => serverSync.status());
-
-    handle('server-sync-set-enabled', (event, enabled) => serverSync.setEnabled(enabled));
-
-    handle('server-sync-now', async () => {
-        const report = await serverSync.sync({ manual: true });
-        return { report, status: serverSync.status() };
     });
 
     /* ---------------- Host monitoring ---------------- */
@@ -1321,7 +1295,7 @@ function register(getWindow) {
         const stamp = new Date().toISOString().slice(0, 10);
         const { canceled, filePath } = await dialog.showSaveDialog(getWindow(), {
             title: 'Export activity log',
-            defaultPath: `cloudblast-activity-${stamp}.json`,
+            defaultPath: `reefterm-activity-${stamp}.json`,
             filters: [{ name: 'JSON', extensions: ['json'] }],
         });
         if (canceled || !filePath) return { success: false, canceled: true };

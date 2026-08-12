@@ -4,12 +4,11 @@
  * Two very different things end up here:
  *
  *   the output of `cat /etc/os-release` and `uname -a` from a live session, and
- *   the name of the template a CloudBlast server was built from ("Ubuntu 22.04").
+ *   the name of a provisioning template ("Ubuntu 22.04").
  *
- * They share this one table on purpose. When they had a vocabulary each, a
- * server synced from the panel and the same server after connecting could
- * disagree about what it was running, and the icon would change under the user
- * for no reason they could see.
+ * They share this one table on purpose, so a host classified from a template
+ * name and the same host after connecting cannot disagree about what it is
+ * running.
  *
  * Order matters: the derivatives come before the distributions they are built
  * on, or every Kubuntu is an Ubuntu and every Manjaro is an Arch.
@@ -80,13 +79,18 @@ function classifyShellOutput(output) {
 }
 
 /**
- * Classify a template name from the panel, e.g. "Ubuntu 22.04" or "Windows
+ * Classify a provisioning template name, e.g. "Ubuntu 22.04" or "Windows
  * Server 2022".
  *
  * Unlike shell output, this can genuinely fail to say anything: a template
  * called "Custom image" identifies nothing. It returns an empty os in that
  * case rather than guessing 'linux', so a caller can tell "I could not tell"
  * apart from "it is a Linux I do not have an icon for".
+ *
+ * Currently unused: the only caller was the CloudBlast VPS-sync feature this
+ * fork removed. Left in place as a small, generic, already-tested utility --
+ * a template-name classifier is a reasonable thing for a future provider
+ * integration to want again.
  */
 function classifyTemplateName(name, version = '') {
     const lower = `${name || ''} ${version || ''}`.toLowerCase().trim();

@@ -334,9 +334,9 @@ export default {
         + 'and anything your servers print is left exactly as it arrives.',
     'settings.general.languageChanged': 'Language changed to {language}',
     'settings.general.startup': 'Start at login',
-    'settings.general.startupDesc': 'Open CloudTerm automatically when you sign in to this computer',
-    'settings.general.startupOn': 'CloudTerm will open when you sign in',
-    'settings.general.startupOff': 'CloudTerm will no longer open when you sign in',
+    'settings.general.startupDesc': 'Open Reef Terminal automatically when you sign in to this computer',
+    'settings.general.startupOn': 'Reef Terminal will open when you sign in',
+    'settings.general.startupOff': 'Reef Terminal will no longer open when you sign in',
     'settings.general.startupFailed': 'That could not be changed',
     'settings.general.startupUnknown': 'Could not read whether the app starts at boot',
     'settings.general.restore': 'Restore sessions',
@@ -377,14 +377,14 @@ export default {
     'settings.appearance.logoShown': 'Logo shown',
     'settings.appearance.logoHidden': 'Logo hidden',
     'settings.appearance.customLogo': 'Custom logo',
-    'settings.appearance.customLogoSet': 'Your own image, in place of the CloudBlast mark.',
-    'settings.appearance.customLogoDesc': 'Use your own image instead of the CloudBlast mark. PNG, '
+    'settings.appearance.customLogoSet': 'Your own image, in place of the Reef Terminal mark.',
+    'settings.appearance.customLogoDesc': 'Use your own image instead of the Reef Terminal mark. PNG, '
         + 'JPG, GIF, WebP, SVG, BMP or ICO, up to 512 KB.',
     'settings.appearance.choosing': 'Choosing…',
     'settings.appearance.chooseImage': 'Choose image',
     'settings.appearance.logoUnreadable': 'That image could not be read',
     'settings.appearance.logoSet': 'Logo set to {name}',
-    'settings.appearance.logoCleared': 'Back to the CloudBlast mark',
+    'settings.appearance.logoCleared': 'Back to the Reef Terminal mark',
     'settings.appearance.position': 'Position',
     'settings.appearance.positionDesc': 'Which end of the title bar the mark sits at: beside the '
         + 'menu button, or over by the window buttons.',
@@ -538,7 +538,7 @@ export default {
     'settings.assistant.signIn': 'Signing in',
     'settings.assistant.theAgent': 'the agent',
     'settings.assistant.accountOpencode': 'OpenCode uses the providers and credentials already '
-        + 'configured in its CLI. Manage them with "opencode auth login"; keys stored in CloudBlast '
+        + 'configured in its CLI. Manage them with "opencode auth login"; keys stored in Reef Terminal '
         + 'are not passed to OpenCode.',
     'settings.assistant.accountPlan': 'Signed in through {agent} on this machine, on a {plan} plan. '
         + 'Usage comes out of that plan, so no key is needed here.',
@@ -568,7 +568,7 @@ export default {
     'settings.monitoring.desc': 'Check that hosts are still reachable while the app is open, and '
         + 'get a notification when one stops answering. It takes two switches: this page turns the '
         + 'feature on, and each host you want watched is switched on in its own editor.',
-    'settings.monitoring.unreadable': 'Monitoring could not be read from the app. Restart CloudTerm '
+    'settings.monitoring.unreadable': 'Monitoring could not be read from the app. Restart Reef Terminal '
         + 'and open this page again.',
     'settings.monitoring.saveFailed': 'Could not save that setting',
     'settings.monitoring.checkFailed': 'Could not check the hosts',
@@ -722,8 +722,8 @@ export default {
      * Settings: Account
      * ---------------------------------------------------------------- */
     'settings.account.title': 'Account',
-    'settings.account.fallbackName': 'CloudBlast account',
-    'settings.account.yourAccount': 'your CloudBlast account',
+    'settings.account.fallbackName': 'Reef Terminal account',
+    'settings.account.yourAccount': 'your Reef Terminal account',
     'settings.account.connectedAs': 'Connected as {account}',
     'settings.account.disconnect': 'Disconnect',
     'settings.account.disconnecting': 'Disconnecting…',
@@ -735,26 +735,13 @@ export default {
     'settings.account.connectDesc': 'Sync your servers and back up your setup.',
     'settings.account.unlockFirst': 'Unlock the app first.',
     'settings.account.waitingForBrowser': 'Waiting for browser…',
-    'settings.account.syncServers': 'Sync my servers',
-    'settings.account.syncServersDesc': 'Your CloudBlast servers appear in Hosts, ready to connect.',
-    'settings.account.syncOn': 'Syncing your CloudBlast servers into Hosts',
-    'settings.account.syncOff': 'Sync turned off. Hosts already added stay where they are.',
-    'settings.account.syncNow': 'Sync now',
-    'settings.account.syncing': 'Syncing…',
-    'settings.account.syncedAgo': 'Synced {when}',
-    'settings.account.notSyncedYet': 'Not synced yet',
-    'settings.account.serverCount_one': '{count} server',
-    'settings.account.serverCount_other': '{count} servers',
-    'settings.account.serversSynced_one': '{count} server synced',
-    'settings.account.serversSynced_other': '{count} servers synced',
-    'settings.account.noServers': 'No servers on this account yet',
     'settings.account.cloudBackup': 'Cloud backup',
     'settings.account.cloudBackupDesc': 'Your hosts, folders, keys and settings, saved to your '
         + 'account for your other devices.',
     'settings.account.backupOn': 'Cloud backup is on',
     'settings.account.backupOff': 'Cloud backup is off. What is already saved stays until you '
         + 'replace it.',
-    'settings.account.backedUp': 'Backed up to your CloudBlast account',
+    'settings.account.backedUp': 'Backed up to your Reef Terminal account',
     'settings.account.saveNow': 'Save now',
     'settings.account.saving': 'Saving…',
     'settings.account.savedAgo': 'Saved {when}',
@@ -787,13 +774,13 @@ export default {
     'settings.backup.exportFailed': 'The backup could not be written',
     'settings.backup.exported': 'Backup saved: {hosts}, {keys}, {snippets}',
     'settings.backup.restoreTitle': 'Restore a backup',
-    'settings.backup.restoreDesc': 'Reads a .cbbackup file and adds what it holds. You are shown '
+    'settings.backup.restoreDesc': 'Reads a .reefbackup file and adds what it holds. You are shown '
         + 'what is in it before anything changes.',
     'settings.backup.restoreNote': 'Anything already here is left alone by default, so restoring '
         + 'twice is safe.',
     'settings.backup.chooseFile': 'Choose file…',
     'settings.backup.openTitle': 'Open encrypted backup',
-    'settings.backup.fileKind': 'CloudBlast backup',
+    'settings.backup.fileKind': 'Reef Terminal backup',
     'settings.backup.pickerFailed': 'Could not open the file picker',
     'settings.backup.file': 'File',
     'settings.backup.open': 'Open backup',
@@ -882,9 +869,6 @@ export default {
     'hosts.selectedCount': '{count} selected',
     'hosts.folderEmpty': 'Empty',
     'hosts.folderActions': 'Folder actions',
-    'hosts.syncedBadge': 'Synced',
-    'hosts.syncedAccount': 'Synced from your CloudBlast account',
-    'hosts.syncedProject': 'A project on your CloudBlast account. The sync keeps its name and its place',
     'hosts.upOneLevel': 'Up one level',
     'hosts.dragHint': 'Drag a card onto a folder to file it · Drag a box to pick out several',
     'hosts.dragHintFiltered': 'Drag a box across the cards to pick out several',

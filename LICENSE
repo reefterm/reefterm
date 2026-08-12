@@ -1,3 +1,18 @@
+NOTICE
+
+Reef Terminal (github.com/reefterm/reefterm) is a fork of CloudTerm
+(github.com/BradPerbs/cloudterm) by CloudBlast, and is distributed under the
+license below exactly as CloudBlast wrote it -- this fork has no license of
+its own and no right to grant one. The terms are unchanged from the original;
+this notice is the only addition.
+
+Reef Terminal is not CloudTerm and is not produced, endorsed by, or affiliated
+with CloudBlast. It carries no rights in the CloudTerm or CloudBlast names,
+logos or other trademarks, per the "NAMES AND LOGOS" section below, which this
+fork observes.
+
+================================================================================
+
 CloudTerm License, version 1.0
 Copyright 2026 CloudBlast. All rights reserved.
 

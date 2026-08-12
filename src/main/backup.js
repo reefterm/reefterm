@@ -23,7 +23,7 @@ const fs = require('fs');
  * since distinguishing them is an oracle.
  */
 
-const FORMAT = 'cloudblast-backup';
+const FORMAT = 'reefterm-backup';
 const VERSION = 1;
 
 // Matched to the vault's own KDF cost: ~33 MB and ~100ms per attempt. Stored in
@@ -112,7 +112,7 @@ function seal(payload, passphrase) {
  */
 function unseal(envelope, passphrase) {
     if (envelope?.format !== FORMAT) {
-        throw new Error('This is not a CloudBlast backup file');
+        throw new Error('This is not a Reef Terminal backup file');
     }
     if (envelope.version > VERSION) {
         throw new Error(
@@ -189,7 +189,7 @@ function readFile(filePath) {
  * neither. Running scrypt over it would cost 100ms per sync and buy nothing.
  * ------------------------------------------------------------------ */
 
-const KEYED_FORMAT = 'cloudblast-snapshot';
+const KEYED_FORMAT = 'reefterm-snapshot';
 
 function keyBuffer(key) {
     const buffer = Buffer.from(String(key || ''), 'base64');
@@ -225,7 +225,7 @@ function sealWithKey(payload, key) {
 /** Returns the payload, or null when the key is wrong or the blob was altered. */
 function unsealWithKey(envelope, key) {
     if (envelope?.format !== KEYED_FORMAT) {
-        throw new Error('This is not a CloudBlast snapshot');
+        throw new Error('This is not a Reef Terminal snapshot');
     }
     if (envelope.version > VERSION) {
         throw new Error('This snapshot was written by a newer version of the app');

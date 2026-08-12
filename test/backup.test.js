@@ -96,7 +96,7 @@ check('rejects a swapped salt', () => {
 });
 
 check('throws on a file that is not a backup', () => {
-    assert.throws(() => backup.unseal({ hello: 'world' }, PASS), /not a CloudBlast backup/i);
+    assert.throws(() => backup.unseal({ hello: 'world' }, PASS), /not a Reef Terminal backup/i);
 });
 
 check('throws on a newer format version', () => {
@@ -117,7 +117,7 @@ check('requires a passphrase of at least 8 characters', () => {
 });
 
 check('writes and reads a file', () => {
-    const file = path.join(userData, 'test.cbbackup');
+    const file = path.join(userData, 'test.reefbackup');
     backup.writeFile(file, backup.seal(PAYLOAD, PASS));
     assert.deepStrictEqual(backup.unseal(backup.readFile(file), PASS), PAYLOAD);
 });
@@ -161,7 +161,7 @@ check('export includes every collection', () => {
     assert.strictEqual(Object.keys(exported.knownHosts).length, 1);
 });
 
-const sealedFile = path.join(userData, 'roundtrip.cbbackup');
+const sealedFile = path.join(userData, 'roundtrip.reefbackup');
 backup.writeFile(sealedFile, backup.seal(exported, PASS));
 
 // A second machine: new user-data directory, nothing in it.

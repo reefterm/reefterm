@@ -416,19 +416,9 @@ contextBridge.exposeInMainWorld('api', {
         cancelSignIn: () => ipcRenderer.invoke('account-sign-in-cancel'),
         signOut: () => ipcRenderer.invoke('account-sign-out'),
         refresh: () => ipcRenderer.invoke('account-refresh'),
-        servers: () => ipcRenderer.invoke('account-servers'),
         // Signing in or out from Settings has to reach the sidebar, which did
         // not ask for it.
         onState: (callback) => subscribe('account-state', callback),
-    },
-
-    serverSync: {
-        status: () => ipcRenderer.invoke('server-sync-status'),
-        setEnabled: (enabled) => ipcRenderer.invoke('server-sync-set-enabled', enabled),
-        now: () => ipcRenderer.invoke('server-sync-now'),
-        // Fired after any sync, including the ones on a timer that nothing in
-        // the renderer asked for, so the host list can refresh itself.
-        onState: (callback) => subscribe('server-sync-state', callback),
     },
 
     /**

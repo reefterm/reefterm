@@ -103,6 +103,9 @@ function destroyAll() {
  * session's own business and reaches the renderer over the port.
  */
 function connect({ tabId, hostId, cols, rows }, { window } = {}) {
+    // FIXME: pre-existing, same pattern as ssh.js's connect(); worth a real fix,
+    // out of scope here.
+    // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve) => {
         destroy(tabId, { reason: 'replaced' });
 

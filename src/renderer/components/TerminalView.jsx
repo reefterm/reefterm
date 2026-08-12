@@ -1052,6 +1052,13 @@ function TerminalView({
      * immediately, and making it queue behind a session would defeat the point
      * of asking for it.
      */
+    // FIXME: this component has an early `if (!pane) return null;` above, so
+    // every hook from here down is skipped on renders where `pane` is falsy.
+    // That's a real Rules-of-Hooks violation (risk of "rendered more/fewer hooks
+    // than previous render" if `pane` ever toggles falsy<->truthy for a mounted
+    // instance), pre-existing, not touched here — needs its own fix, not a
+    // lint-bootstrap side effect.
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
         const next = pendingView.current;
         if (!next) return;

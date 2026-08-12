@@ -1,4 +1,4 @@
-# CloudTerm Resources
+# Reef Terminal Resources
 
 Application resources bundled into the packaged app (icons and similar assets).
 
@@ -22,9 +22,10 @@ every Windows build up to now quietly shipped the default Electron logo.
 electron-builder warns about a missing icon rather than failing, which is how
 that went unnoticed.
 
-**The current `build/icon.png` is built from `cloudterm.png` in the repo root**,
-which is 200x200 and so below the minimum every target needs (256 for Linux and
-the Windows ico, 512 for the macOS icns).
+**Placeholder, inherited from the CloudTerm fork this repo started from, pending
+Reef Terminal's own artwork.** The current `build/icon.png` is built from
+`cloudterm.png` in the repo root, which is 200x200 and so below the minimum
+every target needs (256 for Linux and the Windows ico, 512 for the macOS icns).
 
 The upscale is not a plain resample. `cloudterm.png` measures as a square flush
 to its canvas with a corner radius of exactly 30% of the side (a circle fits to

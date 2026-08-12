@@ -233,7 +233,7 @@ function KeyModal({ keyData, initialMode = 'generate', dismiss, onClose, onSave,
             const result = await onGenerate({
                 type: formData.type,
                 keySize: formData.keySize ? parseInt(formData.keySize) : undefined,
-                comment: formData.comment || `cloudblast-${formData.name}`,
+                comment: formData.comment || `reefterm-${formData.name}`,
                 passphrase: formData.passphrase,
             });
 

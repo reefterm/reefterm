@@ -14,7 +14,7 @@ async function run() {
     const binary = provider.findOpenCode();
     if (!binary) throw new Error('The OpenCode CLI was not found');
 
-    const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'cloudblast-opencode-'));
+    const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'reefterm-opencode-'));
     let server;
     try {
         server = await provider._test.launchServer(binary, provider.serverConfig(), directory);

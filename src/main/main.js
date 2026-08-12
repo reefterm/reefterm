@@ -170,7 +170,7 @@ app.whenReady().then(() => {
      *
      * Harmless everywhere else; the call is a no-op off Windows.
      */
-    app.setAppUserModelId('com.cloudblast.ssh');
+    app.setAppUserModelId('com.reefterm.app');
 
     ipc.register(getWindow);
     createWindow();

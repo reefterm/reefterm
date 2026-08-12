@@ -87,7 +87,7 @@ const configPath = () => path.join(app.getPath('userData'), 'session-log.json');
 /** Where transcripts go when the user has not chosen somewhere else. */
 function defaultDirectory() {
     try {
-        return path.join(app.getPath('documents'), 'CloudBlast', 'Session logs');
+        return path.join(app.getPath('documents'), 'Reef Terminal', 'Session logs');
     } catch {
         // No Documents folder (a stripped container); userData always exists.
         return path.join(app.getPath('userData'), 'session-logs');
@@ -301,7 +301,7 @@ function start(tabId, { hostName = '', address = '', hostId = '', protocol = '',
         });
 
         const header = [
-            `# CloudTerm session log`,
+            `# Reef Terminal session log`,
             `# host: ${hostName || '(unnamed)'}${address ? ` (${address})` : ''}`,
             ...(protocol ? [`# protocol: ${protocol}`] : []),
             `# started: ${startedAt.toISOString()}`,
@@ -376,7 +376,9 @@ function splitPending(text) {
     // to be completed by anything we would want to keep waiting for.
     if (tail.length > MAX_PENDING) return [text, ''];
     // Already terminated, so it is whole and the stripper can see it.
+    // eslint-disable-next-line no-control-regex -- matching raw ANSI control bytes is the point
     if (/[@-~]$/.test(tail) && /^\x1B\[[0-?]*[ -/]*[@-~]$/.test(tail)) return [text, ''];
+    // eslint-disable-next-line no-control-regex -- matching raw ANSI control bytes is the point
     if (/(?:\x07|\x1B\\)$/.test(tail)) return [text, ''];
 
     return [text.slice(0, escape), tail];

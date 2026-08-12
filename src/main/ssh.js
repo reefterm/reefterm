@@ -770,6 +770,10 @@ function describeRoute(chain) {
  * case: this dials a list either way.
  */
 function connect({ tabId, hostId, cols, rows }, { window, requestTrust, requestKeyboardInteractive }) {
+    // FIXME: pre-existing; the executor never rejects (settle() only resolves),
+    // but an uncaught throw in here would become an unhandled rejection. Worth a
+    // real fix, out of scope here.
+    // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve) => {
         destroy(tabId, { reason: 'replaced' });
 

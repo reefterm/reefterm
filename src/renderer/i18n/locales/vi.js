@@ -288,9 +288,9 @@ export default {
         + 'từ terminal và mọi thứ máy chủ của bạn in ra đều được giữ nguyên.',
     'settings.general.languageChanged': 'Đã đổi ngôn ngữ sang {language}',
     'settings.general.startup': 'Khởi động cùng máy',
-    'settings.general.startupDesc': 'Tự mở CloudTerm khi bạn đăng nhập vào máy tính này',
-    'settings.general.startupOn': 'CloudTerm sẽ mở khi bạn đăng nhập',
-    'settings.general.startupOff': 'CloudTerm sẽ không còn mở khi bạn đăng nhập',
+    'settings.general.startupDesc': 'Tự mở Reef Terminal khi bạn đăng nhập vào máy tính này',
+    'settings.general.startupOn': 'Reef Terminal sẽ mở khi bạn đăng nhập',
+    'settings.general.startupOff': 'Reef Terminal sẽ không còn mở khi bạn đăng nhập',
     'settings.general.startupFailed': 'Không thể thay đổi mục này',
     'settings.general.startupUnknown': 'Không đọc được liệu ứng dụng có khởi động cùng máy hay không',
     'settings.general.restore': 'Khôi phục phiên',
@@ -329,14 +329,14 @@ export default {
     'settings.appearance.logoShown': 'Đã hiện logo',
     'settings.appearance.logoHidden': 'Đã ẩn logo',
     'settings.appearance.customLogo': 'Logo tuỳ chỉnh',
-    'settings.appearance.customLogoSet': 'Ảnh của riêng bạn, thay cho biểu tượng CloudBlast.',
-    'settings.appearance.customLogoDesc': 'Dùng ảnh của riêng bạn thay cho biểu tượng CloudBlast. '
+    'settings.appearance.customLogoSet': 'Ảnh của riêng bạn, thay cho biểu tượng Reef Terminal.',
+    'settings.appearance.customLogoDesc': 'Dùng ảnh của riêng bạn thay cho biểu tượng Reef Terminal. '
         + 'PNG, JPG, GIF, WebP, SVG, BMP hoặc ICO, tối đa 512 KB.',
     'settings.appearance.choosing': 'Đang chọn…',
     'settings.appearance.chooseImage': 'Chọn ảnh',
     'settings.appearance.logoUnreadable': 'Không đọc được ảnh đó',
     'settings.appearance.logoSet': 'Đã đặt logo thành {name}',
-    'settings.appearance.logoCleared': 'Đã quay lại biểu tượng CloudBlast',
+    'settings.appearance.logoCleared': 'Đã quay lại biểu tượng Reef Terminal',
     'settings.appearance.position': 'Vị trí',
     'settings.appearance.positionDesc': 'Biểu tượng nằm ở đầu nào của thanh tiêu đề: cạnh nút menu, '
         + 'hay phía các nút cửa sổ.',
@@ -487,7 +487,7 @@ export default {
     'settings.assistant.theAgent': 'tác nhân',
     'settings.assistant.accountOpencode': 'OpenCode dùng các nhà cung cấp và thông tin đăng nhập đã '
         + 'cấu hình trong CLI của nó. Hãy quản lý chúng bằng “opencode auth login”; khoá lưu trong '
-        + 'CloudBlast không được chuyển cho OpenCode.',
+        + 'Reef Terminal không được chuyển cho OpenCode.',
     'settings.assistant.accountPlan': 'Đã đăng nhập qua {agent} trên máy này, với gói {plan}. Mức '
         + 'dùng được trừ vào gói đó, nên ở đây không cần khoá.',
     'settings.assistant.accountProvider': '{agent} trên máy này được cấu hình dùng {provider}, và '
@@ -515,7 +515,7 @@ export default {
         + 'dụng đang mở, và nhận thông báo khi một máy ngừng phản hồi. Cần hai công tắc: trang này '
         + 'bật tính năng, còn từng máy chủ bạn muốn theo dõi thì bật trong trình sửa của chính nó.',
     'settings.monitoring.unreadable': 'Không đọc được phần theo dõi từ ứng dụng. Hãy khởi động lại '
-        + 'CloudTerm rồi mở lại trang này.',
+        + 'Reef Terminal rồi mở lại trang này.',
     'settings.monitoring.saveFailed': 'Không lưu được thiết lập đó',
     'settings.monitoring.checkFailed': 'Không kiểm tra được các máy chủ',
     'settings.monitoring.master': 'Theo dõi máy chủ để phát hiện gián đoạn',
@@ -656,8 +656,8 @@ export default {
 
     /* ---- Settings: Account ---- */
     'settings.account.title': 'Tài khoản',
-    'settings.account.fallbackName': 'Tài khoản CloudBlast',
-    'settings.account.yourAccount': 'tài khoản CloudBlast của bạn',
+    'settings.account.fallbackName': 'Tài khoản Reef Terminal',
+    'settings.account.yourAccount': 'tài khoản Reef Terminal của bạn',
     'settings.account.connectedAs': 'Đã kết nối với tư cách {account}',
     'settings.account.disconnect': 'Ngắt kết nối',
     'settings.account.disconnecting': 'Đang ngắt kết nối…',
@@ -669,25 +669,13 @@ export default {
     'settings.account.connectDesc': 'Đồng bộ máy chủ và sao lưu thiết lập của bạn.',
     'settings.account.unlockFirst': 'Hãy mở khoá ứng dụng trước.',
     'settings.account.waitingForBrowser': 'Đang chờ trình duyệt…',
-    'settings.account.syncServers': 'Đồng bộ máy chủ của tôi',
-    'settings.account.syncServersDesc': 'Các máy chủ CloudBlast của bạn sẽ xuất hiện trong Máy chủ, '
-        + 'sẵn sàng để kết nối.',
-    'settings.account.syncOn': 'Đang đồng bộ các máy chủ CloudBlast của bạn vào Máy chủ',
-    'settings.account.syncOff': 'Đã tắt đồng bộ. Các máy chủ đã thêm vẫn ở nguyên chỗ cũ.',
-    'settings.account.syncNow': 'Đồng bộ ngay',
-    'settings.account.syncing': 'Đang đồng bộ…',
-    'settings.account.syncedAgo': 'Đồng bộ {when}',
-    'settings.account.notSyncedYet': 'Chưa đồng bộ',
-    'settings.account.serverCount_other': '{count} máy chủ',
-    'settings.account.serversSynced_other': 'Đã đồng bộ {count} máy chủ',
-    'settings.account.noServers': 'Tài khoản này chưa có máy chủ nào',
     'settings.account.cloudBackup': 'Sao lưu đám mây',
     'settings.account.cloudBackupDesc': 'Máy chủ, thư mục, khoá và cài đặt của bạn, được lưu vào '
         + 'tài khoản để dùng trên các thiết bị khác.',
     'settings.account.backupOn': 'Sao lưu đám mây đang bật',
     'settings.account.backupOff': 'Sao lưu đám mây đang tắt. Những gì đã lưu vẫn còn cho tới khi '
         + 'bạn thay thế nó.',
-    'settings.account.backedUp': 'Đã sao lưu vào tài khoản CloudBlast của bạn',
+    'settings.account.backedUp': 'Đã sao lưu vào tài khoản Reef Terminal của bạn',
     'settings.account.saveNow': 'Lưu ngay',
     'settings.account.saving': 'Đang lưu…',
     'settings.account.savedAgo': 'Đã lưu {when}',
@@ -719,13 +707,13 @@ export default {
     'settings.backup.exportFailed': 'Không ghi được bản sao lưu',
     'settings.backup.exported': 'Đã lưu bản sao lưu: {hosts}, {keys}, {snippets}',
     'settings.backup.restoreTitle': 'Khôi phục một bản sao lưu',
-    'settings.backup.restoreDesc': 'Đọc một tệp .cbbackup và thêm những gì nó chứa. Bạn được xem '
+    'settings.backup.restoreDesc': 'Đọc một tệp .reefbackup và thêm những gì nó chứa. Bạn được xem '
         + 'trong đó có gì trước khi bất cứ thứ gì thay đổi.',
     'settings.backup.restoreNote': 'Mặc định, những gì đã có ở đây được để nguyên, nên khôi phục '
         + 'hai lần vẫn an toàn.',
     'settings.backup.chooseFile': 'Chọn tệp…',
     'settings.backup.openTitle': 'Mở bản sao lưu đã mã hoá',
-    'settings.backup.fileKind': 'Bản sao lưu CloudBlast',
+    'settings.backup.fileKind': 'Bản sao lưu Reef Terminal',
     'settings.backup.pickerFailed': 'Không mở được hộp thoại chọn tệp',
     'settings.backup.file': 'Tệp',
     'settings.backup.open': 'Mở bản sao lưu',
@@ -801,10 +789,6 @@ export default {
     'hosts.selectedCount': 'Đã chọn {count}',
     'hosts.folderEmpty': 'Trống',
     'hosts.folderActions': 'Thao tác với thư mục',
-    'hosts.syncedBadge': 'Đã đồng bộ',
-    'hosts.syncedAccount': 'Được đồng bộ từ tài khoản CloudBlast của bạn',
-    'hosts.syncedProject': 'Một dự án trên tài khoản CloudBlast của bạn. Việc đồng bộ giữ nguyên '
-        + 'tên và vị trí của nó',
     'hosts.upOneLevel': 'Lên một cấp',
     'hosts.dragHint': 'Kéo một thẻ vào thư mục để xếp nó vào đó · Kéo một khung để chọn nhiều thẻ',
     'hosts.dragHintFiltered': 'Kéo một khung ngang qua các thẻ để chọn nhiều thẻ',

@@ -1,11 +1,6 @@
 /**
- * The cloud setup snapshot: what goes in it, what must never go in it, and the
- * key-based envelope it travels in.
- *
- * The exclusion rule is the one worth guarding hardest. Servers synced from
- * CloudBlast are rebuilt from the API on every device; carrying them in the
- * snapshot as well would mean a stale copy could resurrect hosts for servers
- * that have since been deleted.
+ * The cloud setup snapshot: what goes in it, and the key-based envelope it
+ * travels in.
  */
 const Module = require('module');
 const path = require('path');
@@ -130,11 +125,6 @@ store.saveFolder({ id: 'my-folder', name: 'Personal', parentId: '' });
 store.saveKey({ id: 'key-1', name: 'work key', privateKey: 'PRIVATE-KEY-BODY' });
 store.saveSnippet({ id: 'snip-1', name: 'restart nginx', command: 'systemctl restart nginx' });
 
-// What the CloudBlast server sync owns.
-store.saveFolder({ id: 'cloudblast', name: 'CloudBlast', parentId: '' });
-store.saveFolder({ id: 'cloudblast-folder-7', name: 'Production', parentId: 'cloudblast' });
-store.saveHost({ id: 'cloudblast-uuid-a', name: 'web-01', host: '10.9.9.9', username: 'root', folderId: 'cloudblast-folder-7' });
-
 const collected = snapshot.collect();
 
 check('includes the hosts the user made', () => {
@@ -150,16 +140,6 @@ check('includes folders, keys and snippets', () => {
     assert.ok(collected.folders.some(f => f.id === 'my-folder'));
     assert.ok(collected.keys.some(k => k.id === 'key-1'));
     assert.ok(collected.snippets.some(s => s.id === 'snip-1'));
-});
-
-check('excludes hosts synced from CloudBlast', () => {
-    assert.ok(!collected.hosts.some(h => h.id === 'cloudblast-uuid-a'),
-        'a synced host would be duplicated and could outlive its server');
-});
-
-check('excludes the CloudBlast folder and its projects', () => {
-    assert.ok(!collected.folders.some(f => f.id === 'cloudblast'));
-    assert.ok(!collected.folders.some(f => f.id === 'cloudblast-folder-7'));
 });
 
 check('carries terminal settings once the renderer has reported them', () => {

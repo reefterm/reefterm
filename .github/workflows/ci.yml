@@ -1,0 +1,33 @@
+# Lint and test every push and pull request.
+#
+# This is deliberately separate from release.yml: that workflow only runs on a
+# version tag and builds installers on three platforms, which is too slow and
+# too heavy to gate every commit on. This one runs on Linux only and finishes
+# in the time a PR review takes.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run lint
+
+      - run: npm test

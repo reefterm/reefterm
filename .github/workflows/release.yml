@@ -273,11 +273,11 @@ jobs:
       - uses: vedantmgoyal9/winget-releaser@v2
         if: env.HAS_TOKEN == 'true'
         with:
-          identifier: CloudBlast.CloudTerm
+          identifier: ReefTerminal.ReefTerminal
           # Both Windows builds are `.exe` files, and the action's default
           # pattern would sweep up the portable one as a second installer for
           # the same architecture. Only the installer belongs in winget.
-          installers-regex: '^CloudTerm-Setup-x64\.exe$'
+          installers-regex: '^ReefTerminal-Setup-x64\.exe$'
           token: ${{ secrets.WINGET_TOKEN }}
 
       - name: Say why nothing was submitted

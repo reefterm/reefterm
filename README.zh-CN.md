@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="cloudterm.png" alt="CloudTerm" width="128">
+  <img src="cloudterm.png" alt="Reef Terminal" width="128">
 </p>
 
-<h1 align="center">CloudTerm</h1>
+<h1 align="center">Reef Terminal</h1>
 
 <p align="center">
   <strong>SSH、SFTP、Telnet 与 Windows RDP，全部集于一个终端</strong>
@@ -14,13 +14,13 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/BradPerbs/cloudterm/releases/latest"><img alt="Download" src="https://img.shields.io/badge/Download-Latest-success?style=for-the-badge&logo=github"></a>
+  <a href="https://github.com/reefterm/reefterm/releases/latest"><img alt="Download" src="https://img.shields.io/badge/Download-Latest-success?style=for-the-badge&logo=github"></a>
   &nbsp;
   <a href="#"><img alt="Platform" src="https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-blue?style=for-the-badge&logo=electron"></a>
   &nbsp;
   <a href="LICENSE"><img alt="License" src="https://img.shields.io/badge/License-fair--code-green?style=for-the-badge"></a>
   &nbsp;
-  <a href="https://discord.gg/7M84Xp8QBr"><img alt="Discord" src="https://img.shields.io/badge/Discord-Join-5865F2?style=for-the-badge&logo=discord&logoColor=white"></a>
+  <a href="https://github.com/reefterm/reefterm/issues"><img alt="Issues" src="https://img.shields.io/badge/Issues-Welcome-blue?style=for-the-badge&logo=github"></a>
 </p>
 
 <p align="center">
@@ -32,37 +32,34 @@
 
 ---
 
-CloudTerm 把连接服务器的所有方式放进同一个窗口。开一个 SSH 会话、用 SFTP 传文件、
+Reef Terminal 把连接服务器的所有方式放进同一个窗口。开一个 SSH 会话、用 SFTP 传文件、
 转发一个端口、接管一台 Windows 桌面，全都在同一条连接、同一排标签页上完成。不需要
 第二个程序，也不需要第二次登录。
 
 它能连接任何设备：笔记本上的串口控制台、只会说 telnet 的交换机、通过 RDP 访问的
-Windows 主机，或者任意服务商上的服务器。CloudTerm 由 VPS 云主机公司
-[CloudBlast](https://cloudblast.io) 开发，对所有人免费，全部源码都在这个仓库里，可以随意阅读和修改。
+Windows 主机，或者任意服务商上的服务器。Reef Terminal 是
+[CloudTerm](https://github.com/BradPerbs/cloudterm) 的一个免费、可自托管、由社区
+维护的分支（fork）。对所有人免费，全部源码都在这个仓库里，可以随意阅读和修改。
 
-<img src="Main%20Image.png" alt="CloudTerm" width="100%">
+<img src="Main%20Image.png" alt="Reef Terminal" width="100%">
 
 ---
 
-<h2 align="center">☁️ 免费云同步，人人可用</h2>
+<h2 align="center">🌊 自托管同步，由你掌控</h2>
 
 <p align="center">
-  <strong>在你用的每一台电脑上，都是同一套配置，完全免费。</strong><br/>
+  <strong>在你用的每一台电脑上，都是同一套配置，密钥不必交给任何人。</strong><br/>
   主机、文件夹、密钥、命令片段、已信任的主机密钥和终端设置，<br/>
-  先在本机加密再上传，换一台设备登录即刻还原。
+  在离开本机之前，先用只有你知道的密码短语在本机加密。
 </p>
 
 <p align="center">
-  只要有 <a href="https://cloudblast.io"><strong>CloudBlast</strong></a> 账号即可免费使用，
-  无论你是否在我们这里托管服务器。
+  把应用指向一个自托管的同步服务器——你自己的，或者社区提供的实例——<br/>
+  即使是运营这台服务器的人，也读不到你的数据。
 </p>
 
 <p align="center">
-  <a href="https://cloudblast.io"><img alt="Get a free account" src="https://img.shields.io/badge/%E5%85%8D%E8%B4%B9%E6%B3%A8%E5%86%8C-cloudblast.io-0aa2c0?style=for-the-badge"></a>
-</p>
-
-<p align="center">
-  <sub>已经是 CloudBlast 用户？你的服务器会自动出现在主机列表里，随时可以连接。</sub>
+  <sub>Reef Terminal 的自托管账户服务器正在积极开发中，进展请见已开的 issue。</sub>
 </p>
 
 ---
@@ -70,7 +67,7 @@ Windows 主机，或者任意服务商上的服务器。CloudTerm 由 VPS 云主
 ## 目录
 
 - [下载](#download)
-- [什么是 CloudTerm](#what-is-cloudterm)
+- [什么是 Reef Terminal](#what-is-reef-terminal)
 - [功能](#features)
 - [界面截图](#screenshots)
 - [快速开始](#getting-started)
@@ -81,8 +78,8 @@ Windows 主机，或者任意服务商上的服务器。CloudTerm 由 VPS 云主
 
 ---
 
-<a name="what-is-cloudterm"></a>
-## 什么是 CloudTerm
+<a name="what-is-reef-terminal"></a>
+## 什么是 Reef Terminal
 
 - **一个终端**：SSH、telnet 和串口控制台，带标签页、分屏和 GPU 加速渲染。
 - **一个 SFTP 客户端**：复用已经打开的连接，支持递归传输和拖放。
@@ -188,8 +185,8 @@ Debian 和 Fedora 的机器，不用去读主机名。
 ### 安全
 
 - **加密保险库**存放所有凭据，可选设置启动密码
+- **自托管的端到端加密同步**（开发中），上传前先在本机加密，存储它的服务器也无法读取
 - **主机密钥校验**，每次连接、每一跳都验证
-- **免费云同步**，上传前先在本机加密
 - **加密备份**，把整套配置搬到另一台机器
 - **活动日志**记录每一次连接和每一次改动
 
@@ -198,10 +195,11 @@ Debian 和 Fedora 的机器，不用去读主机名。
 <a name="screenshots"></a>
 ## 界面截图
 
+> 以下截图沿用自本项目分支来源 CloudTerm，换上 Reef Terminal 自己的品牌形象后会更新。
+
 ### 主机与密钥库
 
-所有服务器按文件夹整理，带标签、搜索，卡片上直接标明协议。登录 CloudBlast 之后，
-你的服务器会自动出现在这里。
+所有服务器按文件夹整理，带标签、搜索，卡片上直接标明协议。
 
 <img src="hostscloudterm.png" alt="主机与密钥库" width="100%">
 
@@ -237,29 +235,29 @@ Debian 和 Fedora 的机器，不用去读主机名。
 
 | 操作系统 | 下载 |
 | --- | --- |
-| macOS | [Apple 芯片（M1 及更新机型）](https://github.com/BradPerbs/cloudterm/releases/latest/download/CloudTerm-arm64.dmg) · [Intel](https://github.com/BradPerbs/cloudterm/releases/latest/download/CloudTerm-x64.dmg) |
-| Windows | [安装版，x64（推荐）](https://github.com/BradPerbs/cloudterm/releases/latest/download/CloudTerm-Setup-x64.exe) · [便携版，x64](https://github.com/BradPerbs/cloudterm/releases/latest/download/CloudTerm-x64.exe) |
-| Linux | [AppImage，x64](https://github.com/BradPerbs/cloudterm/releases/latest/download/CloudTerm-x86_64.AppImage) |
+| macOS | [Apple 芯片（M1 及更新机型）](https://github.com/reefterm/reefterm/releases/latest/download/ReefTerminal-arm64.dmg) · [Intel](https://github.com/reefterm/reefterm/releases/latest/download/ReefTerminal-x64.dmg) |
+| Windows | [安装版，x64（推荐）](https://github.com/reefterm/reefterm/releases/latest/download/ReefTerminal-Setup-x64.exe) · [便携版，x64](https://github.com/reefterm/reefterm/releases/latest/download/ReefTerminal-x64.exe) |
+| Linux | [AppImage，x64](https://github.com/reefterm/reefterm/releases/latest/download/ReefTerminal-x86_64.AppImage) |
 
 在 Windows 上也可以直接从终端安装和更新：
 
 ```powershell
-winget install CloudBlast.CloudTerm
+winget install ReefTerminal.ReefTerminal
 ```
 
-也可以浏览 [GitHub 上的全部版本](https://github.com/BradPerbs/cloudterm/releases)。
+也可以浏览 [GitHub 上的全部版本](https://github.com/reefterm/reefterm/releases)。
 
 ### 从源码构建
 
 ```bash
-git clone https://github.com/BradPerbs/cloudterm.git
-cd cloudterm
+git clone https://github.com/reefterm/reefterm.git
+cd reefterm
 npm install
 npm run dev
 ```
 
 要通过 OpenCode 使用 AI 助手，请安装 `opencode` CLI，并运行
-`opencode auth login` 配置至少一个模型提供商。CloudTerm 只使用 OpenCode
+`opencode auth login` 配置至少一个模型提供商。Reef Terminal 只使用 OpenCode
 现有的提供商和凭据，不会复制或保存它们。
 
 构建便携版可执行文件，输出到 `dist/`：
@@ -280,21 +278,16 @@ npm run build
 <a name="community"></a>
 ## 社区
 
-有疑问、发现 bug、想提需求，或者只是想看看接下来会做什么？
-
-<p>
-  <a href="https://discord.gg/7M84Xp8QBr"><img alt="Join the Discord" src="https://img.shields.io/badge/Join%20the%20Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white"></a>
-</p>
-
-也欢迎在 GitHub 上提交 issue 和 pull request。
+有疑问、发现 bug、想提需求，或者只是想看看接下来会做什么？欢迎在 GitHub 上提交
+issue 和 pull request——可以从 [CONTRIBUTING.md](CONTRIBUTING.md) 开始。
 
 <a name="contributors"></a>
 ## 贡献者
 
-感谢每一位为 CloudTerm 付出努力的人。
+感谢每一位为 Reef Terminal 以及它所分支自的 CloudTerm 项目付出努力的人。
 
-<a href="https://github.com/BradPerbs/cloudterm/graphs/contributors">
-  <img alt="贡献者" src="https://contrib.rocks/image?repo=BradPerbs/cloudterm" />
+<a href="https://github.com/reefterm/reefterm/graphs/contributors">
+  <img alt="贡献者" src="https://contrib.rocks/image?repo=reefterm/reefterm" />
 </a>
 
 <a name="tech-stack"></a>
@@ -310,7 +303,9 @@ Vite · Claude Agent SDK · Codex SDK · OpenCode SDK
 <a name="license"></a>
 ## 许可证
 
-CloudTerm 采用 [fair-code](https://faircode.io) 模式，条款见 [CloudTerm 许可证](LICENSE)：
-源码公开，软件可以自由使用、修改和免费分发，在公司里用也没问题。但要出售它，或者把它的
-任何一部分代码放进你收费的产品或服务里，需要向 [CloudBlast](https://cloudblast.io)
-取得商业许可，通常问一声就行。
+Reef Terminal 是 [CloudTerm](https://github.com/BradPerbs/cloudterm) 的一个分支，
+采用 [CloudTerm 许可证](LICENSE) 的条款分发，这是 CloudBlast 编写的
+[fair-code](https://faircode.io) 许可证：源码公开，软件可以自由使用、修改和免费
+分发，在公司里用也没问题。但要出售它，或者把它的任何一部分代码放进你收费的产品或
+服务里，需要向 CloudBlast 取得商业许可——完整条款，包括本分支对 CloudTerm 和
+CloudBlast 名称能主张与不能主张的部分，见 [LICENSE](LICENSE)。

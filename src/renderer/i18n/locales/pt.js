@@ -298,10 +298,10 @@ export default {
         + 'que o terminal e os seus servidores escrevem fica exatamente como chega.',
     'settings.general.languageChanged': 'Idioma alterado para {language}',
     'settings.general.startup': 'Iniciar com a sessão',
-    'settings.general.startupDesc': 'Abrir o CloudTerm automaticamente quando inicia sessão neste '
+    'settings.general.startupDesc': 'Abrir o Reef Terminal automaticamente quando inicia sessão neste '
         + 'computador',
-    'settings.general.startupOn': 'O CloudTerm abrirá quando iniciar sessão',
-    'settings.general.startupOff': 'O CloudTerm deixará de abrir quando iniciar sessão',
+    'settings.general.startupOn': 'O Reef Terminal abrirá quando iniciar sessão',
+    'settings.general.startupOff': 'O Reef Terminal deixará de abrir quando iniciar sessão',
     'settings.general.startupFailed': 'Não foi possível alterar isso',
     'settings.general.startupUnknown': 'Não foi possível saber se a aplicação arranca com o sistema',
     'settings.general.restore': 'Restaurar sessões',
@@ -341,14 +341,14 @@ export default {
     'settings.appearance.logoShown': 'Logótipo visível',
     'settings.appearance.logoHidden': 'Logótipo escondido',
     'settings.appearance.customLogo': 'Logótipo personalizado',
-    'settings.appearance.customLogoSet': 'A sua imagem, no lugar da marca CloudBlast.',
-    'settings.appearance.customLogoDesc': 'Use a sua imagem em vez da marca CloudBlast. PNG, JPG, '
+    'settings.appearance.customLogoSet': 'A sua imagem, no lugar da marca Reef Terminal.',
+    'settings.appearance.customLogoDesc': 'Use a sua imagem em vez da marca Reef Terminal. PNG, JPG, '
         + 'GIF, WebP, SVG, BMP ou ICO, até 512 KB.',
     'settings.appearance.choosing': 'A escolher…',
     'settings.appearance.chooseImage': 'Escolher imagem',
     'settings.appearance.logoUnreadable': 'Não foi possível ler essa imagem',
     'settings.appearance.logoSet': 'Logótipo definido para {name}',
-    'settings.appearance.logoCleared': 'De volta à marca CloudBlast',
+    'settings.appearance.logoCleared': 'De volta à marca Reef Terminal',
     'settings.appearance.position': 'Posição',
     'settings.appearance.positionDesc': 'Em que extremo da barra de título fica a marca: junto ao '
         + 'botão de menu, ou do lado dos botões da janela.',
@@ -501,7 +501,7 @@ export default {
     'settings.assistant.theAgent': 'o agente',
     'settings.assistant.accountOpencode': 'O OpenCode usa os fornecedores e credenciais já '
         + 'configurados na sua CLI. Trate deles com “opencode auth login”; as chaves guardadas no '
-        + 'CloudBlast não são passadas ao OpenCode.',
+        + 'Reef Terminal não são passadas ao OpenCode.',
     'settings.assistant.accountPlan': 'Com sessão iniciada através do {agent} nesta máquina, num '
         + 'plano {plan}. A utilização sai desse plano, por isso não é precisa nenhuma chave aqui.',
     'settings.assistant.accountProvider': 'O {agent} nesta máquina está configurado com {provider}, '
@@ -530,7 +530,7 @@ export default {
         + 'precisos dois interruptores: esta página liga a funcionalidade, e cada anfitrião que '
         + 'quiser vigiar é ligado no seu próprio editor.',
     'settings.monitoring.unreadable': 'Não foi possível ler a monitorização a partir da aplicação. '
-        + 'Reinicie o CloudTerm e abra esta página outra vez.',
+        + 'Reinicie o Reef Terminal e abra esta página outra vez.',
     'settings.monitoring.saveFailed': 'Não foi possível guardar essa definição',
     'settings.monitoring.checkFailed': 'Não foi possível verificar os anfitriões',
     'settings.monitoring.master': 'Vigiar quedas dos anfitriões',
@@ -680,8 +680,8 @@ export default {
 
     /* ---- Settings: Account ---- */
     'settings.account.title': 'Conta',
-    'settings.account.fallbackName': 'Conta CloudBlast',
-    'settings.account.yourAccount': 'a sua conta CloudBlast',
+    'settings.account.fallbackName': 'Conta Reef Terminal',
+    'settings.account.yourAccount': 'a sua conta Reef Terminal',
     'settings.account.connectedAs': 'Ligado como {account}',
     'settings.account.disconnect': 'Desligar',
     'settings.account.disconnecting': 'A desligar…',
@@ -694,28 +694,13 @@ export default {
     'settings.account.connectDesc': 'Sincronize os seus servidores e faça cópia da sua configuração.',
     'settings.account.unlockFirst': 'Desbloqueie a aplicação primeiro.',
     'settings.account.waitingForBrowser': 'A aguardar o navegador…',
-    'settings.account.syncServers': 'Sincronizar os meus servidores',
-    'settings.account.syncServersDesc': 'Os seus servidores CloudBlast aparecem em Anfitriões, '
-        + 'prontos a ligar.',
-    'settings.account.syncOn': 'A sincronizar os seus servidores CloudBlast para Anfitriões',
-    'settings.account.syncOff': 'Sincronização desligada. Os anfitriões já adicionados ficam onde '
-        + 'estão.',
-    'settings.account.syncNow': 'Sincronizar agora',
-    'settings.account.syncing': 'A sincronizar…',
-    'settings.account.syncedAgo': 'Sincronizado {when}',
-    'settings.account.notSyncedYet': 'Ainda não sincronizado',
-    'settings.account.serverCount_one': '{count} servidor',
-    'settings.account.serverCount_other': '{count} servidores',
-    'settings.account.serversSynced_one': '{count} servidor sincronizado',
-    'settings.account.serversSynced_other': '{count} servidores sincronizados',
-    'settings.account.noServers': 'Esta conta ainda não tem servidores',
     'settings.account.cloudBackup': 'Cópia na nuvem',
     'settings.account.cloudBackupDesc': 'Os seus anfitriões, pastas, chaves e definições, guardados '
         + 'na sua conta para os seus outros dispositivos.',
     'settings.account.backupOn': 'A cópia na nuvem está ligada',
     'settings.account.backupOff': 'A cópia na nuvem está desligada. O que já está guardado fica até '
         + 'que o substitua.',
-    'settings.account.backedUp': 'Guardado na sua conta CloudBlast',
+    'settings.account.backedUp': 'Guardado na sua conta Reef Terminal',
     'settings.account.saveNow': 'Guardar agora',
     'settings.account.saving': 'A guardar…',
     'settings.account.savedAgo': 'Guardado {when}',
@@ -748,13 +733,13 @@ export default {
     'settings.backup.exportFailed': 'Não foi possível escrever a cópia',
     'settings.backup.exported': 'Cópia guardada: {hosts}, {keys}, {snippets}',
     'settings.backup.restoreTitle': 'Restaurar uma cópia',
-    'settings.backup.restoreDesc': 'Lê um ficheiro .cbbackup e adiciona o que ele contém. Vê o que '
+    'settings.backup.restoreDesc': 'Lê um ficheiro .reefbackup e adiciona o que ele contém. Vê o que '
         + 'lá está antes de alguma coisa mudar.',
     'settings.backup.restoreNote': 'O que já cá está fica intocado por predefinição, por isso '
         + 'restaurar duas vezes é seguro.',
     'settings.backup.chooseFile': 'Escolher ficheiro…',
     'settings.backup.openTitle': 'Abrir cópia cifrada',
-    'settings.backup.fileKind': 'Cópia CloudBlast',
+    'settings.backup.fileKind': 'Cópia Reef Terminal',
     'settings.backup.pickerFailed': 'Não foi possível abrir o seletor de ficheiros',
     'settings.backup.file': 'Ficheiro',
     'settings.backup.open': 'Abrir cópia',
@@ -841,10 +826,6 @@ export default {
     'hosts.selectedCount': '{count} selecionados',
     'hosts.folderEmpty': 'Vazia',
     'hosts.folderActions': 'Ações da pasta',
-    'hosts.syncedBadge': 'Sincronizada',
-    'hosts.syncedAccount': 'Sincronizada da sua conta CloudBlast',
-    'hosts.syncedProject': 'Um projeto na sua conta CloudBlast. A sincronização mantém o nome e o '
-        + 'lugar dele',
     'hosts.upOneLevel': 'Subir um nível',
     'hosts.dragHint': 'Arraste um cartão para uma pasta para o arquivar · Arraste uma caixa para '
         + 'escolher vários',

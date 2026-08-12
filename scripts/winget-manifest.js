@@ -31,17 +31,17 @@ const crypto = require('crypto');
 
 const pkg = require('../package.json');
 
-const REPO = 'BradPerbs/cloudterm';
+const REPO = 'reefterm/reefterm';
 
 // winget names a package Publisher.Package and keys everything off that name,
 // including the directory it lives in and what people type to install it.
 // Changing it later means submitting a new package and asking for the old one
 // to be taken down, so it is a decision rather than a detail.
-const IDENTIFIER = 'CloudBlast.CloudTerm';
+const IDENTIFIER = 'ReefTerminal.ReefTerminal';
 
 // The installer, and only the installer. The portable build is the other .exe
 // on the release, and there is nothing for winget to install it into.
-const INSTALLER = 'CloudTerm-Setup-x64.exe';
+const INSTALLER = 'ReefTerminal-Setup-x64.exe';
 
 // Which manifest schema these are written against. winget-pkgs still accepts
 // older ones, so this only moves when there is a reason: bump it, then read
@@ -56,8 +56,8 @@ const MINIMUM_WINDOWS = '10.0.17763.0';
 // electron-builder's NSIS installer registers its uninstall entry under a GUID
 // rather than under a name, and derives that GUID as a UUID v5 of the appId in
 // a namespace of its own. Handing winget the same GUID is the whole reason
-// `winget upgrade` can see an installed CloudTerm: the entry is named
-// "CloudTerm 1.2.0", version and all, so matching it by name would break on
+// `winget upgrade` can see an installed Reef Terminal: the entry is named
+// "Reef Terminal 1.2.0", version and all, so matching it by name would break on
 // every release.
 //
 // Derived rather than pasted so it tracks appId. Worth knowing that appId is
@@ -68,19 +68,24 @@ const ELECTRON_BUILDER_NAMESPACE = '50e065bc-3134-11e6-9bab-38c9862bdaf3';
 
 const LOCALE = {
     PackageLocale: 'en-US',
-    Publisher: 'CloudBlast',
-    PublisherUrl: 'https://cloudblast.io',
+    Publisher: 'Reef Terminal Contributors',
+    PublisherUrl: 'https://github.com/reefterm',
     PublisherSupportUrl: `https://github.com/${REPO}/issues`,
-    Author: 'CloudBlast',
-    PackageName: 'CloudTerm',
+    Author: 'Reef Terminal Contributors',
+    PackageName: 'Reef Terminal',
     PackageUrl: `https://github.com/${REPO}`,
+    // Reef Terminal is a fork of CloudTerm and is distributed under CloudTerm's
+    // own license, not a license of its own -- this field describes the terms
+    // that actually govern the software, so it stays as written.
     License: 'CloudTerm License 1.0',
     LicenseUrl: `https://github.com/${REPO}/blob/main/LICENSE`,
+    // Required by that same license: the original copyright notice travels
+    // with every copy, including this one.
     Copyright: 'Copyright 2026 CloudBlast. All rights reserved.',
     CopyrightUrl: `https://github.com/${REPO}/blob/main/LICENSE`,
     ShortDescription: 'SSH, SFTP, Telnet and Windows RDP, all in one terminal',
     Description: [
-        'CloudTerm keeps every way you reach a server in one window. Open an SSH',
+        'Reef Terminal keeps every way you reach a server in one window. Open an SSH',
         'session, move files over SFTP, forward a port and take a Windows desktop,',
         'all on the same connection and the same tab strip.',
         '',
@@ -89,9 +94,9 @@ const LOCALE = {
         'AI agent that can drive the terminal for you. Hosts, keys, snippets and',
         'settings sync between machines, encrypted on your own machine first.',
         '',
-        'Built with Electron, React and xterm.js by CloudBlast, and free to use.',
+        'A free, self-hostable, community-run fork of CloudTerm.',
     ].join('\n'),
-    Moniker: 'cloudterm',
+    Moniker: 'reefterm',
     Tags: [
         'ssh',
         'ssh-client',
@@ -136,7 +141,7 @@ function uuidV5(name, namespace) {
 async function fetchRelease(tag) {
     const headers = {
         Accept: 'application/vnd.github+json',
-        'User-Agent': 'cloudterm-winget-manifest',
+        'User-Agent': 'reefterm-winget-manifest',
     };
 
     // Only to lift the rate limit. The repository is public, so an unauthenticated

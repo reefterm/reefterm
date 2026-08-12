@@ -266,8 +266,15 @@ check('an unknown tool is never auto approved', () => {
 });
 
 check('"never ask" really does mean never', () => {
-    assert.strictEqual(tools.isAutoApproved('run_command', { command: 'rm -rf /' }, open), true);
+    assert.strictEqual(tools.isAutoApproved('run_command', { command: 'echo hello' }, open), true);
     assert.strictEqual(tools.isAutoApproved('some_new_tool', {}, open), true);
+});
+
+check('except for what is hard-blocked, which "never ask" does not override', () => {
+    // blockedReason is checked before the approval-mode shortcut in
+    // isAutoApproved, by design: 'never ask' must not be a way to launder a
+    // command that is blocked outright.
+    assert.strictEqual(tools.isAutoApproved('run_command', { command: 'rm -rf /' }, open), false);
 });
 
 check('a saved host never carries a secret into the model', () => {

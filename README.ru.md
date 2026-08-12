@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="cloudterm.png" alt="CloudTerm" width="128">
+  <img src="cloudterm.png" alt="Reef Terminal" width="128">
 </p>
 
-<h1 align="center">CloudTerm</h1>
+<h1 align="center">Reef Terminal</h1>
 
 <p align="center">
   <strong>SSH, SFTP, Telnet и Windows RDP в одном терминале</strong>
@@ -14,13 +14,13 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/BradPerbs/cloudterm/releases/latest"><img alt="Download" src="https://img.shields.io/badge/%D0%A1%D0%BA%D0%B0%D1%87%D0%B0%D1%82%D1%8C-%D0%9F%D0%BE%D1%81%D0%BB%D0%B5%D0%B4%D0%BD%D1%8F%D1%8F%20%D0%B2%D0%B5%D1%80%D1%81%D0%B8%D1%8F-success?style=for-the-badge&logo=github"></a>
+  <a href="https://github.com/reefterm/reefterm/releases/latest"><img alt="Download" src="https://img.shields.io/badge/%D0%A1%D0%BA%D0%B0%D1%87%D0%B0%D1%82%D1%8C-%D0%9F%D0%BE%D1%81%D0%BB%D0%B5%D0%B4%D0%BD%D1%8F%D1%8F%20%D0%B2%D0%B5%D1%80%D1%81%D0%B8%D1%8F-success?style=for-the-badge&logo=github"></a>
   &nbsp;
   <a href="#"><img alt="Platform" src="https://img.shields.io/badge/%D0%9F%D0%BB%D0%B0%D1%82%D1%84%D0%BE%D1%80%D0%BC%D0%B0-Windows%20%7C%20macOS%20%7C%20Linux-blue?style=for-the-badge&logo=electron"></a>
   &nbsp;
   <a href="LICENSE"><img alt="License" src="https://img.shields.io/badge/%D0%9B%D0%B8%D1%86%D0%B5%D0%BD%D0%B7%D0%B8%D1%8F-fair--code-green?style=for-the-badge"></a>
   &nbsp;
-  <a href="https://discord.gg/7M84Xp8QBr"><img alt="Discord" src="https://img.shields.io/badge/Discord-%D0%9F%D1%80%D0%B8%D1%81%D0%BE%D0%B5%D0%B4%D0%B8%D0%BD%D0%B8%D1%82%D1%8C%D1%81%D1%8F-5865F2?style=for-the-badge&logo=discord&logoColor=white"></a>
+  <a href="https://github.com/reefterm/reefterm/issues"><img alt="Issues" src="https://img.shields.io/badge/Issues-%D0%9E%D1%82%D0%BA%D1%80%D1%8B%D1%82%D1%8B-blue?style=for-the-badge&logo=github"></a>
 </p>
 
 <p align="center">
@@ -32,40 +32,37 @@
 
 ---
 
-CloudTerm собирает все способы подключения к серверу в одном окне. Откройте
+Reef Terminal собирает все способы подключения к серверу в одном окне. Откройте
 сеанс SSH, передайте файлы по SFTP, пробросьте порт и подключитесь к рабочему
 столу Windows, и всё это в рамках одного соединения и одной строки вкладок. Без
 второй программы и без второго входа.
 
 Он подключается к чему угодно: к последовательной консоли ноутбука, к
 коммутатору, который понимает только telnet, к машине с Windows по RDP или к
-серверу у любого провайдера. CloudTerm сделан компанией
-[CloudBlast](https://cloudblast.io), хостинг-провайдером VPS. Он бесплатен для
-всех, а весь исходный код лежит здесь: читайте и меняйте.
+серверу у любого провайдера. Reef Terminal — это бесплатный, самостоятельно
+размещаемый форк [CloudTerm](https://github.com/BradPerbs/cloudterm), которым
+управляет сообщество. Он бесплатен для всех, а весь исходный код лежит здесь:
+читайте и меняйте.
 
-<img src="Main%20Image.png" alt="CloudTerm" width="100%">
+<img src="Main%20Image.png" alt="Reef Terminal" width="100%">
 
 ---
 
-<h2 align="center">☁️ Бесплатная облачная синхронизация для всех</h2>
+<h2 align="center">🌊 Синхронизация на своём сервере, на ваших условиях</h2>
 
 <p align="center">
-  <strong>Ваша конфигурация на каждом компьютере, полностью бесплатно.</strong><br/>
+  <strong>Ваша конфигурация на каждом компьютере, без необходимости доверять ключ кому-то ещё.</strong><br/>
   Хосты, папки, ключи, сниппеты, доверенные ключи серверов и настройки терминала<br/>
-  шифруются на вашем компьютере до отправки и восстанавливаются, как только вы войдёте в аккаунт на другой машине.
+  шифруются на вашем компьютере фразой-паролем, которую знаете только вы, ещё до того, как что-либо покинет машину.
 </p>
 
 <p align="center">
-  Бесплатно с аккаунтом <a href="https://cloudblast.io"><strong>CloudBlast</strong></a>,
-  даже если у вас нет у нас ни одного сервера.
+  Укажите приложению адрес самостоятельно размещаемого сервера синхронизации —<br/>
+  своего собственного или инстанса сообщества — и даже оператор этого сервера не сможет прочитать ваши данные.
 </p>
 
 <p align="center">
-  <a href="https://cloudblast.io"><img alt="Создать бесплатный аккаунт" src="https://img.shields.io/badge/%D0%A1%D0%BE%D0%B7%D0%B4%D0%B0%D1%82%D1%8C%20%D0%B0%D0%BA%D0%BA%D0%B0%D1%83%D0%BD%D1%82-cloudblast.io-0aa2c0?style=for-the-badge"></a>
-</p>
-
-<p align="center">
-  <sub>Уже клиент CloudBlast? Ваши серверы сами появятся в списке хостов, готовые к подключению.</sub>
+  <sub>Это в активной разработке для самостоятельно размещаемого сервера аккаунтов Reef Terminal. Прогресс — в открытых issues.</sub>
 </p>
 
 ---
@@ -73,7 +70,7 @@ CloudTerm собирает все способы подключения к се�
 ## Содержание
 
 - [Скачать](#download)
-- [Что такое CloudTerm](#what-is-cloudterm)
+- [Что такое Reef Terminal](#what-is-reef-terminal)
 - [Возможности](#features)
 - [Скриншоты](#screenshots)
 - [Начало работы](#getting-started)
@@ -84,8 +81,8 @@ CloudTerm собирает все способы подключения к се�
 
 ---
 
-<a name="what-is-cloudterm"></a>
-## Что такое CloudTerm
+<a name="what-is-reef-terminal"></a>
+## Что такое Reef Terminal
 
 - **Терминал** для SSH, telnet и последовательных консолей, со вкладками,
   разделением панелей и отрисовкой на GPU.
@@ -216,8 +213,9 @@ CloudTerm собирает все способы подключения к се�
 
 - **Зашифрованное хранилище** для всех учётных данных, при желании за паролем на
   запуск
+- **Самостоятельно размещаемая, сквозная шифрованная синхронизация** (в разработке),
+  шифруется на вашем компьютере до отправки, нечитаема для сервера, на котором хранится
 - **Проверка ключей хостов** при каждом подключении и на каждом переходе
-- **Бесплатная облачная синхронизация**, шифруется на вашем компьютере до отправки
 - **Зашифрованные резервные копии**, переносящие всю конфигурацию на другую машину
 - **Журнал активности** по каждому подключению и каждому изменению
 
@@ -226,10 +224,13 @@ CloudTerm собирает все способы подключения к се�
 <a name="screenshots"></a>
 ## Скриншоты
 
+> Скриншоты ниже унаследованы от проекта CloudTerm, форком которого является
+> Reef Terminal, и их предстоит обновить с собственным брендом Reef Terminal.
+
 ### Хосты и хранилище ключей
 
 Все серверы разложены по папкам, с тегами, поиском и протоколом прямо на
-карточке. Войдите в CloudBlast, и ваши серверы появятся здесь сами.
+карточке.
 
 <img src="hostscloudterm.png" alt="Хосты и хранилище ключей" width="100%">
 
@@ -265,29 +266,29 @@ CloudTerm собирает все способы подключения к се�
 
 | ОС | Скачать |
 | --- | --- |
-| macOS | [Apple silicon (M1 и новее)](https://github.com/BradPerbs/cloudterm/releases/latest/download/CloudTerm-arm64.dmg) · [Intel](https://github.com/BradPerbs/cloudterm/releases/latest/download/CloudTerm-x64.dmg) |
-| Windows | [Установщик, x64 (рекомендуется)](https://github.com/BradPerbs/cloudterm/releases/latest/download/CloudTerm-Setup-x64.exe) · [Портативная версия, x64](https://github.com/BradPerbs/cloudterm/releases/latest/download/CloudTerm-x64.exe) |
-| Linux | [AppImage, x64](https://github.com/BradPerbs/cloudterm/releases/latest/download/CloudTerm-x86_64.AppImage) |
+| macOS | [Apple silicon (M1 и новее)](https://github.com/reefterm/reefterm/releases/latest/download/ReefTerminal-arm64.dmg) · [Intel](https://github.com/reefterm/reefterm/releases/latest/download/ReefTerminal-x64.dmg) |
+| Windows | [Установщик, x64 (рекомендуется)](https://github.com/reefterm/reefterm/releases/latest/download/ReefTerminal-Setup-x64.exe) · [Портативная версия, x64](https://github.com/reefterm/reefterm/releases/latest/download/ReefTerminal-x64.exe) |
+| Linux | [AppImage, x64](https://github.com/reefterm/reefterm/releases/latest/download/ReefTerminal-x86_64.AppImage) |
 
 В Windows его также можно установить и обновлять из терминала:
 
 ```powershell
-winget install CloudBlast.CloudTerm
+winget install ReefTerminal.ReefTerminal
 ```
 
-Или просмотрите [все релизы на GitHub](https://github.com/BradPerbs/cloudterm/releases).
+Или просмотрите [все релизы на GitHub](https://github.com/reefterm/reefterm/releases).
 
 ### Сборка из исходного кода
 
 ```bash
-git clone https://github.com/BradPerbs/cloudterm.git
-cd cloudterm
+git clone https://github.com/reefterm/reefterm.git
+cd reefterm
 npm install
 npm run dev
 ```
 
 Чтобы использовать ИИ-агента с OpenCode, установите CLI `opencode` и настройте
-хотя бы одного провайдера моделей командой `opencode auth login`. CloudTerm
+хотя бы одного провайдера моделей командой `opencode auth login`. Reef Terminal
 использует существующие провайдеры и учётные данные OpenCode, не копируя и не
 сохраняя их.
 
@@ -311,21 +312,17 @@ npm run build
 ## Сообщество
 
 Вопросы, ошибки, идеи для новых возможностей или просто хотите узнать, что будет
-дальше?
-
-<p>
-  <a href="https://discord.gg/7M84Xp8QBr"><img alt="Присоединиться к Discord" src="https://img.shields.io/badge/%D0%9F%D1%80%D0%B8%D1%81%D0%BE%D0%B5%D0%B4%D0%B8%D0%BD%D0%B8%D1%82%D1%8C%D1%81%D1%8F%20%D0%BA%20Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white"></a>
-</p>
-
-Issues и pull requests на GitHub тоже приветствуются.
+дальше? Issues и pull requests на GitHub приветствуются — с
+[CONTRIBUTING.md](CONTRIBUTING.md) удобно начать.
 
 <a name="contributors"></a>
 ## Участники
 
-Спасибо всем, кто вложил свой труд в CloudTerm.
+Спасибо всем, кто вложил свой труд в Reef Terminal и в проект CloudTerm, из
+которого он вырос.
 
-<a href="https://github.com/BradPerbs/cloudterm/graphs/contributors">
-  <img alt="Участники" src="https://contrib.rocks/image?repo=BradPerbs/cloudterm" />
+<a href="https://github.com/reefterm/reefterm/graphs/contributors">
+  <img alt="Участники" src="https://contrib.rocks/image?repo=reefterm/reefterm" />
 </a>
 
 <a name="tech-stack"></a>
@@ -341,9 +338,11 @@ Vite · Claude Agent SDK · Codex SDK · OpenCode SDK
 <a name="license"></a>
 ## Лицензия
 
-CloudTerm распространяется по модели [fair-code](https://faircode.io), условия
-изложены в [Лицензии CloudTerm](LICENSE): исходный код открыт, а программу можно
-свободно использовать, изменять и передавать, в том числе на работе. Продавать
-её или включать любую часть её кода в то, за что вы берёте деньги, можно только
-по коммерческой лицензии от [CloudBlast](https://cloudblast.io), и обычно
-достаточно просто попросить.
+Reef Terminal — это форк [CloudTerm](https://github.com/BradPerbs/cloudterm),
+распространяемый на условиях [Лицензии CloudTerm](LICENSE), лицензии
+[fair-code](https://faircode.io), написанной CloudBlast: исходный код открыт, а
+программу можно свободно использовать, изменять и передавать, в том числе на
+работе. Продавать её или включать любую часть её кода в то, за что вы берёте
+деньги, можно только по коммерческой лицензии от CloudBlast — полные условия, в
+том числе то, что этот форк может и не может заявлять об именах CloudTerm и
+CloudBlast, смотрите в [LICENSE](LICENSE).

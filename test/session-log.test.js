@@ -428,6 +428,10 @@ const body = (text) => text.split('\n').filter(line => !line.startsWith('#')).jo
 
     await checkAsync('never deletes a transcript still being written', async () => {
         const filePath = sessionLog.start('tab-15', { hostName: 'live', address: 'x' });
+        // start() opens its write stream asynchronously, so the file may not
+        // exist on disk the instant this call returns — wait for it, the same
+        // way every other async assertion in this file does.
+        await settle();
         const old = new Date(Date.now() - 10 * DAY);
         fs.utimesSync(filePath, old, old);
 

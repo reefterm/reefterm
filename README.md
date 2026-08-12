@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="cloudterm.png" alt="CloudTerm" width="128">
+  <img src="cloudterm.png" alt="Reef Terminal" width="128">
 </p>
 
-<h1 align="center">CloudTerm</h1>
+<h1 align="center">Reef Terminal</h1>
 
 <p align="center">
   <strong>SSH, SFTP, Telnet and Windows RDP, all in one terminal</strong>
@@ -14,13 +14,13 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/BradPerbs/cloudterm/releases/latest"><img alt="Download" src="https://img.shields.io/badge/Download-Latest-success?style=for-the-badge&logo=github"></a>
+  <a href="https://github.com/reefterm/reefterm/releases/latest"><img alt="Download" src="https://img.shields.io/badge/Download-Latest-success?style=for-the-badge&logo=github"></a>
   &nbsp;
   <a href="#"><img alt="Platform" src="https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-blue?style=for-the-badge&logo=electron"></a>
   &nbsp;
   <a href="LICENSE"><img alt="License" src="https://img.shields.io/badge/License-fair--code-green?style=for-the-badge"></a>
   &nbsp;
-  <a href="https://discord.gg/7M84Xp8QBr"><img alt="Discord" src="https://img.shields.io/badge/Discord-Join-5865F2?style=for-the-badge&logo=discord&logoColor=white"></a>
+  <a href="https://github.com/reefterm/reefterm/issues"><img alt="Issues" src="https://img.shields.io/badge/Issues-Welcome-blue?style=for-the-badge&logo=github"></a>
 </p>
 
 <p align="center">
@@ -32,38 +32,34 @@
 
 ---
 
-CloudTerm keeps every way you reach a server in one window. Open an SSH session,
+Reef Terminal keeps every way you reach a server in one window. Open an SSH session,
 move files over SFTP, forward a port and take a Windows desktop, all on the same
 connection and the same tab strip. No second app, no second login.
 
 It connects to anything: your laptop's serial console, a switch that only speaks
-telnet, a Windows box over RDP, or a server on any host you like. CloudTerm is
-made by [CloudBlast](https://cloudblast.io), a VPS hosting company. It is free for
-everyone, and the whole source is here to read and change.
+telnet, a Windows box over RDP, or a server on any host you like. Reef Terminal is a
+free, self-hostable, community-run fork of [CloudTerm](https://github.com/BradPerbs/cloudterm).
+It is free for everyone, and the whole source is here to read and change.
 
-<img src="Main%20Image.png" alt="CloudTerm" width="100%">
+<img src="Main%20Image.png" alt="Reef Terminal" width="100%">
 
 ---
 
-<h2 align="center">☁️ Free cloud sync, for everyone</h2>
+<h2 align="center">🌊 Self-hosted sync, on your own terms</h2>
 
 <p align="center">
-  <strong>Your setup on every machine you use, at no charge.</strong><br/>
+  <strong>Your setup on every machine you use, without trusting anyone else with the key.</strong><br/>
   Hosts, folders, keys, snippets, trusted host keys and terminal settings, encrypted<br/>
-  on your machine before it ever leaves and restored the moment you sign in somewhere else.
+  on your machine with a passphrase only you hold, before any of it leaves.
 </p>
 
 <p align="center">
-  Free with a <a href="https://cloudblast.io"><strong>CloudBlast</strong></a> account,
-  whether or not you host a single server with us.
+  Point the app at a self-hosted sync server -- your own, or a community instance --<br/>
+  and even the operator of that server cannot read your data.
 </p>
 
 <p align="center">
-  <a href="https://cloudblast.io"><img alt="Get a free account" src="https://img.shields.io/badge/Get%20a%20free%20account-cloudblast.io-0aa2c0?style=for-the-badge"></a>
-</p>
-
-<p align="center">
-  <sub>Already a CloudBlast customer? Your servers appear in the host list on their own, ready to connect.</sub>
+  <sub>This is under active development for Reef Terminal's self-hosted accounts server. See open issues for progress.</sub>
 </p>
 
 ---
@@ -71,7 +67,7 @@ everyone, and the whole source is here to read and change.
 ## Contents
 
 - [Download](#download)
-- [What is CloudTerm](#what-is-cloudterm)
+- [What is Reef Terminal](#what-is-reef-terminal)
 - [Features](#features)
 - [Screenshots](#screenshots)
 - [Getting started](#getting-started)
@@ -82,8 +78,8 @@ everyone, and the whole source is here to read and change.
 
 ---
 
-<a name="what-is-cloudterm"></a>
-## What is CloudTerm
+<a name="what-is-reef-terminal"></a>
+## What is Reef Terminal
 
 - **A terminal** for SSH, telnet and serial consoles, with tabs, split panes and
   GPU-accelerated rendering.
@@ -102,7 +98,7 @@ everyone, and the whole source is here to read and change.
 
 ### AI agent
 
-Pick the agent you already have. CloudTerm drives the CLI on your machine under
+Pick the agent you already have. Reef Terminal drives the CLI on your machine under
 your own account, so there is nothing to paste and nothing extra to subscribe
 to.
 
@@ -152,7 +148,7 @@ Whichever you choose, the agent:
 
 > On Windows, install OpenCode natively with Chocolatey, Scoop, npm, or its
 > release binary. A copy installed only inside WSL is not visible to the native
-> CloudTerm desktop app.
+> Reef Terminal desktop app.
 
 ### Terminal
 
@@ -236,8 +232,8 @@ hostnames.
 ### Security
 
 - **Encrypted vault** for every credential, behind an optional opening password
+- **Self-hosted, end-to-end encrypted sync** (in progress), encrypted on your machine before it is uploaded, unreadable by the server it's stored on
 - **Host key verification** on every connection and every hop
-- **Free cloud sync**, encrypted on your machine before it is uploaded
 - **Encrypted backups** that move your whole setup to another machine
 - **Activity log** of every connection made and every change
 
@@ -246,10 +242,12 @@ hostnames.
 <a name="screenshots"></a>
 ## Screenshots
 
+> The screenshots below are inherited from the CloudTerm project this fork
+> started from and are due for a refresh with Reef Terminal's own branding.
+
 ### Hosts and keychain
 
-Every server in folders, with tags, search and the protocol on the card. Sign in
-to CloudBlast and your servers appear here on their own.
+Every server in folders, with tags, search and the protocol on the card.
 
 <img src="hostscloudterm.png" alt="Hosts and keychain" width="100%">
 
@@ -285,29 +283,29 @@ Download the latest release for your platform:
 
 | OS | Download |
 | --- | --- |
-| macOS | [Apple silicon (M1 and later)](https://github.com/BradPerbs/cloudterm/releases/latest/download/CloudTerm-arm64.dmg) · [Intel](https://github.com/BradPerbs/cloudterm/releases/latest/download/CloudTerm-x64.dmg) |
-| Windows | [Installer, x64 (recommended)](https://github.com/BradPerbs/cloudterm/releases/latest/download/CloudTerm-Setup-x64.exe) · [Portable, x64](https://github.com/BradPerbs/cloudterm/releases/latest/download/CloudTerm-x64.exe) |
-| Linux | [AppImage, x64](https://github.com/BradPerbs/cloudterm/releases/latest/download/CloudTerm-x86_64.AppImage) |
+| macOS | [Apple silicon (M1 and later)](https://github.com/reefterm/reefterm/releases/latest/download/ReefTerminal-arm64.dmg) · [Intel](https://github.com/reefterm/reefterm/releases/latest/download/ReefTerminal-x64.dmg) |
+| Windows | [Installer, x64 (recommended)](https://github.com/reefterm/reefterm/releases/latest/download/ReefTerminal-Setup-x64.exe) · [Portable, x64](https://github.com/reefterm/reefterm/releases/latest/download/ReefTerminal-x64.exe) |
+| Linux | [AppImage, x64](https://github.com/reefterm/reefterm/releases/latest/download/ReefTerminal-x86_64.AppImage) |
 
 On Windows you can install and update it from a terminal instead:
 
 ```powershell
-winget install CloudBlast.CloudTerm
+winget install ReefTerminal.ReefTerminal
 ```
 
-Or browse [all GitHub releases](https://github.com/BradPerbs/cloudterm/releases).
+Or browse [all GitHub releases](https://github.com/reefterm/reefterm/releases).
 
 ### Build from source
 
 ```bash
-git clone https://github.com/BradPerbs/cloudterm.git
-cd cloudterm
+git clone https://github.com/reefterm/reefterm.git
+cd reefterm
 npm install
 npm run dev
 ```
 
 To use the AI agent with OpenCode, install the `opencode` CLI and configure at
-least one model provider with `opencode auth login`. CloudTerm uses OpenCode's
+least one model provider with `opencode auth login`. Reef Terminal uses OpenCode's
 existing providers and credentials; it does not copy or store them.
 
 Build a portable executable into `dist/`:
@@ -330,20 +328,16 @@ npm run build
 ## Community
 
 Questions, bugs, feature requests, or just want to see what is coming next?
-
-<p>
-  <a href="https://discord.gg/7M84Xp8QBr"><img alt="Join the Discord" src="https://img.shields.io/badge/Join%20the%20Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white"></a>
-</p>
-
-Issues and pull requests are welcome here on GitHub.
+Issues and pull requests are welcome here on GitHub -- see
+[CONTRIBUTING.md](CONTRIBUTING.md) to get started.
 
 <a name="contributors"></a>
 ## Contributors
 
-Thanks to everyone who has put work into CloudTerm.
+Thanks to everyone who has put work into Reef Terminal and the CloudTerm project it forked from.
 
-<a href="https://github.com/BradPerbs/cloudterm/graphs/contributors">
-  <img alt="Contributors" src="https://contrib.rocks/image?repo=BradPerbs/cloudterm" />
+<a href="https://github.com/reefterm/reefterm/graphs/contributors">
+  <img alt="Contributors" src="https://contrib.rocks/image?repo=reefterm/reefterm" />
 </a>
 
 <a name="tech-stack"></a>
@@ -359,9 +353,11 @@ Vite · Claude Agent SDK · Codex SDK · OpenCode SDK
 <a name="license"></a>
 ## License
 
-CloudTerm is [fair-code](https://faircode.io) under the
-[CloudTerm License](LICENSE): the source is open to read, and the software is
-free to use, modify and share, at work or anywhere else. Selling it, or putting
-any part of its code into something you charge for, needs a commercial license
-from [CloudBlast](https://cloudblast.io), which is usually just a matter of
-asking.
+Reef Terminal is a fork of [CloudTerm](https://github.com/BradPerbs/cloudterm),
+distributed under the terms of the [CloudTerm License](LICENSE), a
+[fair-code](https://faircode.io) license written by CloudBlast: the source is
+open to read, and the software is free to use, modify and share, at work or
+anywhere else. Selling it, or putting any part of its code into something you
+charge for, needs a commercial license from CloudBlast -- see [LICENSE](LICENSE)
+for the full terms, including what this fork can and cannot claim about the
+CloudTerm and CloudBlast names.

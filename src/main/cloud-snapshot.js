@@ -13,12 +13,6 @@ const activity = require('./activity');
  * proxies, known hosts and terminal settings, encrypted and kept on the account
  * so signing in elsewhere reproduces it.
  *
- * What is deliberately left out: anything the CloudBlast sync already owns.
- * Those hosts and folders are rebuilt from the servers API on every device, so
- * carrying them here would be a second copy that can disagree with the first --
- * and a stale one would resurrect hosts for servers that have been deleted.
- * Everything the *user* made is in scope; everything the panel made is not.
- *
  * The blob is encrypted on this machine with AES-256-GCM, under a per-account
  * key the console issues and holds in an APP_KEY-encrypted column, so a stolen
  * database alone cannot open it.
@@ -102,9 +96,6 @@ vault.onUnlocked(() => { state = null; });
  * What goes in
  * ------------------------------------------------------------------ */
 
-/** Records the CloudBlast server sync owns, which this must not duplicate. */
-const isManaged = (record) => typeof record?.id === 'string' && record.id.startsWith('cloudblast-');
-
 /**
  * Counts, sent in the clear alongside the ciphertext.
  *
@@ -133,12 +124,10 @@ function collect() {
     return {
         version: SCHEMA_VERSION,
         capturedAt: new Date().toISOString(),
-        hosts: everything.hosts.filter(host => !isManaged(host)),
-        folders: everything.folders.filter(folder => !isManaged(folder) && folder.id !== 'cloudblast'),
+        hosts: everything.hosts,
+        folders: everything.folders,
         keys: everything.keys,
         snippets: everything.snippets,
-        // Not filtered by `isManaged`: proxies are this machine's own, so there
-        // is no server-owned counterpart for one to collide with.
         proxies: everything.proxies,
         knownHosts: knownHosts.exportAll(),
         settings: rendererSettings || null,
@@ -156,8 +145,8 @@ function collect() {
  */
 function apply(payload) {
     const summary = store.importAll({
-        hosts: Array.isArray(payload?.hosts) ? payload.hosts.filter(h => !isManaged(h)) : [],
-        folders: Array.isArray(payload?.folders) ? payload.folders.filter(f => !isManaged(f)) : [],
+        hosts: Array.isArray(payload?.hosts) ? payload.hosts : [],
+        folders: Array.isArray(payload?.folders) ? payload.folders : [],
         keys: payload?.keys,
         snippets: payload?.snippets,
         proxies: payload?.proxies,

@@ -313,9 +313,9 @@ export default {
         + 'терминала и всё, что печатают ваши серверы, остаётся ровно таким, каким приходит.',
     'settings.general.languageChanged': 'Язык изменён на {language}',
     'settings.general.startup': 'Запускать при входе',
-    'settings.general.startupDesc': 'Открывать CloudTerm автоматически при входе в этот компьютер',
-    'settings.general.startupOn': 'CloudTerm будет открываться при входе в систему',
-    'settings.general.startupOff': 'CloudTerm больше не будет открываться при входе в систему',
+    'settings.general.startupDesc': 'Открывать Reef Terminal автоматически при входе в этот компьютер',
+    'settings.general.startupOn': 'Reef Terminal будет открываться при входе в систему',
+    'settings.general.startupOff': 'Reef Terminal больше не будет открываться при входе в систему',
     'settings.general.startupFailed': 'Не удалось изменить эту настройку',
     'settings.general.startupUnknown': 'Не удалось узнать, запускается ли приложение вместе с системой',
     'settings.general.restore': 'Восстанавливать сеансы',
@@ -355,14 +355,14 @@ export default {
     'settings.appearance.logoShown': 'Логотип показан',
     'settings.appearance.logoHidden': 'Логотип скрыт',
     'settings.appearance.customLogo': 'Свой логотип',
-    'settings.appearance.customLogoSet': 'Ваше изображение вместо знака CloudBlast.',
-    'settings.appearance.customLogoDesc': 'Используйте своё изображение вместо знака CloudBlast. '
+    'settings.appearance.customLogoSet': 'Ваше изображение вместо знака Reef Terminal.',
+    'settings.appearance.customLogoDesc': 'Используйте своё изображение вместо знака Reef Terminal. '
         + 'PNG, JPG, GIF, WebP, SVG, BMP или ICO, до 512 КБ.',
     'settings.appearance.choosing': 'Выбор…',
     'settings.appearance.chooseImage': 'Выбрать изображение',
     'settings.appearance.logoUnreadable': 'Не удалось прочитать это изображение',
     'settings.appearance.logoSet': 'Логотип заменён на {name}',
-    'settings.appearance.logoCleared': 'Возврат к знаку CloudBlast',
+    'settings.appearance.logoCleared': 'Возврат к знаку Reef Terminal',
     'settings.appearance.position': 'Положение',
     'settings.appearance.positionDesc': 'С какого края заголовка стоит значок: рядом с кнопкой '
         + 'меню или со стороны кнопок окна.',
@@ -516,7 +516,7 @@ export default {
     'settings.assistant.theAgent': 'агент',
     'settings.assistant.accountOpencode': 'OpenCode использует провайдеров и учётные данные, уже '
         + 'настроенные в его CLI. Управляйте ими командой «opencode auth login»; ключи, сохранённые '
-        + 'в CloudBlast, в OpenCode не передаются.',
+        + 'в Reef Terminal, в OpenCode не передаются.',
     'settings.assistant.accountPlan': 'Вход выполнен через {agent} на этой машине, тариф {plan}. '
         + 'Расход идёт по этому тарифу, поэтому ключ здесь не нужен.',
     'settings.assistant.accountProvider': '{agent} на этой машине настроен на {provider}, который '
@@ -545,7 +545,7 @@ export default {
         + 'переключателя: эта страница включает саму возможность, а каждый нужный хост включается '
         + 'в своём собственном редакторе.',
     'settings.monitoring.unreadable': 'Не удалось прочитать настройки мониторинга из приложения. '
-        + 'Перезапустите CloudTerm и откройте эту страницу снова.',
+        + 'Перезапустите Reef Terminal и откройте эту страницу снова.',
     'settings.monitoring.saveFailed': 'Не удалось сохранить эту настройку',
     'settings.monitoring.checkFailed': 'Не удалось проверить хосты',
     'settings.monitoring.master': 'Следить за недоступностью хостов',
@@ -704,8 +704,8 @@ export default {
 
     /* ---- Settings: Account ---- */
     'settings.account.title': 'Учётная запись',
-    'settings.account.fallbackName': 'Учётная запись CloudBlast',
-    'settings.account.yourAccount': 'вашей учётной записи CloudBlast',
+    'settings.account.fallbackName': 'Учётная запись Reef Terminal',
+    'settings.account.yourAccount': 'вашей учётной записи Reef Terminal',
     'settings.account.connectedAs': 'Подключено как {account}',
     'settings.account.disconnect': 'Отключить',
     'settings.account.disconnecting': 'Отключение…',
@@ -717,31 +717,13 @@ export default {
     'settings.account.connectDesc': 'Синхронизируйте свои серверы и сохраните свою конфигурацию.',
     'settings.account.unlockFirst': 'Сначала разблокируйте приложение.',
     'settings.account.waitingForBrowser': 'Ожидание браузера…',
-    'settings.account.syncServers': 'Синхронизировать мои серверы',
-    'settings.account.syncServersDesc': 'Ваши серверы CloudBlast появятся в разделе «Хосты», готовые '
-        + 'к подключению.',
-    'settings.account.syncOn': 'Ваши серверы CloudBlast синхронизируются в «Хосты»',
-    'settings.account.syncOff': 'Синхронизация выключена. Уже добавленные хосты остаются на месте.',
-    'settings.account.syncNow': 'Синхронизировать',
-    'settings.account.syncing': 'Синхронизация…',
-    'settings.account.syncedAgo': 'Синхронизировано {when}',
-    'settings.account.notSyncedYet': 'Ещё не синхронизировано',
-    'settings.account.serverCount_one': '{count} сервер',
-    'settings.account.serverCount_few': '{count} сервера',
-    'settings.account.serverCount_many': '{count} серверов',
-    'settings.account.serverCount_other': '{count} сервера',
-    'settings.account.serversSynced_one': 'Синхронизирован {count} сервер',
-    'settings.account.serversSynced_few': 'Синхронизировано {count} сервера',
-    'settings.account.serversSynced_many': 'Синхронизировано {count} серверов',
-    'settings.account.serversSynced_other': 'Синхронизировано {count} сервера',
-    'settings.account.noServers': 'В этой учётной записи пока нет серверов',
     'settings.account.cloudBackup': 'Резервная копия в облаке',
     'settings.account.cloudBackupDesc': 'Ваши хосты, папки, ключи и настройки, сохранённые в учётной '
         + 'записи для ваших других устройств.',
     'settings.account.backupOn': 'Резервное копирование в облако включено',
     'settings.account.backupOff': 'Резервное копирование в облако выключено. То, что уже сохранено, '
         + 'останется, пока вы это не замените.',
-    'settings.account.backedUp': 'Сохранено в вашей учётной записи CloudBlast',
+    'settings.account.backedUp': 'Сохранено в вашей учётной записи Reef Terminal',
     'settings.account.saveNow': 'Сохранить сейчас',
     'settings.account.saving': 'Сохранение…',
     'settings.account.savedAgo': 'Сохранено {when}',
@@ -773,13 +755,13 @@ export default {
     'settings.backup.exportFailed': 'Не удалось записать резервную копию',
     'settings.backup.exported': 'Копия сохранена: {hosts}, {keys}, {snippets}',
     'settings.backup.restoreTitle': 'Восстановить из копии',
-    'settings.backup.restoreDesc': 'Читает файл .cbbackup и добавляет то, что в нём есть. Вы '
+    'settings.backup.restoreDesc': 'Читает файл .reefbackup и добавляет то, что в нём есть. Вы '
         + 'увидите его содержимое до того, как что-либо изменится.',
     'settings.backup.restoreNote': 'То, что здесь уже есть, по умолчанию не трогается, поэтому '
         + 'восстанавливать дважды безопасно.',
     'settings.backup.chooseFile': 'Выбрать файл…',
     'settings.backup.openTitle': 'Открыть зашифрованную копию',
-    'settings.backup.fileKind': 'Копия CloudBlast',
+    'settings.backup.fileKind': 'Копия Reef Terminal',
     'settings.backup.pickerFailed': 'Не удалось открыть выбор файла',
     'settings.backup.file': 'Файл',
     'settings.backup.open': 'Открыть копию',
@@ -883,10 +865,6 @@ export default {
     'hosts.selectedCount': 'Выбрано: {count}',
     'hosts.folderEmpty': 'Пусто',
     'hosts.folderActions': 'Действия с папкой',
-    'hosts.syncedBadge': 'Синхронизировано',
-    'hosts.syncedAccount': 'Синхронизировано из вашей учётной записи CloudBlast',
-    'hosts.syncedProject': 'Проект в вашей учётной записи CloudBlast. Синхронизация сохраняет его '
-        + 'имя и его место',
     'hosts.upOneLevel': 'На уровень выше',
     'hosts.dragHint': 'Перетащите карточку на папку, чтобы убрать её туда · Растяните рамку, чтобы '
         + 'выбрать несколько',

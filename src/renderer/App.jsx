@@ -1277,14 +1277,9 @@ function App() {
         loadKeys();
     }, [loadData, loadKeys]);
 
-    // A background sync adds, renames and removes hosts without the renderer
-    // asking for anything, so the sidebar has to be told rather than left
-    // showing whatever it loaded at startup.
-    useEffect(() => window.api.serverSync.onState(({ report }) => {
-        if (report && !report.error && !report.skipped) loadData();
-    }), [loadData]);
-
-    // Same for a setup pulled down from another device.
+    // A setup pulled down from another device adds hosts and keys without the
+    // renderer asking for anything, so the sidebar has to be told rather than
+    // left showing whatever it loaded at startup.
     useEffect(() => window.api.cloudSnapshot.onState((state) => {
         if (state?.pulled && state.added > 0) {
             loadData();

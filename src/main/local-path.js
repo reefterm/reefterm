@@ -29,6 +29,7 @@ const WINDOWS = process.platform === 'win32';
 const WINDOWS_ILLEGAL = /[\\:*?"<>|]/g;
 
 /** Control characters are invalid in a filename on every platform we target. */
+// eslint-disable-next-line no-control-regex -- matching raw control bytes is the point
 const CONTROL = /[\u0000-\u001f\u007f]/g;
 
 /**

@@ -166,7 +166,7 @@ async function acquire({ toolContext, requestApproval, onEvent = () => {} }) {
         server = http.createServer(async (request, response) => {
             const offered = String(request.headers.authorization || '').replace(/^Bearer\s+/i, '');
             if (!tokenMatches(offered)) {
-                if (process.env.CLOUDBLAST_MCP_DEBUG) console.error('[mcp] 401', request.method, request.url);
+                if (process.env.REEFTERM_MCP_DEBUG) console.error('[mcp] 401', request.method, request.url);
                 response.writeHead(401).end();
                 return;
             }
@@ -176,7 +176,7 @@ async function acquire({ toolContext, requestApproval, onEvent = () => {} }) {
                     ? JSON.parse(await readBody(request) || '{}')
                     : undefined;
 
-                if (process.env.CLOUDBLAST_MCP_DEBUG) {
+                if (process.env.REEFTERM_MCP_DEBUG) {
                     console.error('[mcp]', request.method, request.url, body?.method || '', 'accept=', request.headers.accept || '');
                 }
 

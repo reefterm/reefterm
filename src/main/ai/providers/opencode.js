@@ -138,8 +138,8 @@ function serverConfig({ url, token, allowLocalTools = false, maxTurns = 40 } = {
             [`${SERVER_NAME}_*`]: true,
         },
         agent: {
-            cloudblast: {
-                description: 'Operate the remote systems visible in CloudBlast SSH.',
+            reefterm: {
+                description: 'Operate the remote systems visible in Reef Terminal.',
                 mode: 'primary',
                 maxSteps: maxTurns,
                 permission,
@@ -242,7 +242,7 @@ function closeProcess(child, {
     if (!child || child.exitCode != null || child.signalCode != null) return;
 
     // A .cmd npm shim owns the actual OpenCode process beneath cmd.exe.
-    // Killing only the shim leaves the server listening after CloudBlast
+    // Killing only the shim leaves the server listening after Reef Terminal
     // closes, so Windows gets the same whole-tree shutdown OpenCode's SDK uses.
     if (platform === 'win32' && child.pid) {
         const result = spawnSyncFn('taskkill', ['/pid', String(child.pid), '/T', '/F'], {
@@ -420,7 +420,7 @@ async function start({
         }
         if (!session) {
             session = dataOf(await client.session.create({
-                body: { title: 'CloudBlast SSH' },
+                body: { title: 'Reef Terminal' },
             }));
         }
     } catch (error) {
@@ -494,7 +494,7 @@ async function start({
             await client.session.prompt({
                 path: { id: session.id },
                 body: {
-                    agent: 'cloudblast',
+                    agent: 'reefterm',
                     system: systemPrompt,
                     ...(model ? { model } : {}),
                     parts: [{ type: 'text', text }],

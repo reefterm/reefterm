@@ -1,5 +1,6 @@
 /**
- * The os/distro vocabulary shared by live SSH detection and CloudBlast sync.
+ * The os/distro vocabulary shared by live SSH detection and template-name
+ * classification.
  *
  * Both paths matter equally: a host synced from the panel and the same host
  * after connecting must agree, or the icon changes under the user for no
@@ -57,7 +58,7 @@ check('survives empty and missing output', () => {
     assert.deepStrictEqual(classifyShellOutput(undefined), { os: 'linux', distro: '' });
 });
 
-console.log('\nos detection: CloudBlast template names');
+console.log('\nos detection: provisioning template names');
 
 check('maps the common templates', () => {
     assert.deepStrictEqual(classifyTemplateName('Ubuntu 22.04'), { os: 'linux', distro: 'ubuntu' });

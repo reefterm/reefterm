@@ -286,7 +286,7 @@ function RestoreCard({ onRestored }) {
                 title: t('settings.backup.openTitle'),
                 properties: ['openFile'],
                 filters: [
-                    { name: t('settings.backup.fileKind'), extensions: ['cbbackup'] },
+                    { name: t('settings.backup.fileKind'), extensions: ['reefbackup'] },
                     { name: t('common.allFiles'), extensions: ['*'] },
                 ],
             });

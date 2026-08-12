@@ -45,6 +45,7 @@ const MAX_PENDING = 512;
  *
  * Anything already terminated is passed through and stripped normally.
  */
+// eslint-disable-next-line no-control-regex -- matching raw ANSI control bytes is the point
 const OPEN_SEQUENCE = /\x1B(?:\[[0-?]*[ -/]*|[\]P X^_][^\x07\x1B]*|[()#]?)$/;
 
 function splitTail(text) {

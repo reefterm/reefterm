@@ -497,6 +497,11 @@ async function refresh() {
 }
 
 /**
+ * Dead code: server-sync (the only caller, via ipc.js's now-removed
+ * `account-servers` handler) was stripped from this fork entirely. Left here
+ * rather than deleted because this whole file is replaced in the E2EE/
+ * self-hosted-sync rewrite; no sense editing it twice.
+ *
  * Every server on the account, ready to be offered as hosts.
  *
  * The console paginates this at 25. Following the pages matters: a sync that

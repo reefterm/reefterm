@@ -60,33 +60,6 @@ function StatusLine({ tone, text, pulse = false }) {
     );
 }
 
-/**
- * The last sync.
- *
- * A failure says so rather than showing a stale success: "synced 20 minutes
- * ago" next to a list that never arrived is worse than no line at all.
- */
-function syncState(t, sync, running) {
-    if (!sync) return { tone: 'off', text: '' };
-    if (!sync.enabled) return { tone: 'off', text: t('common.off') };
-    if (running || sync.running) return { tone: 'busy', text: t('settings.account.syncing'), pulse: true };
-
-    const result = sync.lastResult;
-
-    if (result?.error) return { tone: 'error', text: result.error };
-    if (result?.skipped) return { tone: 'warn', text: result.skipped };
-    if (!sync.lastSyncAt) return { tone: 'on', text: t('settings.account.notSyncedYet') };
-
-    if (result && typeof result.total === 'number') {
-        return {
-            tone: 'on',
-            text: `${t('settings.account.serverCount', { count: result.total })} · ${ago(t, sync.lastSyncAt)}`,
-        };
-    }
-
-    return { tone: 'on', text: t('settings.account.syncedAgo', { when: ago(t, sync.lastSyncAt) }) };
-}
-
 /** The state of the saved setup. */
 function snapshotState(t, snapshot, saving) {
     if (!snapshot) return { tone: 'off', text: '' };
@@ -115,7 +88,6 @@ export default function AccountPage() {
     const t = useT();
     const [status, setStatus] = useState(null);
     const [busy, setBusy] = useState('');
-    const [sync, setSync] = useState(null);
     const [snapshot, setSnapshot] = useState(null);
 
     const notify = useCallback((kind, message) => {
@@ -124,13 +96,11 @@ export default function AccountPage() {
 
     useEffect(() => {
         window.api.account.status().then(setStatus);
-        window.api.serverSync.status().then(setSync);
         window.api.cloudSnapshot.status().then(setSnapshot);
     }, []);
 
     // Timer syncs land without anyone asking, so the panel follows them rather
     // than showing a report that stopped being true.
-    useEffect(() => window.api.serverSync.onState(setSync), []);
     useEffect(() => window.api.cloudSnapshot.onState(setSnapshot), []);
 
     const handleSignIn = useCallback(async () => {
@@ -174,14 +144,6 @@ export default function AccountPage() {
         }
     }, [notify, t]);
 
-    const handleToggleSync = useCallback(async (enabled) => {
-        setSync(await window.api.serverSync.setEnabled(enabled));
-
-        notify('success', enabled
-            ? t('settings.account.syncOn')
-            : t('settings.account.syncOff'));
-    }, [notify, t]);
-
     const handleToggleSnapshot = useCallback(async (enabled) => {
         setSnapshot(await window.api.cloudSnapshot.setEnabled(enabled));
 
@@ -200,27 +162,6 @@ export default function AccountPage() {
             if (result?.error) notify('error', result.error);
             else if (result?.skipped) notify('error', result.skipped);
             else notify('success', t('settings.account.backedUp'));
-        } finally {
-            setBusy('');
-        }
-    }, [notify, t]);
-
-    const handleSyncNow = useCallback(async () => {
-        setBusy('sync');
-
-        try {
-            const { report, status: next } = await window.api.serverSync.now();
-            setSync(next);
-
-            if (report?.error) {
-                notify('error', report.error);
-            } else if (report?.skipped) {
-                notify('error', report.skipped);
-            } else {
-                notify('success', report.total === 0
-                    ? t('settings.account.noServers')
-                    : t('settings.account.serversSynced', { count: report.total }));
-            }
         } finally {
             setBusy('');
         }
@@ -275,40 +216,6 @@ export default function AccountPage() {
                                     : t('settings.account.disconnect')}
                             </button>
                         </div>
-
-                        <SettingRow
-                            className={DIVIDED}
-                            title={t('settings.account.syncServers')}
-                            description={t('settings.account.syncServersDesc')}
-                            align="center"
-                            control={
-                                <Toggle
-                                    checked={Boolean(sync?.enabled)}
-                                    onChange={handleToggleSync}
-                                    disabled={Boolean(busy) || !sync}
-                                    ariaLabel={t('settings.account.syncServers')}
-                                />
-                            }
-                        >
-                            <div className="flex items-center justify-between gap-4">
-                                <StatusLine {...syncState(t, sync, busy === 'sync')} />
-
-                                <button
-                                    type="button"
-                                    onClick={handleSyncNow}
-                                    disabled={Boolean(busy)}
-                                    className="shrink-0 flex items-center gap-2 px-4 h-9 rounded-xl text-sm font-medium
-                                        text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-neutral-700
-                                        hover:bg-gray-50 dark:hover:bg-neutral-800 disabled:opacity-50
-                                        transition-colors"
-                                >
-                                    <RefreshIcon size={16} strokeWidth={1.8} />
-                                    {busy === 'sync' || sync?.running
-                                        ? t('settings.account.syncing')
-                                        : t('settings.account.syncNow')}
-                                </button>
-                            </div>
-                        </SettingRow>
 
                         <SettingRow
                             className={DIVIDED}

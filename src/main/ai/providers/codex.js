@@ -274,7 +274,7 @@ async function start({
 
     const { url, token } = await mcpHost.acquire({ toolContext, requestApproval, onEvent });
 
-    const env = { ...process.env, CLOUDBLAST_MCP_TOKEN: token };
+    const env = { ...process.env, REEFTERM_MCP_TOKEN: token };
     if (settings.apiKey) env.OPENAI_API_KEY = settings.apiKey;
 
     const codex = new sdk.Codex({
@@ -284,7 +284,7 @@ async function start({
             mcp_servers: {
                 [SERVER_NAME]: {
                     url,
-                    bearer_token_env_var: 'CLOUDBLAST_MCP_TOKEN',
+                    bearer_token_env_var: 'REEFTERM_MCP_TOKEN',
                     // Codex asks its own caller before every MCP tool call,
                     // as an elicitation. Nothing can answer that here: the
                     // SDK exposes no hook for it, so it resolves itself with
@@ -535,7 +535,7 @@ async function listModels() {
             jsonrpc: '2.0',
             id: 1,
             method: 'initialize',
-            params: { clientInfo: { name: 'cloudblast', title: 'CloudTerm', version: '1.0.0' } },
+            params: { clientInfo: { name: 'reefterm', title: 'Reef Terminal', version: '1.0.0' } },
         });
     });
 }
