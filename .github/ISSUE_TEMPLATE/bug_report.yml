@@ -5,7 +5,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for taking the time to report a bug. If this involves a security vulnerability (credential handling, the vault, sync/encryption), please follow [SECURITY.md](../../SECURITY.md) instead of filing a public issue.
+        Thanks for taking the time to report a bug. If this involves a security vulnerability (credential handling, the vault, sync/encryption), please follow [SECURITY.md](../SECURITY.md) instead of filing a public issue.
 
   - type: textarea
     id: description

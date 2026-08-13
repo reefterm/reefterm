@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="cloudterm.png" alt="Reef Terminal" width="128">
+  <img src="../images/cloudterm.png" alt="Reef Terminal" width="128">
 </p>
 
 <h1 align="center">Reef Terminal</h1>
@@ -24,7 +24,7 @@
 </p>
 
 <p align="center">
-  <a href="./README.md">English</a> ·
+  <a href="../../README.md">English</a> ·
   <a href="./README.zh-CN.md">简体中文</a> ·
   <a href="./README.es.md">Español</a> ·
   <strong>Русский</strong>
@@ -44,7 +44,7 @@ Reef Terminal собирает все способы подключения к �
 управляет сообщество. Он бесплатен для всех, а весь исходный код лежит здесь:
 читайте и меняйте.
 
-<img src="Main%20Image.png" alt="Reef Terminal" width="100%">
+<img src="../images/Main%20Image.png" alt="Reef Terminal" width="100%">
 
 ---
 
@@ -101,11 +101,11 @@ Reef Terminal собирает все способы подключения к �
 ### ИИ-агент
 
 <p align="center">
-  <img src="docs/logos/claude-code.svg" alt="Claude Code" title="Claude Code" height="34">
+  <img src="../logos/claude-code.svg" alt="Claude Code" title="Claude Code" height="34">
   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="docs/logos/codex.svg" alt="Codex" title="Codex" height="34">
+  <img src="../logos/codex.svg" alt="Codex" title="Codex" height="34">
   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="docs/logos/opencode.svg" alt="OpenCode" title="OpenCode" height="34">
+  <img src="../logos/opencode.svg" alt="OpenCode" title="OpenCode" height="34">
   <br/>
   <sub><b>Claude Code</b> &nbsp;·&nbsp; <b>Codex</b> &nbsp;·&nbsp; <b>OpenCode</b></sub>
 </p>
@@ -206,7 +206,7 @@ Reef Terminal собирает все способы подключения к �
   <img src="src/renderer/assets/icons/128_slackware.png" alt="Slackware" title="Slackware" width="42">
   <img src="src/renderer/assets/icons/128_linux.png" alt="Linux" title="Any other Linux" width="42">
   <img src="src/renderer/assets/icons/128_windows.png" alt="Windows" title="Windows" width="42">
-  <img src="docs/logos/macos.svg" alt="macOS" title="macOS" width="42">
+  <img src="../logos/macos.svg" alt="macOS" title="macOS" width="42">
 </p>
 
 ### Безопасность
@@ -232,27 +232,27 @@ Reef Terminal собирает все способы подключения к �
 Все серверы разложены по папкам, с тегами, поиском и протоколом прямо на
 карточке.
 
-<img src="hostscloudterm.png" alt="Хосты и хранилище ключей" width="100%">
+<img src="../images/hostscloudterm.png" alt="Хосты и хранилище ключей" width="100%">
 
 ### Разделение панелей и SFTP
 
 Слева файлы, справа две оболочки, и одно соединение на всё это. Делите столько,
 сколько позволяет окно, и двигайте разделители как удобно.
 
-<img src="Split%20Pane.png" alt="Разделение панелей и SFTP" width="100%">
+<img src="../images/Split%20Pane.png" alt="Разделение панелей и SFTP" width="100%">
 
 ### Windows RDP
 
 Полноценный рабочий стол Windows во вкладке, рядом с сеансами Linux. Буфер
 обмена работает в обе стороны, а разрешение подстраивается под размер панели.
 
-<img src="RDP.png" alt="Windows RDP" width="100%">
+<img src="../images/RDP.png" alt="Windows RDP" width="100%">
 
 ### Настройте под себя
 
 Темы терминала, цвета интерфейса, шрифты и даже логотип в заголовке окна.
 
-<img src="Customizeable.png" alt="Настройки внешнего вида" width="100%">
+<img src="../images/Customizeable.png" alt="Настройки внешнего вида" width="100%">
 
 ---
 
@@ -313,7 +313,7 @@ npm run build
 
 Вопросы, ошибки, идеи для новых возможностей или просто хотите узнать, что будет
 дальше? Issues и pull requests на GitHub приветствуются — с
-[CONTRIBUTING.md](CONTRIBUTING.md) удобно начать.
+[CONTRIBUTING.md](../../.github/CONTRIBUTING.md) удобно начать.
 
 <a name="contributors"></a>
 ## Участники

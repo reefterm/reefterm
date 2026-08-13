@@ -24,7 +24,7 @@ that went unnoticed.
 
 **Placeholder, inherited from the CloudTerm fork this repo started from, pending
 Reef Terminal's own artwork.** The current `build/icon.png` is built from
-`cloudterm.png` in the repo root, which is 200x200 and so below the minimum
+`docs/images/cloudterm.png`, which is 200x200 and so below the minimum
 every target needs (256 for Linux and the Windows ico, 512 for the macOS icns).
 
 The upscale is not a plain resample. `cloudterm.png` measures as a square flush

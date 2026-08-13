@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="cloudterm.png" alt="Reef Terminal" width="128">
+  <img src="docs/images/cloudterm.png" alt="Reef Terminal" width="128">
 </p>
 
 <h1 align="center">Reef Terminal</h1>
@@ -25,9 +25,9 @@
 
 <p align="center">
   <strong>English</strong> ·
-  <a href="./README.zh-CN.md">简体中文</a> ·
-  <a href="./README.es.md">Español</a> ·
-  <a href="./README.ru.md">Русский</a>
+  <a href="docs/readme/README.zh-CN.md">简体中文</a> ·
+  <a href="docs/readme/README.es.md">Español</a> ·
+  <a href="docs/readme/README.ru.md">Русский</a>
 </p>
 
 ---
@@ -41,7 +41,7 @@ telnet, a Windows box over RDP, or a server on any host you like. Reef Terminal 
 free, self-hostable, community-run fork of [CloudTerm](https://github.com/BradPerbs/cloudterm).
 It is free for everyone, and the whole source is here to read and change.
 
-<img src="Main%20Image.png" alt="Reef Terminal" width="100%">
+<img src="docs/images/Main%20Image.png" alt="Reef Terminal" width="100%">
 
 ---
 
@@ -249,27 +249,27 @@ hostnames.
 
 Every server in folders, with tags, search and the protocol on the card.
 
-<img src="hostscloudterm.png" alt="Hosts and keychain" width="100%">
+<img src="docs/images/hostscloudterm.png" alt="Hosts and keychain" width="100%">
 
 ### Split panes and SFTP
 
 Files on the left, two shells on the right, one connection behind all three.
 Split as far as the window allows and drag the dividers where you want them.
 
-<img src="Split%20Pane.png" alt="Split panes and SFTP" width="100%">
+<img src="docs/images/Split%20Pane.png" alt="Split panes and SFTP" width="100%">
 
 ### Windows RDP
 
 A full Windows desktop in a tab, next to your Linux sessions. Clipboard works
 both ways and the desktop resizes to fit the pane.
 
-<img src="RDP.png" alt="Windows RDP" width="100%">
+<img src="docs/images/RDP.png" alt="Windows RDP" width="100%">
 
 ### Make it yours
 
 Terminal themes, app colours, fonts and even the logo in the title bar.
 
-<img src="Customizeable.png" alt="Appearance settings" width="100%">
+<img src="docs/images/Customizeable.png" alt="Appearance settings" width="100%">
 
 ---
 
@@ -329,7 +329,7 @@ npm run build
 
 Questions, bugs, feature requests, or just want to see what is coming next?
 Issues and pull requests are welcome here on GitHub -- see
-[CONTRIBUTING.md](CONTRIBUTING.md) to get started.
+[CONTRIBUTING.md](.github/CONTRIBUTING.md) to get started.
 
 <a name="contributors"></a>
 ## Contributors

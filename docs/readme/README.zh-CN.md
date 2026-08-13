@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="cloudterm.png" alt="Reef Terminal" width="128">
+  <img src="../images/cloudterm.png" alt="Reef Terminal" width="128">
 </p>
 
 <h1 align="center">Reef Terminal</h1>
@@ -24,7 +24,7 @@
 </p>
 
 <p align="center">
-  <a href="./README.md">English</a> ·
+  <a href="../../README.md">English</a> ·
   <strong>简体中文</strong> ·
   <a href="./README.es.md">Español</a> ·
   <a href="./README.ru.md">Русский</a>
@@ -41,7 +41,7 @@ Windows 主机，或者任意服务商上的服务器。Reef Terminal 是
 [CloudTerm](https://github.com/BradPerbs/cloudterm) 的一个免费、可自托管、由社区
 维护的分支（fork）。对所有人免费，全部源码都在这个仓库里，可以随意阅读和修改。
 
-<img src="Main%20Image.png" alt="Reef Terminal" width="100%">
+<img src="../images/Main%20Image.png" alt="Reef Terminal" width="100%">
 
 ---
 
@@ -92,11 +92,11 @@ Windows 主机，或者任意服务商上的服务器。Reef Terminal 是
 ### AI 助手
 
 <p align="center">
-  <img src="docs/logos/claude-code.svg" alt="Claude Code" title="Claude Code" height="34">
+  <img src="../logos/claude-code.svg" alt="Claude Code" title="Claude Code" height="34">
   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="docs/logos/codex.svg" alt="Codex" title="Codex" height="34">
+  <img src="../logos/codex.svg" alt="Codex" title="Codex" height="34">
   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="docs/logos/opencode.svg" alt="OpenCode" title="OpenCode" height="34">
+  <img src="../logos/opencode.svg" alt="OpenCode" title="OpenCode" height="34">
   <br/>
   <sub><b>Claude Code</b> &nbsp;·&nbsp; <b>Codex</b> &nbsp;·&nbsp; <b>OpenCode</b></sub>
 </p>
@@ -179,7 +179,7 @@ Debian 和 Fedora 的机器，不用去读主机名。
   <img src="src/renderer/assets/icons/128_slackware.png" alt="Slackware" title="Slackware" width="42">
   <img src="src/renderer/assets/icons/128_linux.png" alt="Linux" title="Any other Linux" width="42">
   <img src="src/renderer/assets/icons/128_windows.png" alt="Windows" title="Windows" width="42">
-  <img src="docs/logos/macos.svg" alt="macOS" title="macOS" width="42">
+  <img src="../logos/macos.svg" alt="macOS" title="macOS" width="42">
 </p>
 
 ### 安全
@@ -201,27 +201,27 @@ Debian 和 Fedora 的机器，不用去读主机名。
 
 所有服务器按文件夹整理，带标签、搜索，卡片上直接标明协议。
 
-<img src="hostscloudterm.png" alt="主机与密钥库" width="100%">
+<img src="../images/hostscloudterm.png" alt="主机与密钥库" width="100%">
 
 ### 分屏与 SFTP
 
 左边是文件，右边是两个 shell，背后只有一条连接。窗口能放下多少就能分多少，
 分隔条随手拖动。
 
-<img src="Split%20Pane.png" alt="分屏与 SFTP" width="100%">
+<img src="../images/Split%20Pane.png" alt="分屏与 SFTP" width="100%">
 
 ### Windows 远程桌面
 
 完整的 Windows 桌面就开在标签页里，和 Linux 会话并排。剪贴板双向同步，
 桌面分辨率会跟着面板变化。
 
-<img src="RDP.png" alt="Windows 远程桌面" width="100%">
+<img src="../images/RDP.png" alt="Windows 远程桌面" width="100%">
 
 ### 打造成你喜欢的样子
 
 终端主题、界面配色、字体，连标题栏上的图标都能换。
 
-<img src="Customizeable.png" alt="外观设置" width="100%">
+<img src="../images/Customizeable.png" alt="外观设置" width="100%">
 
 ---
 
@@ -279,7 +279,7 @@ npm run build
 ## 社区
 
 有疑问、发现 bug、想提需求，或者只是想看看接下来会做什么？欢迎在 GitHub 上提交
-issue 和 pull request——可以从 [CONTRIBUTING.md](CONTRIBUTING.md) 开始。
+issue 和 pull request——可以从 [CONTRIBUTING.md](../../.github/CONTRIBUTING.md) 开始。
 
 <a name="contributors"></a>
 ## 贡献者

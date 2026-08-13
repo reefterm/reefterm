@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="cloudterm.png" alt="Reef Terminal" width="128">
+  <img src="../images/cloudterm.png" alt="Reef Terminal" width="128">
 </p>
 
 <h1 align="center">Reef Terminal</h1>
@@ -24,7 +24,7 @@
 </p>
 
 <p align="center">
-  <a href="./README.md">English</a> ·
+  <a href="../../README.md">English</a> ·
   <a href="./README.zh-CN.md">简体中文</a> ·
   <strong>Español</strong> ·
   <a href="./README.ru.md">Русский</a>
@@ -43,7 +43,7 @@ prefieras. Reef Terminal es un fork gratuito, autoalojable y mantenido por la
 comunidad de [CloudTerm](https://github.com/BradPerbs/cloudterm). Es gratuito
 para todo el mundo y todo el código está aquí para leerlo y modificarlo.
 
-<img src="Main%20Image.png" alt="Reef Terminal" width="100%">
+<img src="../images/Main%20Image.png" alt="Reef Terminal" width="100%">
 
 ---
 
@@ -101,11 +101,11 @@ para todo el mundo y todo el código está aquí para leerlo y modificarlo.
 ### Agente de IA
 
 <p align="center">
-  <img src="docs/logos/claude-code.svg" alt="Claude Code" title="Claude Code" height="34">
+  <img src="../logos/claude-code.svg" alt="Claude Code" title="Claude Code" height="34">
   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="docs/logos/codex.svg" alt="Codex" title="Codex" height="34">
+  <img src="../logos/codex.svg" alt="Codex" title="Codex" height="34">
   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="docs/logos/opencode.svg" alt="OpenCode" title="OpenCode" height="34">
+  <img src="../logos/opencode.svg" alt="OpenCode" title="OpenCode" height="34">
   <br/>
   <sub><b>Claude Code</b> &nbsp;·&nbsp; <b>Codex</b> &nbsp;·&nbsp; <b>OpenCode</b></sub>
 </p>
@@ -208,7 +208,7 @@ de leer nombres.
   <img src="src/renderer/assets/icons/128_slackware.png" alt="Slackware" title="Slackware" width="42">
   <img src="src/renderer/assets/icons/128_linux.png" alt="Linux" title="Any other Linux" width="42">
   <img src="src/renderer/assets/icons/128_windows.png" alt="Windows" title="Windows" width="42">
-  <img src="docs/logos/macos.svg" alt="macOS" title="macOS" width="42">
+  <img src="../logos/macos.svg" alt="macOS" title="macOS" width="42">
 </p>
 
 ### Seguridad
@@ -233,28 +233,28 @@ de leer nombres.
 
 Cada servidor en carpetas, con etiquetas, búsqueda y el protocolo en la tarjeta.
 
-<img src="hostscloudterm.png" alt="Hosts y llavero" width="100%">
+<img src="../images/hostscloudterm.png" alt="Hosts y llavero" width="100%">
 
 ### Paneles divididos y SFTP
 
 Archivos a la izquierda, dos shells a la derecha, una sola conexión detrás de
 las tres. Divide hasta donde dé la ventana y arrastra los separadores a tu gusto.
 
-<img src="Split%20Pane.png" alt="Paneles divididos y SFTP" width="100%">
+<img src="../images/Split%20Pane.png" alt="Paneles divididos y SFTP" width="100%">
 
 ### Windows RDP
 
 Un escritorio de Windows completo en una pestaña, junto a tus sesiones de Linux.
 El portapapeles funciona en ambos sentidos y el escritorio se ajusta al panel.
 
-<img src="RDP.png" alt="Windows RDP" width="100%">
+<img src="../images/RDP.png" alt="Windows RDP" width="100%">
 
 ### Hazlo tuyo
 
 Temas del terminal, colores de la aplicación, fuentes e incluso el logo de la
 barra de título.
 
-<img src="Customizeable.png" alt="Ajustes de apariencia" width="100%">
+<img src="../images/Customizeable.png" alt="Ajustes de apariencia" width="100%">
 
 ---
 
@@ -314,7 +314,7 @@ npm run build
 
 ¿Dudas, errores, ideas para nuevas funciones, o simplemente quieres ver qué
 viene después? Los issues y los pull requests son bienvenidos aquí en GitHub --
-consulta [CONTRIBUTING.md](CONTRIBUTING.md) para empezar.
+consulta [CONTRIBUTING.md](../../.github/CONTRIBUTING.md) para empezar.
 
 <a name="contributors"></a>
 ## Colaboradores
