@@ -702,8 +702,71 @@ export default {
     'settings.knownHosts.forgotHost': '{host} забыт',
     'settings.knownHosts.forgotKey': 'Ключ {type} для {host} забыт',
 
-    /* ---- Settings: Sync ----
-     * Not yet translated -- falls back to English. See settings.sync.* in en.js. */
+    /* ---- Settings: Sync ---- */
+    'settings.sync.title': 'Синхронизация',
+    'settings.sync.intro': 'Необязательно. Укажите приложению адрес сервера синхронизации, который '
+        + 'вы (или кто-то, кому вы доверяете) размещаете самостоятельно, чтобы держать настройки '
+        + 'одинаковыми на всех устройствах -- зашифрованными ещё до того, как они покинут это устройство.',
+    'settings.sync.serverTitle': 'Сервер синхронизации',
+    'settings.sync.serverDesc': 'Введите адрес самостоятельно размещённого сервера синхронизации '
+        + 'Reef Terminal.',
+    'settings.sync.serverPlaceholder': 'https://sync.example.com',
+    'settings.sync.serverConnect': 'Подключить',
+    'settings.sync.connectedTo': 'Подключено к {server}',
+    'settings.sync.loginTab': 'Войти',
+    'settings.sync.registerTab': 'Создать учётную запись',
+    'settings.sync.emailPlaceholder': 'Адрес электронной почты',
+    'settings.sync.passphrasePlaceholder': 'Парольная фраза',
+    'settings.sync.confirmPassphrasePlaceholder': 'Подтвердите парольную фразу',
+    'settings.sync.passphraseMismatch': 'Парольные фразы не совпадают',
+    'settings.sync.loginAction': 'Войти',
+    'settings.sync.registerAction': 'Создать учётную запись',
+    'settings.sync.forgotPassphrase': 'Забыли парольную фразу?',
+    'settings.sync.forgotRequestDesc': 'Введите email, на который зарегистрирована ваша учётная '
+        + 'запись. Если такая запись существует, мы отправим код, подтверждающий, что это вы.',
+    'settings.sync.forgotSendAction': 'Отправить код',
+    'settings.sync.forgotCompleteDesc': 'Введите код из письма вместе с кодом восстановления '
+        + 'учётной записи, чтобы задать новую парольную фразу. Нужны оба -- письмо подтверждает, что '
+        + 'это вы, а код восстановления подтверждает, что вы всё ещё можете расшифровать свои данные.',
+    'settings.sync.forgotTokenPlaceholder': 'Код из письма',
+    'settings.sync.forgotCompleteAction': 'Сбросить парольную фразу',
+    'settings.sync.unlockTitle': 'Разблокируйте синхронизированные данные',
+    'settings.sync.unlockDesc': 'Подключено, но для расшифровки настроек на этом устройстве нужна '
+        + 'парольная фраза.',
+    'settings.sync.unlockAction': 'Разблокировать',
+    'settings.sync.useRecoveryCode': 'Использовать код восстановления',
+    'settings.sync.recoveryCodePlaceholder': 'XXXX-XXXX-XXXX-XXXX-XXXX-XXXX',
+    'settings.sync.recoveryCodeTitle': 'Сохраните код восстановления',
+    'settings.sync.recoveryCodeDesc': 'Он показывается только один раз. Если вы когда-нибудь '
+        + 'забудете парольную фразу, этот код -- единственный способ вернуть доступ к синхронизированным '
+        + 'данным. Храните его в надёжном месте.',
+    'settings.sync.recoveryCodeSaved': 'Код сохранён',
+    'settings.sync.disconnect': 'Отключиться',
+    'settings.sync.disconnecting': 'Отключение…',
+    'settings.sync.disconnected': 'Отключено',
+    'settings.sync.disconnectedLocally': 'Отключено на этом устройстве, но не удалось связаться с '
+        + 'сервером, чтобы отозвать сессию.',
+    'settings.sync.enableSync': 'Синхронизация',
+    'settings.sync.enableSyncDesc': 'Ваши хосты, папки, ключи и настройки -- зашифрованные здесь и '
+        + 'сохранённые на сервере синхронизации для остальных ваших устройств.',
+    'settings.sync.saveNow': 'Синхронизировать сейчас',
+    'settings.sync.savedNow': 'Синхронизировано',
+    'settings.sync.syncOn': 'Синхронизация включена',
+    'settings.sync.syncOff': 'Синхронизация выключена. Уже сохранённое остаётся, пока вы это не замените.',
+    'settings.sync.saving': 'Синхронизация…',
+    'settings.sync.savedAgo': 'Синхронизировано {when}',
+    'settings.sync.notSavedYet': 'Ещё не синхронизировано',
+    'settings.sync.changePassphraseTitle': 'Изменить парольную фразу',
+    'settings.sync.changePassphraseDesc': 'Меняет и пароль для входа, и ключ, защищающий '
+        + 'синхронизированные данные -- это один и тот же секрет.',
+    'settings.sync.currentPassphrasePlaceholder': 'Текущая парольная фраза',
+    'settings.sync.newPassphrasePlaceholder': 'Новая парольная фраза',
+    'settings.sync.changePassphraseAction': 'Изменить парольную фразу',
+    'settings.sync.passphraseChanged': 'Парольная фраза изменена',
+    'settings.sync.justNow': 'только что',
+    'settings.sync.minutesAgo': '{count} мин назад',
+    'settings.sync.hoursAgo': '{count} ч назад',
+    'settings.sync.daysAgo': '{count} дн назад',
 
     /* ---- Settings: Backup ---- */
     'settings.backup.title': 'Резервные копии',

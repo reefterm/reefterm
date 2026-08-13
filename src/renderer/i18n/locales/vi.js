@@ -654,8 +654,69 @@ export default {
     'settings.knownHosts.forgotHost': 'Đã quên {host}',
     'settings.knownHosts.forgotKey': 'Đã quên khoá {type} của {host}',
 
-    /* ---- Settings: Sync ----
-     * Not yet translated -- falls back to English. See settings.sync.* in en.js. */
+    /* ---- Settings: Sync ---- */
+    'settings.sync.title': 'Đồng bộ',
+    'settings.sync.intro': 'Không bắt buộc. Trỏ ứng dụng này tới một máy chủ đồng bộ tự lưu trữ -- '
+        + 'của bạn, hoặc của ai đó bạn tin tưởng -- để giữ cấu hình đồng nhất trên các thiết bị, được '
+        + 'mã hoá trước khi rời khỏi thiết bị này.',
+    'settings.sync.serverTitle': 'Máy chủ đồng bộ',
+    'settings.sync.serverDesc': 'Nhập địa chỉ của một máy chủ đồng bộ Reef Terminal tự lưu trữ.',
+    'settings.sync.serverPlaceholder': 'https://sync.example.com',
+    'settings.sync.serverConnect': 'Kết nối',
+    'settings.sync.connectedTo': 'Đã kết nối tới {server}',
+    'settings.sync.loginTab': 'Đăng nhập',
+    'settings.sync.registerTab': 'Tạo tài khoản',
+    'settings.sync.emailPlaceholder': 'Địa chỉ email',
+    'settings.sync.passphrasePlaceholder': 'Cụm mật khẩu',
+    'settings.sync.confirmPassphrasePlaceholder': 'Xác nhận cụm mật khẩu',
+    'settings.sync.passphraseMismatch': 'Các cụm mật khẩu không khớp',
+    'settings.sync.loginAction': 'Đăng nhập',
+    'settings.sync.registerAction': 'Tạo tài khoản',
+    'settings.sync.forgotPassphrase': 'Quên cụm mật khẩu?',
+    'settings.sync.forgotRequestDesc': 'Nhập email mà tài khoản của bạn đã đăng ký. Nếu có tài '
+        + 'khoản, chúng tôi sẽ gửi một mã để xác nhận đó là bạn.',
+    'settings.sync.forgotSendAction': 'Gửi mã',
+    'settings.sync.forgotCompleteDesc': 'Nhập mã từ email của bạn, cùng với mã khôi phục tài khoản, '
+        + 'để đặt cụm mật khẩu mới. Bạn cần cả hai -- email chứng minh đó là bạn, mã khôi phục chứng '
+        + 'minh bạn vẫn có thể giải mã dữ liệu của mình.',
+    'settings.sync.forgotTokenPlaceholder': 'Mã từ email của bạn',
+    'settings.sync.forgotCompleteAction': 'Đặt lại cụm mật khẩu',
+    'settings.sync.unlockTitle': 'Mở khoá dữ liệu đã đồng bộ',
+    'settings.sync.unlockDesc': 'Đã kết nối, nhưng cần cụm mật khẩu để giải mã cấu hình của bạn trên '
+        + 'thiết bị này.',
+    'settings.sync.unlockAction': 'Mở khoá',
+    'settings.sync.useRecoveryCode': 'Dùng mã khôi phục thay thế',
+    'settings.sync.recoveryCodePlaceholder': 'XXXX-XXXX-XXXX-XXXX-XXXX-XXXX',
+    'settings.sync.recoveryCodeTitle': 'Lưu mã khôi phục của bạn',
+    'settings.sync.recoveryCodeDesc': 'Mã này chỉ hiển thị một lần. Nếu bạn quên cụm mật khẩu, đây '
+        + 'là cách duy nhất để lấy lại dữ liệu đã đồng bộ -- hãy lưu ở nơi an toàn.',
+    'settings.sync.recoveryCodeSaved': 'Tôi đã lưu mã này',
+    'settings.sync.disconnect': 'Ngắt kết nối',
+    'settings.sync.disconnecting': 'Đang ngắt kết nối…',
+    'settings.sync.disconnected': 'Đã ngắt kết nối',
+    'settings.sync.disconnectedLocally': 'Đã ngắt kết nối trên thiết bị này, nhưng không thể liên hệ '
+        + 'máy chủ để thu hồi phiên.',
+    'settings.sync.enableSync': 'Đồng bộ',
+    'settings.sync.enableSyncDesc': 'Máy chủ, thư mục, khoá và cài đặt của bạn, được mã hoá tại đây '
+        + 'và lưu lên máy chủ đồng bộ cho các thiết bị khác của bạn.',
+    'settings.sync.saveNow': 'Đồng bộ ngay',
+    'settings.sync.savedNow': 'Đã đồng bộ',
+    'settings.sync.syncOn': 'Đồng bộ đang bật',
+    'settings.sync.syncOff': 'Đồng bộ đang tắt. Những gì đã lưu vẫn giữ nguyên cho đến khi bạn thay thế.',
+    'settings.sync.saving': 'Đang đồng bộ…',
+    'settings.sync.savedAgo': 'Đã đồng bộ {when}',
+    'settings.sync.notSavedYet': 'Chưa đồng bộ',
+    'settings.sync.changePassphraseTitle': 'Đổi cụm mật khẩu',
+    'settings.sync.changePassphraseDesc': 'Thay đổi cả mật khẩu đăng nhập và khoá bảo vệ dữ liệu đã '
+        + 'đồng bộ -- chúng là cùng một bí mật.',
+    'settings.sync.currentPassphrasePlaceholder': 'Cụm mật khẩu hiện tại',
+    'settings.sync.newPassphrasePlaceholder': 'Cụm mật khẩu mới',
+    'settings.sync.changePassphraseAction': 'Đổi cụm mật khẩu',
+    'settings.sync.passphraseChanged': 'Đã đổi cụm mật khẩu',
+    'settings.sync.justNow': 'vừa xong',
+    'settings.sync.minutesAgo': '{count} phút trước',
+    'settings.sync.hoursAgo': '{count} giờ trước',
+    'settings.sync.daysAgo': '{count} ngày trước',
 
     /* ---- Settings: Backup ---- */
     'settings.backup.title': 'Sao lưu',

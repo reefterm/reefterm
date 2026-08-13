@@ -678,8 +678,72 @@ export default {
     'settings.knownHosts.forgotHost': '{host} esquecido',
     'settings.knownHosts.forgotKey': 'Esquecida a chave {type} de {host}',
 
-    /* ---- Settings: Sync ----
-     * Not yet translated -- falls back to English. See settings.sync.* in en.js. */
+    /* ---- Settings: Sync ---- */
+    'settings.sync.title': 'Sincronização',
+    'settings.sync.intro': 'Opcional. Aponte esta aplicação para um servidor de sincronização '
+        + 'auto-alojado -- seu, ou de alguém em quem confie -- para manter a sua configuração igual '
+        + 'em todos os dispositivos, cifrada antes de sair sequer deste.',
+    'settings.sync.serverTitle': 'Servidor de sincronização',
+    'settings.sync.serverDesc': 'Introduza o endereço de um servidor de sincronização Reef Terminal '
+        + 'auto-alojado.',
+    'settings.sync.serverPlaceholder': 'https://sync.example.com',
+    'settings.sync.serverConnect': 'Ligar',
+    'settings.sync.connectedTo': 'Ligado a {server}',
+    'settings.sync.loginTab': 'Iniciar sessão',
+    'settings.sync.registerTab': 'Criar conta',
+    'settings.sync.emailPlaceholder': 'Endereço de email',
+    'settings.sync.passphrasePlaceholder': 'Palavra-passe',
+    'settings.sync.confirmPassphrasePlaceholder': 'Confirmar palavra-passe',
+    'settings.sync.passphraseMismatch': 'As palavras-passe não coincidem',
+    'settings.sync.loginAction': 'Iniciar sessão',
+    'settings.sync.registerAction': 'Criar conta',
+    'settings.sync.forgotPassphrase': 'Esqueceu-se da palavra-passe?',
+    'settings.sync.forgotRequestDesc': 'Introduza o email com que a sua conta está registada. Se '
+        + 'existir uma conta, enviaremos um código para confirmar que é você.',
+    'settings.sync.forgotSendAction': 'Enviar código',
+    'settings.sync.forgotCompleteDesc': 'Introduza o código do seu email, juntamente com o código '
+        + 'de recuperação da sua conta, para definir uma nova palavra-passe. Precisa de ambos -- o '
+        + 'email prova que é você, o código de recuperação prova que ainda consegue decifrar os seus dados.',
+    'settings.sync.forgotTokenPlaceholder': 'Código do seu email',
+    'settings.sync.forgotCompleteAction': 'Repor palavra-passe',
+    'settings.sync.unlockTitle': 'Desbloquear os seus dados sincronizados',
+    'settings.sync.unlockDesc': 'Ligado, mas é necessária a palavra-passe para decifrar a sua '
+        + 'configuração neste dispositivo.',
+    'settings.sync.unlockAction': 'Desbloquear',
+    'settings.sync.useRecoveryCode': 'Usar antes um código de recuperação',
+    'settings.sync.recoveryCodePlaceholder': 'XXXX-XXXX-XXXX-XXXX-XXXX-XXXX',
+    'settings.sync.recoveryCodeTitle': 'Guarde o seu código de recuperação',
+    'settings.sync.recoveryCodeDesc': 'Isto só é mostrado uma vez. Se alguma vez se esquecer da '
+        + 'palavra-passe, este código é a única forma de voltar a aceder aos seus dados sincronizados '
+        + '-- guarde-o num local seguro.',
+    'settings.sync.recoveryCodeSaved': 'Já guardei isto',
+    'settings.sync.disconnect': 'Desligar',
+    'settings.sync.disconnecting': 'A desligar…',
+    'settings.sync.disconnected': 'Desligado',
+    'settings.sync.disconnectedLocally': 'Desligado neste dispositivo, mas não foi possível contactar '
+        + 'o servidor para revogar a sessão.',
+    'settings.sync.enableSync': 'Sincronização',
+    'settings.sync.enableSyncDesc': 'Os seus anfitriões, pastas, chaves e definições, cifrados aqui '
+        + 'e guardados no servidor de sincronização para os seus outros dispositivos.',
+    'settings.sync.saveNow': 'Sincronizar agora',
+    'settings.sync.savedNow': 'Sincronizado',
+    'settings.sync.syncOn': 'A sincronização está ativa',
+    'settings.sync.syncOff': 'A sincronização está desativada. O que já está guardado mantém-se até '
+        + 'o substituir.',
+    'settings.sync.saving': 'A sincronizar…',
+    'settings.sync.savedAgo': 'Sincronizado {when}',
+    'settings.sync.notSavedYet': 'Ainda não sincronizado',
+    'settings.sync.changePassphraseTitle': 'Alterar palavra-passe',
+    'settings.sync.changePassphraseDesc': 'Altera tanto a sua palavra-passe de acesso como a chave '
+        + 'que protege os seus dados sincronizados -- são o mesmo segredo.',
+    'settings.sync.currentPassphrasePlaceholder': 'Palavra-passe atual',
+    'settings.sync.newPassphrasePlaceholder': 'Nova palavra-passe',
+    'settings.sync.changePassphraseAction': 'Alterar palavra-passe',
+    'settings.sync.passphraseChanged': 'Palavra-passe alterada',
+    'settings.sync.justNow': 'agora mesmo',
+    'settings.sync.minutesAgo': 'há {count} min',
+    'settings.sync.hoursAgo': 'há {count} h',
+    'settings.sync.daysAgo': 'há {count} d',
 
     /* ---- Settings: Backup ---- */
     'settings.backup.title': 'Cópia de segurança',
