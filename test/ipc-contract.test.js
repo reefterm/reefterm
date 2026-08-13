@@ -1,17 +1,21 @@
 /**
- * The boundary between preload.js's exposed `window.api` and the channels
- * ipc/ registers. ipc.js is split into per-feature files (see src/main/ipc/);
- * preload.js is not, and cannot be the same way - Electron's sandboxed
- * preload (`sandbox: true` in main.js) can only require Node builtins and
- * `electron` itself, not arbitrary local files, so a multi-file preload
- * needs a bundler in front of it, which this project does not have. That
- * makes this test worth more, not less: with everything ipc.js registers
- * spread across nineteen files and everything preload.js calls sitting in
- * one, a channel-name typo on either side has no nearby twin to catch it by
- * eye. This runs both sides for real, under a stubbed `electron`, rather
- * than grepping for channel strings: a call spanning more than one line
- * (there is exactly one, sync-connection-recover-complete) defeats a regex
- * but not an actual function call.
+ * The boundary between preload/'s exposed `window.api` and the channels
+ * ipc/ registers, checked against source (src/main/preload/index.js and
+ * everything it requires) rather than the built src/main/preload.js -
+ * Electron's sandboxed preload (`sandbox: true` in main.js) can only require
+ * Node builtins and `electron` itself, not arbitrary local files, so
+ * scripts/build-preload.js bundles preload/ into that one file for Electron
+ * to actually load; this test doesn't need the bundle; plain Node resolves
+ * the directory fine, and testing source directly means it never needs a
+ * build step to stay current.
+ *
+ * With ipc.js's registrations spread across nineteen files and everything
+ * preload calls sitting across a matching set, a channel-name typo on either
+ * side has no nearby twin to catch it by eye - this runs both sides for
+ * real, under a stubbed `electron`, rather than grepping for channel
+ * strings: a call spanning more than one line (there is exactly one,
+ * sync-connection-recover-complete) defeats a regex but not an actual
+ * function call.
  */
 const path = require('path');
 const os = require('os');
@@ -27,7 +31,7 @@ class FakeEmitter {
     emit(event, ...args) { (this.handlers[event] || []).forEach(fn => fn(...args)); }
 }
 
-/** Everything both preload.js's tree and ipc/'s tree touch on `electron`. */
+/** Everything both preload/'s tree and ipc/'s tree touch on `electron`. */
 function buildElectronStub({ onRegister, onCall, onExpose = () => {} }) {
     return {
         app: Object.assign(new FakeEmitter(), {
@@ -111,14 +115,14 @@ function loadWithStub(relativePath, { onRegister = () => {}, onCall = () => {} }
 }
 
 describe('ipc/preload channel contract', () => {
-    test('every channel preload.js can invoke or send is registered in ipc/', () => {
+    test('every channel preload/ can invoke or send is registered in ipc/', () => {
         const registered = new Set();
         loadWithStub('ipc/index.js', { onRegister: (c) => registered.add(c) })
             .register(() => null);
 
         const invoked = new Set();
-        // preload.js calls contextBridge.exposeInMainWorld('api', {...}) at
-        // require time as a side effect rather than exporting anything, so
+        // preload/index.js calls contextBridge.exposeInMainWorld('api', {...})
+        // at require time as a side effect rather than exporting anything, so
         // the stub captures what it was called with and that object is what
         // gets walked.
         let exposedApi = null;
@@ -136,11 +140,11 @@ describe('ipc/preload channel contract', () => {
             for (const key of Object.keys(require.cache)) {
                 if (key.includes(`${path.sep}main${path.sep}`)) delete require.cache[key];
             }
-            require(path.join(ROOT, 'preload.js'));
+            require(path.join(ROOT, 'preload', 'index.js'));
         } finally {
             Module._load = realLoad;
         }
-        assert.ok(exposedApi, 'preload.js never called contextBridge.exposeInMainWorld');
+        assert.ok(exposedApi, 'preload/index.js never called contextBridge.exposeInMainWorld');
         callEveryFunction(exposedApi);
 
         const orphaned = [...invoked].filter((channel) => !registered.has(channel));

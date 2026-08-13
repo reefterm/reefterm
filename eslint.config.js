@@ -11,6 +11,8 @@ module.exports = [
             'node_modules/**',
             'resources/**',
             'src/renderer/styles.css',
+            // Bundled from src/main/preload/ by scripts/build-preload.js.
+            'src/main/preload.js',
             'patches/**',
         ],
     },

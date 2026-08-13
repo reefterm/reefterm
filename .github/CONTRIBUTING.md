@@ -15,6 +15,8 @@ pnpm install
 pnpm run dev        # Vite + Electron in watch mode
 ```
 
+`src/main/preload.js` is not tracked in git — `pnpm install` builds it from `src/main/preload/` (`postinstall` runs `scripts/build-preload.js`). Electron's sandboxed preload can only require Node builtins and `electron` itself, not local project files, so that directory is bundled into the one file it's allowed to load. `start`, `dev:electron` and `build` all rebuild it too, so editing anything under `src/main/preload/` just needs a re-run of whichever of those you're using, not a separate step.
+
 Useful scripts:
 
 ```sh

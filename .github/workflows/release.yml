@@ -91,6 +91,13 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      # Already ran once via postinstall, above. Explicit here too, rather
+      # than relying on that alone: src/main/preload.js is gitignored and
+      # bundled from src/main/preload/ (Electron's sandboxed preload can't
+      # require local files directly, see scripts/build-preload.js), so
+      # packaging without it would ship a broken preload silently.
+      - run: pnpm run build:preload
+
       # npm exposes global CLIs as `.cmd` shims on Windows, and pnpm does the
       # same. This starts the actual OpenCode server through that shim,
       # connects through its SDK, and tears down the full process tree
