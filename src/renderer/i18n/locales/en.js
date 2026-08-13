@@ -737,6 +737,15 @@ export default {
     'settings.sync.passphraseMismatch': 'The passphrases do not match',
     'settings.sync.loginAction': 'Log in',
     'settings.sync.registerAction': 'Create account',
+    'settings.sync.forgotPassphrase': 'Forgot your passphrase?',
+    'settings.sync.forgotRequestDesc': 'Enter the email your account is registered with. If it has '
+        + 'an account, we\'ll email a code to confirm it\'s you.',
+    'settings.sync.forgotSendAction': 'Send code',
+    'settings.sync.forgotCompleteDesc': 'Enter the code from your email, along with your account '
+        + 'recovery code, to set a new passphrase. You need both -- the email proves it\'s you, the '
+        + 'recovery code proves you can still decrypt your data.',
+    'settings.sync.forgotTokenPlaceholder': 'Code from your email',
+    'settings.sync.forgotCompleteAction': 'Reset passphrase',
     'settings.sync.unlockTitle': 'Unlock your synced data',
     'settings.sync.unlockDesc': 'Connected, but your passphrase is needed to decrypt your setup on this device.',
     'settings.sync.unlockAction': 'Unlock',

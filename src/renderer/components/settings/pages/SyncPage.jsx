@@ -127,6 +127,12 @@ export default function SyncPage() {
     const [currentPassphrase, setCurrentPassphrase] = useState('');
     const [newPassphrase, setNewPassphrase] = useState('');
 
+    // Recovering from a fully logged-out state: no session anywhere, needs
+    // both an emailed token and the account recovery code together.
+    const [showForgotFlow, setShowForgotFlow] = useState(false);
+    const [forgotStep, setForgotStep] = useState('request'); // 'request' | 'complete'
+    const [forgotToken, setForgotToken] = useState('');
+
     const notify = useCallback((kind, message) => {
         toast[kind](message, { style: getToastStyle() });
     }, []);
@@ -215,6 +221,55 @@ export default function SyncPage() {
             setBusy('');
         }
     }, [recoveryInput, notify]);
+
+    const handleForgotStart = useCallback(async (event) => {
+        event.preventDefault();
+        setBusy('forgotStart');
+
+        try {
+            const result = await window.api.syncConnection.recoverStart(email);
+            if (!result.success) {
+                notify('error', result.message);
+                return;
+            }
+            notify('success', result.message);
+            setForgotStep('complete');
+        } finally {
+            setBusy('');
+        }
+    }, [email, notify]);
+
+    const handleForgotComplete = useCallback(async (event) => {
+        event.preventDefault();
+
+        if (newPassphrase !== confirmPassphrase) {
+            notify('error', t('settings.sync.passphraseMismatch'));
+            return;
+        }
+
+        setBusy('forgotComplete');
+
+        try {
+            const result = await window.api.syncConnection.recoverComplete(
+                email, forgotToken, recoveryInput, newPassphrase,
+            );
+            if (!result.success) {
+                notify('error', result.message);
+                return;
+            }
+            setStatus(result.status);
+            if (result.recoveryCode) setRecoveryCode(result.recoveryCode);
+
+            setShowForgotFlow(false);
+            setForgotStep('request');
+            setForgotToken('');
+            setRecoveryInput('');
+            setNewPassphrase('');
+            setConfirmPassphrase('');
+        } finally {
+            setBusy('');
+        }
+    }, [email, forgotToken, recoveryInput, newPassphrase, confirmPassphrase, notify, t]);
 
     const handleDisconnect = useCallback(async () => {
         setBusy('disconnect');
@@ -330,45 +385,138 @@ export default function SyncPage() {
                         {t('settings.sync.connectedTo', { server: serverHost })}
                     </p>
 
-                    <div className="flex gap-1 mt-4 p-1 rounded-xl bg-gray-100 dark:bg-neutral-900 w-fit">
-                        {['login', 'register'].map((option) => (
-                            <button
-                                key={option}
-                                type="button"
-                                onClick={() => setMode(option)}
-                                className={`px-4 h-8 rounded-lg text-sm font-medium transition-colors
-                                    ${mode === option
-                                        ? 'bg-white dark:bg-neutral-700 text-gray-900 dark:text-white shadow-sm'
-                                        : 'text-gray-500 dark:text-gray-400'}`}
-                            >
-                                {t(`settings.sync.${option === 'login' ? 'loginTab' : 'registerTab'}`)}
-                            </button>
-                        ))}
-                    </div>
+                    {!showForgotFlow ? (
+                        <>
+                            <div className="flex gap-1 mt-4 p-1 rounded-xl bg-gray-100 dark:bg-neutral-900 w-fit">
+                                {['login', 'register'].map((option) => (
+                                    <button
+                                        key={option}
+                                        type="button"
+                                        onClick={() => setMode(option)}
+                                        className={`px-4 h-8 rounded-lg text-sm font-medium transition-colors
+                                            ${mode === option
+                                                ? 'bg-white dark:bg-neutral-700 text-gray-900 dark:text-white shadow-sm'
+                                                : 'text-gray-500 dark:text-gray-400'}`}
+                                    >
+                                        {t(`settings.sync.${option === 'login' ? 'loginTab' : 'registerTab'}`)}
+                                    </button>
+                                ))}
+                            </div>
 
-                    <form
-                        onSubmit={mode === 'login' ? handleLogin : handleRegister}
-                        className="flex flex-col gap-3 mt-4"
-                    >
-                        <input
-                            type="email"
-                            required
-                            value={email}
-                            onChange={(event) => setEmail(event.target.value)}
-                            placeholder={t('settings.sync.emailPlaceholder')}
-                            className={INPUT}
-                            autoComplete="email"
-                        />
-                        <input
-                            type="password"
-                            required
-                            value={passphrase}
-                            onChange={(event) => setPassphrase(event.target.value)}
-                            placeholder={t('settings.sync.passphrasePlaceholder')}
-                            className={INPUT}
-                            autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-                        />
-                        {mode === 'register' && (
+                            <form
+                                onSubmit={mode === 'login' ? handleLogin : handleRegister}
+                                className="flex flex-col gap-3 mt-4"
+                            >
+                                <input
+                                    type="email"
+                                    required
+                                    value={email}
+                                    onChange={(event) => setEmail(event.target.value)}
+                                    placeholder={t('settings.sync.emailPlaceholder')}
+                                    className={INPUT}
+                                    autoComplete="email"
+                                />
+                                <input
+                                    type="password"
+                                    required
+                                    value={passphrase}
+                                    onChange={(event) => setPassphrase(event.target.value)}
+                                    placeholder={t('settings.sync.passphrasePlaceholder')}
+                                    className={INPUT}
+                                    autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+                                />
+                                {mode === 'register' && (
+                                    <input
+                                        type="password"
+                                        required
+                                        value={confirmPassphrase}
+                                        onChange={(event) => setConfirmPassphrase(event.target.value)}
+                                        placeholder={t('settings.sync.confirmPassphrasePlaceholder')}
+                                        className={INPUT}
+                                        autoComplete="new-password"
+                                    />
+                                )}
+                                <div className="flex items-center gap-3">
+                                    <button
+                                        type="submit"
+                                        disabled={Boolean(busy)}
+                                        className={PRIMARY_BTN}
+                                    >
+                                        {mode === 'login'
+                                            ? t('settings.sync.loginAction')
+                                            : t('settings.sync.registerAction')}
+                                    </button>
+                                    {mode === 'login' && (
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowForgotFlow(true)}
+                                            className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                                        >
+                                            {t('settings.sync.forgotPassphrase')}
+                                        </button>
+                                    )}
+                                </div>
+                            </form>
+                        </>
+                    ) : forgotStep === 'request' ? (
+                        <form onSubmit={handleForgotStart} className="flex flex-col gap-3 mt-4">
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                                {t('settings.sync.forgotRequestDesc')}
+                            </p>
+                            <input
+                                type="email"
+                                required
+                                value={email}
+                                onChange={(event) => setEmail(event.target.value)}
+                                placeholder={t('settings.sync.emailPlaceholder')}
+                                className={INPUT}
+                                autoComplete="email"
+                                autoFocus
+                            />
+                            <div className="flex items-center gap-3">
+                                <button type="submit" disabled={Boolean(busy)} className={PRIMARY_BTN}>
+                                    {t('settings.sync.forgotSendAction')}
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowForgotFlow(false)}
+                                    className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                                >
+                                    {t('common.cancel')}
+                                </button>
+                            </div>
+                        </form>
+                    ) : (
+                        <form onSubmit={handleForgotComplete} className="flex flex-col gap-3 mt-4">
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                                {t('settings.sync.forgotCompleteDesc')}
+                            </p>
+                            <input
+                                type="text"
+                                required
+                                value={forgotToken}
+                                onChange={(event) => setForgotToken(event.target.value)}
+                                placeholder={t('settings.sync.forgotTokenPlaceholder')}
+                                className={INPUT}
+                                autoFocus
+                            />
+                            <input
+                                type="text"
+                                required
+                                value={recoveryInput}
+                                onChange={(event) => setRecoveryInput(event.target.value)}
+                                placeholder={t('settings.sync.recoveryCodePlaceholder')}
+                                className={`${INPUT} font-mono`}
+                            />
+                            <input
+                                type="password"
+                                required
+                                value={newPassphrase}
+                                onChange={(event) => setNewPassphrase(event.target.value)}
+                                placeholder={t('settings.sync.newPassphrasePlaceholder')}
+                                className={INPUT}
+                                autoComplete="new-password"
+                            />
                             <input
                                 type="password"
                                 required
@@ -378,11 +526,20 @@ export default function SyncPage() {
                                 className={INPUT}
                                 autoComplete="new-password"
                             />
-                        )}
-                        <button type="submit" disabled={Boolean(busy)} className={`${PRIMARY_BTN} self-start`}>
-                            {mode === 'login' ? t('settings.sync.loginAction') : t('settings.sync.registerAction')}
-                        </button>
-                    </form>
+                            <div className="flex items-center gap-3">
+                                <button type="submit" disabled={Boolean(busy)} className={PRIMARY_BTN}>
+                                    {t('settings.sync.forgotCompleteAction')}
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => { setShowForgotFlow(false); setForgotStep('request'); }}
+                                    className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                                >
+                                    {t('common.cancel')}
+                                </button>
+                            </div>
+                        </form>
+                    )}
                 </SettingCard>
             </SettingsPage>
         );

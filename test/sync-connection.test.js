@@ -18,7 +18,9 @@ function createFakeServer() {
     const users = new Map(); // email -> { userId, password, wrappedPassphrase, wrappedRecovery }
     const sessions = new Map(); // token -> userId
     const snapshots = new Map(); // userId -> { revision, payload, stats, deviceName }
+    const recoveryTokens = new Map(); // token -> { email, used }
     let nextId = 1;
+    let nextRecoveryToken = 1;
 
     const respond = (status, payload) => ({
         ok: status >= 200 && status < 300,
@@ -66,7 +68,50 @@ function createFakeServer() {
             return respond(204, null);
         }
 
-        if (!userId && routePath !== '/api/v1/register' && routePath !== '/api/v1/login') {
+        if (method === 'POST' && routePath === '/api/v1/recover/start') {
+            const generic = { message: 'If that email has an account, recovery instructions have been sent to it.' };
+            const user = users.get(body.email);
+            if (user) {
+                // Invalidate any earlier unused token for this account, same as the real server.
+                for (const [t, entry] of recoveryTokens) {
+                    if (entry.email === body.email && !entry.used) recoveryTokens.delete(t);
+                }
+                const recoveryToken = `recovery-token-${nextRecoveryToken++}`;
+                recoveryTokens.set(recoveryToken, { email: body.email, used: false });
+                fakeFetch.lastRecoveryToken = recoveryToken;
+            }
+            return respond(200, generic);
+        }
+
+        if (method === 'POST' && routePath === '/api/v1/recover/keys') {
+            const entry = recoveryTokens.get(body.token);
+            if (!entry || entry.used) return respond(401, { error: { message: 'invalid or expired recovery link' } });
+            const user = users.get(entry.email);
+            return respond(200, { wrapped_key_recovery: user.wrappedRecovery });
+        }
+
+        if (method === 'POST' && routePath === '/api/v1/recover/complete') {
+            const entry = recoveryTokens.get(body.token);
+            if (!entry || entry.used) return respond(401, { error: { message: 'invalid or expired recovery link' } });
+            entry.used = true;
+
+            const user = users.get(entry.email);
+            user.password = body.new_login_password;
+            user.wrappedPassphrase = body.wrapped_key_passphrase;
+            user.wrappedRecovery = body.wrapped_key_recovery;
+
+            // Revoke every existing session for this account, same as the real server.
+            for (const [t, uid] of sessions) {
+                if (uid === user.userId) sessions.delete(t);
+            }
+
+            const newToken = `token-${user.userId}-${Math.random()}`;
+            sessions.set(newToken, user.userId);
+            return respond(200, { user_id: user.userId, session_token: newToken, expires_at: new Date().toISOString() });
+        }
+
+        if (!userId && !routePath.startsWith('/api/v1/recover/')
+            && routePath !== '/api/v1/register' && routePath !== '/api/v1/login') {
             return respond(401, { error: { message: 'missing or invalid session' } });
         }
 
@@ -316,6 +361,77 @@ await checkAsync('the new passphrase logs in; the old one no longer does', async
     await assert.rejects(() => sc.login('change@example.com', 'the old passphrase'));
     const status = await sc.login('change@example.com', 'the new passphrase');
     assert.strictEqual(status.unlocked, true);
+});
+
+/* ---------------- email-based recovery, from a fully logged-out state ---------------- */
+
+console.log('\nsync-connection: email-based recovery');
+
+await checkAsync('recovers with the token and the recovery code, and logs in fresh', async () => {
+    const sc = reset();
+    sc.configure('https://sync.example.com');
+    const { recoveryCode } = await sc.register('forgot@example.com', 'the forgotten passphrase');
+    await sc.logout();
+
+    await sc.recoverStart('forgot@example.com');
+    const emailToken = currentFetch.lastRecoveryToken;
+
+    const { status, recoveryCode: newCode } = await sc.recoverComplete(
+        'forgot@example.com', emailToken, recoveryCode, 'a brand new passphrase',
+    );
+
+    assert.strictEqual(status.connected, true);
+    assert.strictEqual(status.unlocked, true);
+    assert.ok(newCode, 'a fresh recovery code should be issued');
+    assert.notStrictEqual(newCode, recoveryCode);
+});
+
+await checkAsync('the recovered passphrase logs in afterward; the old one does not', async () => {
+    const sc = reset();
+    sc.configure('https://sync.example.com');
+    const { recoveryCode } = await sc.register('forgot2@example.com', 'the forgotten passphrase');
+    await sc.logout();
+
+    await sc.recoverStart('forgot2@example.com');
+    const emailToken = currentFetch.lastRecoveryToken;
+    await sc.recoverComplete('forgot2@example.com', emailToken, recoveryCode, 'a brand new passphrase');
+    await sc.logout();
+
+    await assert.rejects(() => sc.login('forgot2@example.com', 'the forgotten passphrase'));
+    const status = await sc.login('forgot2@example.com', 'a brand new passphrase');
+    assert.strictEqual(status.unlocked, true);
+});
+
+await checkAsync('rejects the wrong recovery code even with a valid email token', async () => {
+    const sc = reset();
+    sc.configure('https://sync.example.com');
+    await sc.register('forgot3@example.com', 'the forgotten passphrase');
+    await sc.logout();
+
+    await sc.recoverStart('forgot3@example.com');
+    const emailToken = currentFetch.lastRecoveryToken;
+
+    await assert.rejects(
+        () => sc.recoverComplete('forgot3@example.com', emailToken, 'WRONG-CODE-ENTIRELY-HERE-XX', 'a new passphrase'),
+    );
+});
+
+await checkAsync('rejects an invalid or already-used email token', async () => {
+    const sc = reset();
+    sc.configure('https://sync.example.com');
+    const { recoveryCode } = await sc.register('forgot4@example.com', 'the forgotten passphrase');
+    await sc.logout();
+
+    await assert.rejects(() => sc.recoverComplete('forgot4@example.com', 'not-a-real-token', recoveryCode, 'x'));
+
+    await sc.recoverStart('forgot4@example.com');
+    const emailToken = currentFetch.lastRecoveryToken;
+    await sc.recoverComplete('forgot4@example.com', emailToken, recoveryCode, 'a new passphrase');
+
+    // The same token, used again, must not work a second time.
+    await assert.rejects(
+        () => sc.recoverComplete('forgot4@example.com', emailToken, recoveryCode, 'yet another passphrase'),
+    );
 });
 
 /* ---------------- snapshot ---------------- */

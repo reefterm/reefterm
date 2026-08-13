@@ -1217,6 +1217,51 @@ function register(getWindow) {
         }
     });
 
+    // Recovering from a fully logged-out state: no session, passphrase
+    // forgotten. Two steps, matching the server's own split -- start proves
+    // email control, complete needs both the emailed token and the account's
+    // recovery code together.
+    handle('sync-connection-recover-start', async (event, email) => {
+        try {
+            const message = await syncConnection.recoverStart(email);
+            return { success: true, message };
+        } catch (error) {
+            return { success: false, message: error.message };
+        }
+    });
+
+    handle('sync-connection-recover-complete', async (event, { email, token, recoveryCode, newPassphrase } = {}) => {
+        try {
+            const { status, recoveryCode: newCode } =
+                await syncConnection.recoverComplete(email, token, recoveryCode, newPassphrase);
+
+            activity.record({
+                category: 'security',
+                action: 'sync.connect',
+                outcome: 'success',
+                target: 'sync server',
+                detail: `${status.email || ''} (recovered)`,
+            });
+
+            notify('sync-connection-state', status);
+
+            cloudSnapshot.pull({ force: true })
+                .catch(error => console.error('Post-recovery restore failed:', error.message));
+
+            return { success: true, status, recoveryCode: newCode };
+        } catch (error) {
+            activity.record({
+                category: 'security',
+                action: 'sync.connect',
+                outcome: 'failure',
+                target: 'sync server',
+                message: `recovery failed: ${error.message}`,
+            });
+
+            return { success: false, message: error.message };
+        }
+    });
+
     /* ---------------- Host monitoring ---------------- */
 
     handle('monitor-status', () => monitor.status());

@@ -21,15 +21,14 @@ const syncKeys = require('./sync-keys');
  * only ever sees that string for an argon2id hash comparison; the key it
  * derives locally for decryption never crosses the wire.
  *
- * Known limitation, worth being upfront about: a completely forgotten
- * passphrase with no device anywhere still holding a valid session cannot
- * currently be recovered. The recovery code lets an already-authenticated
- * session unlock or re-key without the passphrase; it is not yet a way back
- * in from a fully logged-out state. A zero-knowledge server cannot verify
- * possession of a recovery code it has never seen, so solving that properly
- * needs a second channel (e.g. an email-verified reset) this project does
- * not have yet, rather than a self-service endpoint that would just move
- * the trust problem instead of closing it.
+ * A completely forgotten passphrase, with no device anywhere still holding a
+ * valid session, is recoverable two ways -- and both are required together,
+ * deliberately. A zero-knowledge server can never verify possession of a
+ * recovery code it has never seen, so it verifies the one thing it can:
+ * that the requester controls the account's registered email. `recoverStart`
+ * and `recoverComplete` are that flow. `unlockWithRecoveryCode` below is the
+ * other, narrower case -- a session that's still logged in but has lost its
+ * local key some other way, which doesn't need the email round trip at all.
  */
 
 const SCHEMA_VERSION = 1;
@@ -377,6 +376,83 @@ async function changePassphrase(currentPassphrase, newPassphrase) {
     return status();
 }
 
+/**
+ * Start email-based recovery: no session, no passphrase, just the email the
+ * account was registered with. The server's response is the same whether or
+ * not that email has an account -- there is nothing useful to tell apart
+ * here, and doing so would let this call enumerate registered emails.
+ *
+ * Does not require being connected or configured beyond having a server URL
+ * set; this is explicitly the path for someone who is not signed in anywhere.
+ */
+async function recoverStart(email) {
+    if (!load().serverUrl) throw new Error('Configure a sync server first');
+
+    const result = await apiFetch('/api/v1/recover/start', {
+        method: 'POST',
+        body: { email },
+    });
+
+    if (!result.ok) throw new Error(apiError(result, 'Could not start recovery'));
+
+    return result.payload?.message || 'Check your email for recovery instructions.';
+}
+
+/**
+ * Finishes recovery: the token from the email proves control of the
+ * account, and the recovery code (the one from registration, or from the
+ * last time this rotated) is what actually unseals the Sync Master Key.
+ * Both are required -- the server checked the first, this checks the
+ * second, and neither alone is enough to get in.
+ *
+ * On success this behaves like a login: the connection is established, the
+ * data is unlocked, and a fresh recovery code is issued (the one just used
+ * is treated as spent, the same as unlockWithRecoveryCode does).
+ */
+async function recoverComplete(email, token, recoveryCode, newPassphrase) {
+    const keysResult = await apiFetch('/api/v1/recover/keys', {
+        method: 'POST',
+        body: { token },
+    });
+
+    if (!keysResult.ok) throw new Error(apiError(keysResult, 'That recovery link is invalid or has expired'));
+
+    const normalized = syncKeys.normalizeRecoveryCode(recoveryCode);
+    const smk = syncKeys.unsealSmk(keysResult.payload?.wrapped_key_recovery, normalized);
+    if (!smk) throw new Error('That recovery code is incorrect');
+
+    const passphraseEnvelope = syncKeys.reseal(smk, newPassphrase);
+    const rotated = syncKeys.rotateRecoveryCode(smk);
+
+    const result = await apiFetch('/api/v1/recover/complete', {
+        method: 'POST',
+        body: {
+            token,
+            new_login_password: newPassphrase,
+            wrapped_key_passphrase: passphraseEnvelope,
+            wrapped_key_recovery: rotated.recoveryEnvelope,
+        },
+    });
+
+    if (!result.ok) throw new Error(apiError(result, 'Could not complete recovery'));
+
+    const data = result.payload;
+
+    activeSmk = smk;
+    syncKeys.cacheSmk(smk);
+
+    state = {
+        ...load(),
+        userId: data.user_id,
+        email,
+        connectedAt: new Date().toISOString(),
+        token: data.session_token,
+    };
+    persist();
+
+    return { status: status(), recoveryCode: rotated.recoveryCode };
+}
+
 /* ------------------------------------------------------------------ *
  * The synced setup snapshot
  * ------------------------------------------------------------------ */
@@ -467,6 +543,8 @@ module.exports = {
     refresh,
     unlockWithRecoveryCode,
     changePassphrase,
+    recoverStart,
+    recoverComplete,
     snapshotMeta,
     snapshotGet,
     snapshotPut,

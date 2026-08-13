@@ -422,6 +422,12 @@ contextBridge.exposeInMainWorld('api', {
             ipcRenderer.invoke('sync-connection-unlock-with-recovery-code', recoveryCode),
         changePassphrase: (currentPassphrase, newPassphrase) =>
             ipcRenderer.invoke('sync-connection-change-passphrase', { currentPassphrase, newPassphrase }),
+        // Recovering with no session at all: an emailed token plus the
+        // account's recovery code, required together.
+        recoverStart: (email) => ipcRenderer.invoke('sync-connection-recover-start', email),
+        recoverComplete: (email, token, recoveryCode, newPassphrase) => ipcRenderer.invoke(
+            'sync-connection-recover-complete', { email, token, recoveryCode, newPassphrase },
+        ),
         // Connecting or disconnecting from Settings has to reach the sidebar,
         // which did not ask for it.
         onState: (callback) => subscribe('sync-connection-state', callback),
