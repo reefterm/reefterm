@@ -300,8 +300,8 @@ Or browse [all GitHub releases](https://github.com/reefterm/reefterm/releases).
 ```bash
 git clone https://github.com/reefterm/reefterm.git
 cd reefterm
-npm install
-npm run dev
+pnpm install
+pnpm run dev
 ```
 
 To use the AI agent with OpenCode, install the `opencode` CLI and configure at
@@ -311,7 +311,7 @@ existing providers and credentials; it does not copy or store them.
 Build a portable executable into `dist/`:
 
 ```bash
-npm run build
+pnpm run build
 ```
 
 ### Shortcuts

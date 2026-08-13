@@ -3,6 +3,7 @@
     "version": "0.1.0",
     "description": "Modern SSH Client built with Electron, React and xterm.js",
     "main": "src/main/main.js",
+    "packageManager": "pnpm@10.33.2",
     "scripts": {
         "postinstall": "patch-package",
         "start": "electron .",
@@ -11,7 +12,7 @@
         "test": "node --test",
         "test:watch": "node --test --watch",
         "test:coverage": "node --test --experimental-test-coverage",
-        "dev": "concurrently -k \"npm run dev:vite\" \"npm run dev:electron\"",
+        "dev": "concurrently -k \"pnpm run dev:vite\" \"pnpm run dev:electron\"",
         "dev:vite": "vite",
         "dev:electron": "wait-on tcp:5173 && electron .",
         "build:css": "tailwindcss -i ./src/renderer/input.css -o ./src/renderer/styles.css",
@@ -20,9 +21,9 @@
         "build:electron": "electron-builder --win --x64",
         "build:electron:mac": "electron-builder --mac",
         "build:electron:linux": "electron-builder --linux AppImage",
-        "build": "npm run build:hello && npm run build:css && npm run build:renderer && npm run build:electron",
-        "build:mac": "npm run build:renderer && npm run build:electron:mac",
-        "build:linux": "npm run build:renderer && npm run build:electron:linux"
+        "build": "pnpm run build:hello && pnpm run build:css && pnpm run build:renderer && pnpm run build:electron",
+        "build:mac": "pnpm run build:renderer && pnpm run build:electron:mac",
+        "build:linux": "pnpm run build:renderer && pnpm run build:electron:linux"
     },
     "build": {
         "appId": "com.reefterm.app",

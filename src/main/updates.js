@@ -268,7 +268,7 @@ function signedOnMac() {
  * Every branch is a thing that has to be true before an update is allowed to
  * overwrite the app, and none of them is about convenience:
  *
- *   unpackaged  There is nothing to replace. `npm run dev` is not a release.
+ *   unpackaged  There is nothing to replace. `pnpm run dev` is not a release.
  *   portable    A portable exe is a single file somebody carries around,
  *               often on media they cannot write to, and it has no installer
  *               to hand a payload to. Being unable to install anything is the

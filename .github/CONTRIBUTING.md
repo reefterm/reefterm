@@ -11,23 +11,23 @@ Reef Terminal is a community-run fork. Contributions of all sizes are welcome �
 ## Development setup
 
 ```sh
-npm install
-npm run dev        # Vite + Electron in watch mode
+pnpm install
+pnpm run dev        # Vite + Electron in watch mode
 ```
 
 Useful scripts:
 
 ```sh
-npm run lint        # ESLint
-npm test            # the full test suite (plain Node scripts, no framework)
-npm run build:renderer   # build the renderer bundle
-npm run build            # full production build (Windows)
+pnpm run lint        # ESLint
+pnpm test            # the full test suite (plain Node scripts, no framework)
+pnpm run build:renderer   # build the renderer bundle
+pnpm run build            # full production build (Windows)
 ```
 
 ## Code style
 
 - No dedicated formatter is enforced yet; match the style already in the file you're editing (4-space indent, semicolons, single quotes).
-- `npm run lint` must pass before a PR is merged — CI runs it on every push.
+- `pnpm run lint` must pass before a PR is merged — CI runs it on every push.
 - Comments should explain *why*, not *what* — the existing codebase leans heavily on this and it's worth keeping consistent.
 
 ## Tests

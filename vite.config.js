@@ -51,7 +51,7 @@ export default defineConfig({
         esbuildOptions: {
             // The dev server pre-bundles dependencies with its own esbuild pass
             // that does not read `build.target`, so the same allowance has to be
-            // made twice or `npm run dev` fails where `npm run build` succeeds.
+            // made twice or `pnpm run dev` fails where `pnpm run build` succeeds.
             target: 'esnext',
         },
     },

@@ -52,7 +52,7 @@ function load() {
         binding = require('serialport');
     } catch (error) {
         bindingError = /cannot find module/i.test(error.message)
-            ? 'Serial support is not installed in this build (npm install serialport)'
+            ? 'Serial support is not installed in this build (pnpm install serialport)'
             : `Serial support could not be loaded: ${error.message}`;
         console.error('serialport unavailable:', error.message);
     }

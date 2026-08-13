@@ -1,0 +1,6 @@
+allowBuilds:
+  '@serialport/bindings-cpp': true
+  cpu-features: true
+  electron-winstaller: true
+  esbuild: true
+  ssh2: true

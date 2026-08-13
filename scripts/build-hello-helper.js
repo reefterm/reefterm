@@ -6,7 +6,7 @@
  * SDK, a Developer Pack, or a node-gyp toolchain — which is the whole reason
  * the helper is a tiny exe rather than a native node addon.
  *
- * Run by `npm run build:hello`, and folded into `npm run build`. On anything
+ * Run by `pnpm run build:hello`, and folded into `pnpm run build`. On anything
  * other than Windows it does nothing and says so: the output is only reachable
  * from a Windows build, and failing the whole build over it would be wrong.
  */

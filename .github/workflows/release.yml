@@ -1,7 +1,7 @@
 # Build every platform and attach the results to a GitHub Release.
 #
 # One machine cannot do this. The app carries the serialport native bindings,
-# which npm installs per platform and architecture and only ever fetches for
+# which pnpm installs per platform and architecture and only ever fetches for
 # the host it runs on, so a macOS package built on Windows would have none. So
 # each entry below installs and builds on its own runner, and the release job
 # collects what they produce.
@@ -61,7 +61,7 @@ jobs:
           # Intel dmg is cross-built. Packaging never executes the app, it only
           # copies binaries, so the host architecture does not matter there.
           #
-          # It matters to npm, though: the install has to be native or the
+          # It matters to the install, though: it has to be native or the
           # renderer cannot build, because rollup loads a binary for the
           # machine it is running on.
           #
@@ -82,31 +82,34 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: pnpm/action-setup@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
+          cache: pnpm
 
-      - run: npm ci
+      - run: pnpm install --frozen-lockfile
 
-      # npm exposes global CLIs as `.cmd` shims on Windows. This starts the
-      # actual OpenCode server through that shim, connects through its SDK,
-      # and tears down the full process tree without sending a model prompt.
+      # npm exposes global CLIs as `.cmd` shims on Windows, and pnpm does the
+      # same. This starts the actual OpenCode server through that shim,
+      # connects through its SDK, and tears down the full process tree
+      # without sending a model prompt.
       - name: Smoke test native OpenCode integration
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
           $version = node -p "require('./node_modules/@opencode-ai/sdk/package.json').version"
-          npm install --global "opencode-ai@$version"
+          pnpm add --global "opencode-ai@$version"
           node scripts/smoke-opencode-provider.js
 
       # Compiles against the C# compiler and WinRT metadata that ship inside
       # Windows. The script no-ops elsewhere, but there is no reason to call it.
       - name: Build the Windows Hello helper
         if: runner.os == 'Windows'
-        run: npm run build:hello
+        run: pnpm run build:hello
 
-      - run: npm run build:renderer
+      - run: pnpm run build:renderer
 
       # ssh2 lists cpu-features as an optional dependency and uses it only to
       # prefer a hardware-accelerated cipher, behind a bare try/catch. It is
@@ -115,18 +118,24 @@ jobs:
       # a required tag argument. So @electron/rebuild fails on any runner that
       # has a compiler to try it with.
       #
-      # Windows never had it installed at all, npm having skipped it there,
-      # which is the only reason that build has ever worked. Removing it puts
-      # macOS and Linux in the same position rather than a worse one.
+      # Windows never had it installed at all under npm, which skipped it
+      # there, and that was the only reason that build ever worked. Removing
+      # it puts macOS and Linux in the same position rather than a worse one.
+      # NOTE: this was written against npm's optional-dependency behavior;
+      # unverified whether pnpm skips the same way on Windows now that the
+      # install step above uses it, so watch the Windows build after this
+      # migration in case cpu-features ends up installed (or absent) there
+      # and this step's assumption needs revisiting.
       #
-      # Last thing before packaging, deliberately. Anything that runs npm can
-      # bring it back, so this wants to be after everything that might.
+      # Last thing before packaging, deliberately. Anything that runs an
+      # install can bring it back, so this wants to be after everything that
+      # might.
       - name: Drop cpu-features, which cannot build against this Electron
         shell: bash
         run: rm -rf node_modules/cpu-features
 
       - name: Package
-        run: npx electron-builder ${{ matrix.args }} --publish never
+        run: pnpm exec electron-builder ${{ matrix.args }} --publish never
         env:
           # There is no signing certificate on a CI runner. Without this,
           # electron-builder hunts for one and fails the macOS build.
@@ -134,7 +143,7 @@ jobs:
 
       # The agent SDK carries the Claude CLI as an optional platform package,
       # a 253MB binary that the app deliberately does not ship: the provider
-      # drives the user's own install instead. npm still puts it in
+      # drives the user's own install instead. The install still puts it in
       # node_modules, so only the `files` excludes in package.json keep it out
       # of the build, and the sole symptom of losing them is an installer three
       # times the size. Cheaper to fail here than to notice on a release page.
@@ -196,9 +205,9 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/')
 
     steps:
-      # For scripts/merge-update-manifests.js, and nothing else. No npm install:
-      # the script has no dependencies precisely so this step can stay this
-      # cheap.
+      # For scripts/merge-update-manifests.js, and nothing else. No install
+      # step: the script has no dependencies precisely so this step can stay
+      # this cheap.
       - uses: actions/checkout@v4
 
       - uses: actions/download-artifact@v4

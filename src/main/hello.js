@@ -42,7 +42,7 @@ let helperPath = null;
  * Where the helper is, in a build and in a checkout.
  *
  * Packaged it rides in `resources` beside the asar; in development it is
- * whatever `npm run build:hello` last wrote. Resolved once and remembered,
+ * whatever `pnpm run build:hello` last wrote. Resolved once and remembered,
  * because it is asked for on every connection.
  */
 function findHelper() {

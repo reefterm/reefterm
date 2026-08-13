@@ -252,8 +252,8 @@ winget install ReefTerminal.ReefTerminal
 ```bash
 git clone https://github.com/reefterm/reefterm.git
 cd reefterm
-npm install
-npm run dev
+pnpm install
+pnpm run dev
 ```
 
 要通过 OpenCode 使用 AI 助手，请安装 `opencode` CLI，并运行
@@ -263,7 +263,7 @@ npm run dev
 构建便携版可执行文件，输出到 `dist/`：
 
 ```bash
-npm run build
+pnpm run build
 ```
 
 ### 快捷键

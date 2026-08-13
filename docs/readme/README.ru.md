@@ -283,8 +283,8 @@ winget install ReefTerminal.ReefTerminal
 ```bash
 git clone https://github.com/reefterm/reefterm.git
 cd reefterm
-npm install
-npm run dev
+pnpm install
+pnpm run dev
 ```
 
 Чтобы использовать ИИ-агента с OpenCode, установите CLI `opencode` и настройте
@@ -295,7 +295,7 @@ npm run dev
 Собрать переносимый исполняемый файл в `dist/`:
 
 ```bash
-npm run build
+pnpm run build
 ```
 
 ### Горячие клавиши

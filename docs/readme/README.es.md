@@ -285,8 +285,8 @@ También puedes consultar [todas las versiones en GitHub](https://github.com/ree
 ```bash
 git clone https://github.com/reefterm/reefterm.git
 cd reefterm
-npm install
-npm run dev
+pnpm install
+pnpm run dev
 ```
 
 Para usar el agente de IA con OpenCode, instala la CLI `opencode` y configura
@@ -296,7 +296,7 @@ los proveedores y credenciales existentes de OpenCode; no los copia ni almacena.
 Compila un ejecutable portable en `dist/`:
 
 ```bash
-npm run build
+pnpm run build
 ```
 
 ### Atajos
