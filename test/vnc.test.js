@@ -20,6 +20,7 @@ const fs = require('fs');
 const os = require('os');
 const net = require('net');
 const assert = require('assert');
+const { describe, test } = require('node:test');
 
 const ROOT = path.join(__dirname, '..', 'src', 'main');
 
@@ -50,168 +51,143 @@ const fresh = (name) => {
     return require(path.join(ROOT, name));
 };
 
-let passed = 0;
-const check = (label, fn) => {
-    try {
-        fn();
-        console.log(`  ok   ${label}`);
-        passed++;
-    } catch (error) {
-        console.log(`  FAIL ${label}`);
-        console.log(`       ${error.message}`);
-        process.exitCode = 1;
-    }
-};
-
-const checkAsync = async (label, fn) => {
-    try {
-        await fn();
-        console.log(`  ok   ${label}`);
-        passed++;
-    } catch (error) {
-        console.log(`  FAIL ${label}`);
-        console.log(`       ${error.message}`);
-        process.exitCode = 1;
-    }
-};
-
 /* ---------------- DES ---------------- */
-
-console.log('\nVNC authentication (DES)');
 
 const vncAuth = fresh('vnc-auth.js');
 
-check('matches the published DES worked example', () => {
-    const out = vncAuth.encrypt(
-        Buffer.from('133457799BBCDFF1', 'hex'),
-        Buffer.from('0123456789ABCDEF', 'hex')
-    );
-    assert.strictEqual(out.toString('hex').toUpperCase(), '85E813540F0AB405');
-});
+describe('VNC authentication (DES)', () => {
+    test('matches the published DES worked example', () => {
+        const out = vncAuth.encrypt(
+            Buffer.from('133457799BBCDFF1', 'hex'),
+            Buffer.from('0123456789ABCDEF', 'hex')
+        );
+        assert.strictEqual(out.toString('hex').toUpperCase(), '85E813540F0AB405');
+    });
 
-check('matches a FIPS 46-3 known-answer vector', () => {
-    const out = vncAuth.encrypt(
-        Buffer.from('0101010101010101', 'hex'),
-        Buffer.from('95F8A5E5DD31D900', 'hex')
-    );
-    assert.strictEqual(out.toString('hex').toUpperCase(), '8000000000000000');
-});
+    test('matches a FIPS 46-3 known-answer vector', () => {
+        const out = vncAuth.encrypt(
+            Buffer.from('0101010101010101', 'hex'),
+            Buffer.from('95F8A5E5DD31D900', 'hex')
+        );
+        assert.strictEqual(out.toString('hex').toUpperCase(), '8000000000000000');
+    });
 
-check('encrypts each block independently (ECB)', () => {
-    const key = Buffer.from('133457799BBCDFF1', 'hex');
-    const block = Buffer.from('0123456789ABCDEF', 'hex');
-    const doubled = vncAuth.encrypt(key, Buffer.concat([block, block]));
-    assert.strictEqual(
-        doubled.subarray(0, 8).toString('hex'),
-        doubled.subarray(8).toString('hex')
-    );
-});
+    test('encrypts each block independently (ECB)', () => {
+        const key = Buffer.from('133457799BBCDFF1', 'hex');
+        const block = Buffer.from('0123456789ABCDEF', 'hex');
+        const doubled = vncAuth.encrypt(key, Buffer.concat([block, block]));
+        assert.strictEqual(
+            doubled.subarray(0, 8).toString('hex'),
+            doubled.subarray(8).toString('hex')
+        );
+    });
 
-check('reverses the bits of every key byte', () => {
-    // 'a' is 0x61 = 0b0110_0001; reversed it is 0b1000_0110 = 0x86.
-    assert.strictEqual(vncAuth.keyFromPassword('a').toString('hex'), '8600000000000000');
-});
+    test('reverses the bits of every key byte', () => {
+        // 'a' is 0x61 = 0b0110_0001; reversed it is 0b1000_0110 = 0x86.
+        assert.strictEqual(vncAuth.keyFromPassword('a').toString('hex'), '8600000000000000');
+    });
 
-check('pads a short password with zeros and truncates a long one', () => {
-    assert.strictEqual(vncAuth.keyFromPassword('').toString('hex'), '0000000000000000');
-    const long = vncAuth.keyFromPassword('123456789abcdef');
-    assert.strictEqual(long.length, 8);
-    // The 9th character must not have reached the key.
-    assert.deepStrictEqual(long, vncAuth.keyFromPassword('12345678'));
-});
+    test('pads a short password with zeros and truncates a long one', () => {
+        assert.strictEqual(vncAuth.keyFromPassword('').toString('hex'), '0000000000000000');
+        const long = vncAuth.keyFromPassword('123456789abcdef');
+        assert.strictEqual(long.length, 8);
+        // The 9th character must not have reached the key.
+        assert.deepStrictEqual(long, vncAuth.keyFromPassword('12345678'));
+    });
 
-check('answers a challenge with 16 bytes', () => {
-    const response = vncAuth.respond('secret', Buffer.alloc(16, 7));
-    assert.strictEqual(response.length, 16);
-    assert.notDeepStrictEqual(response, Buffer.alloc(16, 7));
-});
+    test('answers a challenge with 16 bytes', () => {
+        const response = vncAuth.respond('secret', Buffer.alloc(16, 7));
+        assert.strictEqual(response.length, 16);
+        assert.notDeepStrictEqual(response, Buffer.alloc(16, 7));
+    });
 
-check('refuses a challenge that is not 16 bytes', () => {
-    assert.throws(() => vncAuth.respond('secret', Buffer.alloc(8)), /16 bytes/);
+    test('refuses a challenge that is not 16 bytes', () => {
+        assert.throws(() => vncAuth.respond('secret', Buffer.alloc(8)), /16 bytes/);
+    });
 });
 
 /* ---------------- desktop config ---------------- */
 
-console.log('\ndesktop config');
-
 const desktopConfig = fresh('desktop-config.js');
 
-check('defaults to a tunnelled desktop on the server loopback', () => {
-    const desktop = desktopConfig.normalizeDesktop({ enabled: true });
-    assert.strictEqual(desktop.transport, 'tunnel');
-    assert.strictEqual(desktop.host, '127.0.0.1');
-    assert.strictEqual(desktop.port, 5900);
-    assert.strictEqual(desktop.shared, true);
-});
-
-check('leaves a direct desktop with no address rather than inventing one', () => {
-    const desktop = desktopConfig.normalizeDesktop({ enabled: true, transport: 'direct' });
-    assert.strictEqual(desktop.host, '');
-    assert.strictEqual(desktopConfig.validateDesktop(desktop), 'A VNC address is required');
-});
-
-check('rejects a nonsense transport, port and scaling mode', () => {
-    const desktop = desktopConfig.normalizeDesktop({
-        enabled: true,
-        transport: 'telepathy',
-        port: 99999,
-        scaling: 'sideways',
-        quality: 42,
+describe('desktop config', () => {
+    test('defaults to a tunnelled desktop on the server loopback', () => {
+        const desktop = desktopConfig.normalizeDesktop({ enabled: true });
+        assert.strictEqual(desktop.transport, 'tunnel');
+        assert.strictEqual(desktop.host, '127.0.0.1');
+        assert.strictEqual(desktop.port, 5900);
+        assert.strictEqual(desktop.shared, true);
     });
-    assert.strictEqual(desktop.transport, 'tunnel');
-    assert.strictEqual(desktop.port, 5900);
-    assert.strictEqual(desktop.scaling, 'fit');
-    assert.strictEqual(desktop.quality, 6);
-});
 
-check('normalises absent and disabled to the same thing', () => {
-    assert.deepStrictEqual(
-        desktopConfig.normalizeDesktop(undefined),
-        desktopConfig.normalizeDesktop({ enabled: false })
-    );
-});
+    test('leaves a direct desktop with no address rather than inventing one', () => {
+        const desktop = desktopConfig.normalizeDesktop({ enabled: true, transport: 'direct' });
+        assert.strictEqual(desktop.host, '');
+        assert.strictEqual(desktopConfig.validateDesktop(desktop), 'A VNC address is required');
+    });
 
-check('will not open a desktop that is not enabled', () => {
-    const desktop = desktopConfig.normalizeDesktop({ host: '10.0.0.5', port: 5901 });
-    assert.match(desktopConfig.validateDesktop(desktop), /not enabled/);
+    test('rejects a nonsense transport, port and scaling mode', () => {
+        const desktop = desktopConfig.normalizeDesktop({
+            enabled: true,
+            transport: 'telepathy',
+            port: 99999,
+            scaling: 'sideways',
+            quality: 42,
+        });
+        assert.strictEqual(desktop.transport, 'tunnel');
+        assert.strictEqual(desktop.port, 5900);
+        assert.strictEqual(desktop.scaling, 'fit');
+        assert.strictEqual(desktop.quality, 6);
+    });
+
+    test('normalises absent and disabled to the same thing', () => {
+        assert.deepStrictEqual(
+            desktopConfig.normalizeDesktop(undefined),
+            desktopConfig.normalizeDesktop({ enabled: false })
+        );
+    });
+
+    test('will not open a desktop that is not enabled', () => {
+        const desktop = desktopConfig.normalizeDesktop({ host: '10.0.0.5', port: 5901 });
+        assert.match(desktopConfig.validateDesktop(desktop), /not enabled/);
+    });
 });
 
 /* ---------------- security type choice ---------------- */
 
-console.log('\nsecurity negotiation');
-
 const vnc = fresh('vnc.js');
 
-check('prefers VNC authentication when a password is configured', () => {
-    assert.strictEqual(vnc.chooseSecurity([1, 2], true), 2);
-});
+describe('security negotiation', () => {
+    test('prefers VNC authentication when a password is configured', () => {
+        assert.strictEqual(vnc.chooseSecurity([1, 2], true), 2);
+    });
 
-check('takes None when there is no password to send', () => {
-    assert.strictEqual(vnc.chooseSecurity([1, 2], false), 1);
-});
+    test('takes None when there is no password to send', () => {
+        assert.strictEqual(vnc.chooseSecurity([1, 2], false), 1);
+    });
 
-check('asks for a password when that is the only thing missing', () => {
-    assert.throws(
-        () => vnc.chooseSecurity([2], false),
-        (error) => error.needsPassword === true && /requires a password/.test(error.message)
-    );
-});
+    test('asks for a password when that is the only thing missing', () => {
+        assert.throws(
+            () => vnc.chooseSecurity([2], false),
+            (error) => error.needsPassword === true && /requires a password/.test(error.message)
+        );
+    });
 
-check('names what it could not use', () => {
-    assert.throws(() => vnc.chooseSecurity([19, 30], true), /VeNCrypt.*Apple Remote Desktop/);
-});
+    test('names what it could not use', () => {
+        assert.throws(() => vnc.chooseSecurity([19, 30], true), /VeNCrypt.*Apple Remote Desktop/);
+    });
 
-check('reads a version banner and clamps it to what it implements', () => {
-    assert.strictEqual(vnc.parseVersion(Buffer.from('RFB 003.008\n')), 8);
-    assert.strictEqual(vnc.parseVersion(Buffer.from('RFB 003.007\n')), 7);
-    // 3.4 and 3.6 exist in the wild and mean 3.3.
-    assert.strictEqual(vnc.parseVersion(Buffer.from('RFB 003.004\n')), 3);
-    assert.strictEqual(vnc.parseVersion(Buffer.from('RFB 003.889\n')), 8);
-});
+    test('reads a version banner and clamps it to what it implements', () => {
+        assert.strictEqual(vnc.parseVersion(Buffer.from('RFB 003.008\n')), 8);
+        assert.strictEqual(vnc.parseVersion(Buffer.from('RFB 003.007\n')), 7);
+        // 3.4 and 3.6 exist in the wild and mean 3.3.
+        assert.strictEqual(vnc.parseVersion(Buffer.from('RFB 003.004\n')), 3);
+        assert.strictEqual(vnc.parseVersion(Buffer.from('RFB 003.889\n')), 8);
+    });
 
-check('refuses something that is not a VNC server', () => {
-    assert.throws(() => vnc.parseVersion(Buffer.from('SSH-2.0-Open')), /does not look like/);
-    assert.throws(() => vnc.parseVersion(Buffer.from('RFB 004.000\n')), /major version 4/);
+    test('refuses something that is not a VNC server', () => {
+        assert.throws(() => vnc.parseVersion(Buffer.from('SSH-2.0-Open')), /does not look like/);
+        assert.throws(() => vnc.parseVersion(Buffer.from('RFB 004.000\n')), /major version 4/);
+    });
 });
 
 /* ---------------- a scripted RFB server ---------------- */
@@ -288,10 +264,8 @@ async function clientHandshake(stream, password) {
     return { result, reader };
 }
 
-async function run() {
-    console.log('\nhandshake against a scripted server');
-
-    await checkAsync('completes VNC password authentication on 3.8', async () => {
+describe('handshake against a scripted server', () => {
+    test('completes VNC password authentication on 3.8', async () => {
         const { port, server, state } = await scriptedServer({ password: 'hunter2' });
         const socket = net.connect(port, '127.0.0.1');
         await new Promise((resolve, reject) => {
@@ -309,7 +283,7 @@ async function run() {
         server.close();
     });
 
-    await checkAsync('reports a rejected password as an auth failure', async () => {
+    test('reports a rejected password as an auth failure', async () => {
         const { port, server } = await scriptedServer({ password: 'right' });
         const socket = net.connect(port, '127.0.0.1');
         await new Promise((resolve) => socket.once('connect', resolve));
@@ -323,7 +297,7 @@ async function run() {
         server.close();
     });
 
-    await checkAsync('completes a passwordless 3.3 handshake with no SecurityResult', async () => {
+    test('completes a passwordless 3.3 handshake with no SecurityResult', async () => {
         const { port, server } = await scriptedServer({ version: '003.003', types: [1] });
         const socket = net.connect(port, '127.0.0.1');
         await new Promise((resolve) => socket.once('connect', resolve));
@@ -336,7 +310,7 @@ async function run() {
         server.close();
     });
 
-    await checkAsync('gives up on a server that offers nothing it can use', async () => {
+    test('gives up on a server that offers nothing it can use', async () => {
         const { port, server } = await scriptedServer({ types: [19] });
         const socket = net.connect(port, '127.0.0.1');
         await new Promise((resolve) => socket.once('connect', resolve));
@@ -346,20 +320,20 @@ async function run() {
         socket.destroy();
         server.close();
     });
+});
 
-    /* ---------------- end to end ---------------- */
+/* ---------------- the bridge, end to end ---------------- */
 
-    console.log('\nthe bridge, end to end');
+const store = fresh('store.js');
+// vnc.js and store.js have to be the same instances the bridge uses, so the
+// module cache is not cleared again between here and the end of the file.
+const bridge = require(path.join(ROOT, 'vnc.js'));
+const WebSocket = require('ws');
 
-    const store = fresh('store.js');
-    // vnc.js and store.js have to be the same instances the bridge uses, so the
-    // module cache is not cleared again between here and the end of the file.
-    const bridge = require(path.join(ROOT, 'vnc.js'));
-    const WebSocket = require('ws');
+bridge.setNotifier(() => {});
 
-    bridge.setNotifier(() => {});
-
-    await checkAsync('authenticates in main and hands the renderer a clean stream', async () => {
+describe('the bridge, end to end', () => {
+    test('authenticates in main and hands the renderer a clean stream', async () => {
         const { port, server, state } = await scriptedServer({ password: 'topsecret' });
 
         const host = store.saveHost({
@@ -443,7 +417,7 @@ async function run() {
         server.close();
     });
 
-    await checkAsync('refuses a viewer that does not know the token', async () => {
+    test('refuses a viewer that does not know the token', async () => {
         const { port, server } = await scriptedServer({ types: [1] });
 
         const host = store.saveHost({
@@ -470,7 +444,7 @@ async function run() {
         server.close();
     });
 
-    await checkAsync('reports a refused port instead of hanging', async () => {
+    test('reports a refused port instead of hanging', async () => {
         // Port 1 on loopback: nothing is listening and nothing can be.
         const host = store.saveHost({
             name: 'nothing there',
@@ -485,18 +459,18 @@ async function run() {
         bridge.close('pane-refused');
     });
 
-    await checkAsync('will not open a desktop for a host that has none', async () => {
+    test('will not open a desktop for a host that has none', async () => {
         const host = store.saveHost({ name: 'shell only', host: '127.0.0.1', username: 'root' });
         const opened = await bridge.open('pane-none', host.id);
         assert.strictEqual(opened.success, false);
         assert.match(opened.message, /not enabled/);
     });
+});
 
-    /* ---------------- the password stays put ---------------- */
+/* ---------------- the password stays put ---------------- */
 
-    console.log('\nsecret handling');
-
-    await checkAsync('keeps the VNC password out of the renderer and in the backup', async () => {
+describe('secret handling', () => {
+    test('keeps the VNC password out of the renderer and in the backup', async () => {
         const host = store.saveHost({
             name: 'secret box',
             host: '10.0.0.9',
@@ -526,7 +500,7 @@ async function run() {
         assert.strictEqual(backedUp.vncPassword, 'vnc-pass');
     });
 
-    await checkAsync('keeps the stored password when a save omits it', async () => {
+    test('keeps the stored password when a save omits it', async () => {
         const created = store.saveHost({
             name: 'keeper',
             host: '10.0.0.10',
@@ -542,7 +516,7 @@ async function run() {
         assert.strictEqual(store.resolveDesktop(created.id).password, '');
     });
 
-    await checkAsync('never records the password in the activity log', async () => {
+    test('never records the password in the activity log', async () => {
         const activity = require(path.join(ROOT, 'activity.js'));
         const created = store.saveHost({
             name: 'logged',
@@ -559,15 +533,4 @@ async function run() {
         // The edit is still recorded, just without the value.
         assert.ok(text.includes('vncPassword'), 'the change itself should still be logged');
     });
-
-    console.log(`\n${passed} checks passed`);
-}
-
-run().then(() => {
-    // Any listener the bridge or a scripted server left behind would hold the
-    // process open, which would look like a hang rather than a failure.
-    setTimeout(() => process.exit(process.exitCode || 0), 50);
-}).catch((error) => {
-    console.error('\nthe suite itself failed:', error);
-    process.exit(1);
 });

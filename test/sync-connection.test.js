@@ -9,6 +9,7 @@ const path = require('path');
 const fs = require('fs');
 const os = require('os');
 const assert = require('assert');
+const { describe, test } = require('node:test');
 
 const ROOT = path.join(__dirname, '..', 'src', 'main');
 let userData = fs.mkdtempSync(path.join(os.tmpdir(), 'cb-test-sync-conn-'));
@@ -207,274 +208,236 @@ function reset() {
     return fresh();
 }
 
-let passed = 0;
-const checkAsync = async (label, fn) => {
-    try {
-        await fn();
-        console.log(`  ok   ${label}`);
-        passed++;
-    } catch (error) {
-        console.log(`  FAIL ${label}`);
-        console.log(`       ${error.message}`);
-        process.exitCode = 1;
-    }
-};
-
-// Wrapped in an async IIFE: this file is CommonJS, not a module, so
-// top-level await isn't available -- same pattern cloud-snapshot.test.js
-// uses for the same reason.
-(async () => {
-
-/* ---------------- configure ---------------- */
-
-console.log('\nsync-connection: configuring a server');
-
-await checkAsync('rejects an empty address', async () => {
-    const sc = reset();
-    assert.throws(() => sc.configure(''));
-});
-
-await checkAsync('rejects an address with no scheme', async () => {
-    const sc = reset();
-    assert.throws(() => sc.configure('sync.example.com'));
-});
-
-await checkAsync('accepts and normalizes a trailing slash', async () => {
-    const sc = reset();
-    const status = sc.configure('https://sync.example.com/');
-    assert.strictEqual(status.serverUrl, 'https://sync.example.com');
-});
-
-/* ---------------- register ---------------- */
-
-console.log('\nsync-connection: registering');
-
-await checkAsync('register connects and returns a recovery code once', async () => {
-    const sc = reset();
-    sc.configure('https://sync.example.com');
-
-    const { status, recoveryCode } = await sc.register('alice@example.com', 'a good passphrase');
-
-    assert.strictEqual(status.connected, true);
-    assert.strictEqual(status.unlocked, true);
-    assert.strictEqual(status.email, 'alice@example.com');
-    assert.match(recoveryCode, /^[0-9A-Z-]+$/);
-});
-
-await checkAsync('refuses to register with no server configured', async () => {
-    const sc = reset();
-    await assert.rejects(() => sc.register('alice@example.com', 'a good passphrase'));
-});
-
-await checkAsync('the server rejects a duplicate email', async () => {
-    const sc = reset();
-    sc.configure('https://sync.example.com');
-    await sc.register('dup@example.com', 'a good passphrase');
-    await assert.rejects(() => sc.register('dup@example.com', 'a different passphrase'));
-});
-
-/* ---------------- login ---------------- */
-
-console.log('\nsync-connection: logging in');
-
-await checkAsync('a second device logs in and unlocks with the same passphrase', async () => {
-    const server = createFakeServer();
-    currentFetch = server;
-
-    userData = fs.mkdtempSync(path.join(os.tmpdir(), 'cb-test-sync-conn-'));
-    const deviceA = fresh();
-    deviceA.configure('https://sync.example.com');
-    await deviceA.register('shared@example.com', 'a good passphrase');
-
-    userData = fs.mkdtempSync(path.join(os.tmpdir(), 'cb-test-sync-conn-'));
-    const deviceB = fresh();
-    deviceB.configure('https://sync.example.com');
-    const status = await deviceB.login('shared@example.com', 'a good passphrase');
-
-    assert.strictEqual(status.connected, true);
-    assert.strictEqual(status.unlocked, true);
-});
-
-await checkAsync('rejects the wrong password', async () => {
-    const sc = reset();
-    sc.configure('https://sync.example.com');
-    await sc.register('bob@example.com', 'a good passphrase');
-    await sc.logout();
-
-    await assert.rejects(() => sc.login('bob@example.com', 'the wrong passphrase entirely'));
-});
-
-/* ---------------- logout ---------------- */
-
-console.log('\nsync-connection: logging out');
-
-await checkAsync('clears connection state but keeps the configured server', async () => {
-    const sc = reset();
-    sc.configure('https://sync.example.com');
-    await sc.register('logout@example.com', 'a good passphrase');
-
-    const { status, revoked } = await sc.logout();
-
-    assert.strictEqual(revoked, true, 'the fake server should have accepted the revoke');
-    assert.strictEqual(status.connected, false);
-    assert.strictEqual(status.unlocked, false);
-    assert.strictEqual(status.serverUrl, 'https://sync.example.com');
-});
-
-/* ---------------- recovery ---------------- */
-
-console.log('\nsync-connection: recovery code');
-
-await checkAsync('unlocks with the recovery code and rotates it', async () => {
-    const sc = reset();
-    sc.configure('https://sync.example.com');
-    const { recoveryCode: firstCode } = await sc.register('recover@example.com', 'a good passphrase');
-
-    const { status, recoveryCode: secondCode } = await sc.unlockWithRecoveryCode(firstCode);
-
-    assert.strictEqual(status.unlocked, true);
-    assert.ok(secondCode, 'a new recovery code should be issued');
-    assert.notStrictEqual(secondCode, firstCode);
-});
-
-await checkAsync('the old recovery code no longer works after rotation', async () => {
-    const sc = reset();
-    sc.configure('https://sync.example.com');
-    const { recoveryCode: firstCode } = await sc.register('recover2@example.com', 'a good passphrase');
-    await sc.unlockWithRecoveryCode(firstCode);
-
-    await assert.rejects(() => sc.unlockWithRecoveryCode(firstCode));
-});
-
-/* ---------------- changing the passphrase ---------------- */
-
-console.log('\nsync-connection: changing the passphrase');
-
-await checkAsync('the new passphrase logs in; the old one no longer does', async () => {
-    const sc = reset();
-    sc.configure('https://sync.example.com');
-    await sc.register('change@example.com', 'the old passphrase');
-
-    await sc.changePassphrase('the old passphrase', 'the new passphrase');
-    await sc.logout();
-
-    await assert.rejects(() => sc.login('change@example.com', 'the old passphrase'));
-    const status = await sc.login('change@example.com', 'the new passphrase');
-    assert.strictEqual(status.unlocked, true);
-});
-
-/* ---------------- email-based recovery, from a fully logged-out state ---------------- */
-
-console.log('\nsync-connection: email-based recovery');
-
-await checkAsync('recovers with the token and the recovery code, and logs in fresh', async () => {
-    const sc = reset();
-    sc.configure('https://sync.example.com');
-    const { recoveryCode } = await sc.register('forgot@example.com', 'the forgotten passphrase');
-    await sc.logout();
-
-    await sc.recoverStart('forgot@example.com');
-    const emailToken = currentFetch.lastRecoveryToken;
-
-    const { status, recoveryCode: newCode } = await sc.recoverComplete(
-        'forgot@example.com', emailToken, recoveryCode, 'a brand new passphrase',
-    );
-
-    assert.strictEqual(status.connected, true);
-    assert.strictEqual(status.unlocked, true);
-    assert.ok(newCode, 'a fresh recovery code should be issued');
-    assert.notStrictEqual(newCode, recoveryCode);
-});
-
-await checkAsync('the recovered passphrase logs in afterward; the old one does not', async () => {
-    const sc = reset();
-    sc.configure('https://sync.example.com');
-    const { recoveryCode } = await sc.register('forgot2@example.com', 'the forgotten passphrase');
-    await sc.logout();
-
-    await sc.recoverStart('forgot2@example.com');
-    const emailToken = currentFetch.lastRecoveryToken;
-    await sc.recoverComplete('forgot2@example.com', emailToken, recoveryCode, 'a brand new passphrase');
-    await sc.logout();
-
-    await assert.rejects(() => sc.login('forgot2@example.com', 'the forgotten passphrase'));
-    const status = await sc.login('forgot2@example.com', 'a brand new passphrase');
-    assert.strictEqual(status.unlocked, true);
-});
-
-await checkAsync('rejects the wrong recovery code even with a valid email token', async () => {
-    const sc = reset();
-    sc.configure('https://sync.example.com');
-    await sc.register('forgot3@example.com', 'the forgotten passphrase');
-    await sc.logout();
-
-    await sc.recoverStart('forgot3@example.com');
-    const emailToken = currentFetch.lastRecoveryToken;
-
-    await assert.rejects(
-        () => sc.recoverComplete('forgot3@example.com', emailToken, 'WRONG-CODE-ENTIRELY-HERE-XX', 'a new passphrase'),
-    );
-});
-
-await checkAsync('rejects an invalid or already-used email token', async () => {
-    const sc = reset();
-    sc.configure('https://sync.example.com');
-    const { recoveryCode } = await sc.register('forgot4@example.com', 'the forgotten passphrase');
-    await sc.logout();
-
-    await assert.rejects(() => sc.recoverComplete('forgot4@example.com', 'not-a-real-token', recoveryCode, 'x'));
-
-    await sc.recoverStart('forgot4@example.com');
-    const emailToken = currentFetch.lastRecoveryToken;
-    await sc.recoverComplete('forgot4@example.com', emailToken, recoveryCode, 'a new passphrase');
-
-    // The same token, used again, must not work a second time.
-    await assert.rejects(
-        () => sc.recoverComplete('forgot4@example.com', emailToken, recoveryCode, 'yet another passphrase'),
-    );
-});
-
-/* ---------------- snapshot ---------------- */
-
-console.log('\nsync-connection: the synced snapshot');
-
-await checkAsync('meta reports nothing saved for a fresh account', async () => {
-    const sc = reset();
-    sc.configure('https://sync.example.com');
-    await sc.register('fresh@example.com', 'a good passphrase');
-
-    const meta = await sc.snapshotMeta();
-    assert.strictEqual(meta.exists, false);
-});
-
-await checkAsync('push then pull round trips the payload untouched', async () => {
-    const sc = reset();
-    sc.configure('https://sync.example.com');
-    await sc.register('snap@example.com', 'a good passphrase');
-
-    const push = await sc.snapshotPut({
-        payload: { cipher: 'opaque-ciphertext' }, baseRevision: 0, deviceName: 'laptop', stats: { hosts: 2 },
+describe('sync-connection: configuring a server', () => {
+    test('rejects an empty address', () => {
+        const sc = reset();
+        assert.throws(() => sc.configure(''));
     });
-    assert.strictEqual(push.conflict, false);
-    assert.strictEqual(push.revision, 1);
 
-    const pulled = await sc.snapshotGet();
-    assert.deepStrictEqual(pulled.payload, { cipher: 'opaque-ciphertext' });
-    assert.strictEqual(pulled.revision, 1);
+    test('rejects an address with no scheme', () => {
+        const sc = reset();
+        assert.throws(() => sc.configure('sync.example.com'));
+    });
+
+    test('accepts and normalizes a trailing slash', () => {
+        const sc = reset();
+        const status = sc.configure('https://sync.example.com/');
+        assert.strictEqual(status.serverUrl, 'https://sync.example.com');
+    });
 });
 
-await checkAsync('a stale base revision reports a conflict with the current revision', async () => {
-    const sc = reset();
-    sc.configure('https://sync.example.com');
-    await sc.register('conflict@example.com', 'a good passphrase');
+describe('sync-connection: registering', () => {
+    test('register connects and returns a recovery code once', async () => {
+        const sc = reset();
+        sc.configure('https://sync.example.com');
 
-    await sc.snapshotPut({ payload: { v: 1 }, baseRevision: 0 });
+        const { status, recoveryCode } = await sc.register('alice@example.com', 'a good passphrase');
 
-    const result = await sc.snapshotPut({ payload: { v: 2 }, baseRevision: 0 });
-    assert.strictEqual(result.conflict, true);
-    assert.strictEqual(result.revision, 1);
+        assert.strictEqual(status.connected, true);
+        assert.strictEqual(status.unlocked, true);
+        assert.strictEqual(status.email, 'alice@example.com');
+        assert.match(recoveryCode, /^[0-9A-Z-]+$/);
+    });
+
+    test('refuses to register with no server configured', async () => {
+        const sc = reset();
+        await assert.rejects(() => sc.register('alice@example.com', 'a good passphrase'));
+    });
+
+    test('the server rejects a duplicate email', async () => {
+        const sc = reset();
+        sc.configure('https://sync.example.com');
+        await sc.register('dup@example.com', 'a good passphrase');
+        await assert.rejects(() => sc.register('dup@example.com', 'a different passphrase'));
+    });
 });
 
-console.log(`\n${passed} checks passed${process.exitCode ? ', with failures above' : ''}`);
+describe('sync-connection: logging in', () => {
+    test('a second device logs in and unlocks with the same passphrase', async () => {
+        const server = createFakeServer();
+        currentFetch = server;
 
-})();
+        userData = fs.mkdtempSync(path.join(os.tmpdir(), 'cb-test-sync-conn-'));
+        const deviceA = fresh();
+        deviceA.configure('https://sync.example.com');
+        await deviceA.register('shared@example.com', 'a good passphrase');
+
+        userData = fs.mkdtempSync(path.join(os.tmpdir(), 'cb-test-sync-conn-'));
+        const deviceB = fresh();
+        deviceB.configure('https://sync.example.com');
+        const status = await deviceB.login('shared@example.com', 'a good passphrase');
+
+        assert.strictEqual(status.connected, true);
+        assert.strictEqual(status.unlocked, true);
+    });
+
+    test('rejects the wrong password', async () => {
+        const sc = reset();
+        sc.configure('https://sync.example.com');
+        await sc.register('bob@example.com', 'a good passphrase');
+        await sc.logout();
+
+        await assert.rejects(() => sc.login('bob@example.com', 'the wrong passphrase entirely'));
+    });
+});
+
+describe('sync-connection: logging out', () => {
+    test('clears connection state but keeps the configured server', async () => {
+        const sc = reset();
+        sc.configure('https://sync.example.com');
+        await sc.register('logout@example.com', 'a good passphrase');
+
+        const { status, revoked } = await sc.logout();
+
+        assert.strictEqual(revoked, true, 'the fake server should have accepted the revoke');
+        assert.strictEqual(status.connected, false);
+        assert.strictEqual(status.unlocked, false);
+        assert.strictEqual(status.serverUrl, 'https://sync.example.com');
+    });
+});
+
+describe('sync-connection: recovery code', () => {
+    test('unlocks with the recovery code and rotates it', async () => {
+        const sc = reset();
+        sc.configure('https://sync.example.com');
+        const { recoveryCode: firstCode } = await sc.register('recover@example.com', 'a good passphrase');
+
+        const { status, recoveryCode: secondCode } = await sc.unlockWithRecoveryCode(firstCode);
+
+        assert.strictEqual(status.unlocked, true);
+        assert.ok(secondCode, 'a new recovery code should be issued');
+        assert.notStrictEqual(secondCode, firstCode);
+    });
+
+    test('the old recovery code no longer works after rotation', async () => {
+        const sc = reset();
+        sc.configure('https://sync.example.com');
+        const { recoveryCode: firstCode } = await sc.register('recover2@example.com', 'a good passphrase');
+        await sc.unlockWithRecoveryCode(firstCode);
+
+        await assert.rejects(() => sc.unlockWithRecoveryCode(firstCode));
+    });
+});
+
+describe('sync-connection: changing the passphrase', () => {
+    test('the new passphrase logs in; the old one no longer does', async () => {
+        const sc = reset();
+        sc.configure('https://sync.example.com');
+        await sc.register('change@example.com', 'the old passphrase');
+
+        await sc.changePassphrase('the old passphrase', 'the new passphrase');
+        await sc.logout();
+
+        await assert.rejects(() => sc.login('change@example.com', 'the old passphrase'));
+        const status = await sc.login('change@example.com', 'the new passphrase');
+        assert.strictEqual(status.unlocked, true);
+    });
+});
+
+describe('sync-connection: email-based recovery', () => {
+    test('recovers with the token and the recovery code, and logs in fresh', async () => {
+        const sc = reset();
+        sc.configure('https://sync.example.com');
+        const { recoveryCode } = await sc.register('forgot@example.com', 'the forgotten passphrase');
+        await sc.logout();
+
+        await sc.recoverStart('forgot@example.com');
+        const emailToken = currentFetch.lastRecoveryToken;
+
+        const { status, recoveryCode: newCode } = await sc.recoverComplete(
+            'forgot@example.com', emailToken, recoveryCode, 'a brand new passphrase',
+        );
+
+        assert.strictEqual(status.connected, true);
+        assert.strictEqual(status.unlocked, true);
+        assert.ok(newCode, 'a fresh recovery code should be issued');
+        assert.notStrictEqual(newCode, recoveryCode);
+    });
+
+    test('the recovered passphrase logs in afterward; the old one does not', async () => {
+        const sc = reset();
+        sc.configure('https://sync.example.com');
+        const { recoveryCode } = await sc.register('forgot2@example.com', 'the forgotten passphrase');
+        await sc.logout();
+
+        await sc.recoverStart('forgot2@example.com');
+        const emailToken = currentFetch.lastRecoveryToken;
+        await sc.recoverComplete('forgot2@example.com', emailToken, recoveryCode, 'a brand new passphrase');
+        await sc.logout();
+
+        await assert.rejects(() => sc.login('forgot2@example.com', 'the forgotten passphrase'));
+        const status = await sc.login('forgot2@example.com', 'a brand new passphrase');
+        assert.strictEqual(status.unlocked, true);
+    });
+
+    test('rejects the wrong recovery code even with a valid email token', async () => {
+        const sc = reset();
+        sc.configure('https://sync.example.com');
+        await sc.register('forgot3@example.com', 'the forgotten passphrase');
+        await sc.logout();
+
+        await sc.recoverStart('forgot3@example.com');
+        const emailToken = currentFetch.lastRecoveryToken;
+
+        await assert.rejects(
+            () => sc.recoverComplete('forgot3@example.com', emailToken, 'WRONG-CODE-ENTIRELY-HERE-XX', 'a new passphrase'),
+        );
+    });
+
+    test('rejects an invalid or already-used email token', async () => {
+        const sc = reset();
+        sc.configure('https://sync.example.com');
+        const { recoveryCode } = await sc.register('forgot4@example.com', 'the forgotten passphrase');
+        await sc.logout();
+
+        await assert.rejects(() => sc.recoverComplete('forgot4@example.com', 'not-a-real-token', recoveryCode, 'x'));
+
+        await sc.recoverStart('forgot4@example.com');
+        const emailToken = currentFetch.lastRecoveryToken;
+        await sc.recoverComplete('forgot4@example.com', emailToken, recoveryCode, 'a new passphrase');
+
+        // The same token, used again, must not work a second time.
+        await assert.rejects(
+            () => sc.recoverComplete('forgot4@example.com', emailToken, recoveryCode, 'yet another passphrase'),
+        );
+    });
+});
+
+describe('sync-connection: the synced snapshot', () => {
+    test('meta reports nothing saved for a fresh account', async () => {
+        const sc = reset();
+        sc.configure('https://sync.example.com');
+        await sc.register('fresh@example.com', 'a good passphrase');
+
+        const meta = await sc.snapshotMeta();
+        assert.strictEqual(meta.exists, false);
+    });
+
+    test('push then pull round trips the payload untouched', async () => {
+        const sc = reset();
+        sc.configure('https://sync.example.com');
+        await sc.register('snap@example.com', 'a good passphrase');
+
+        const push = await sc.snapshotPut({
+            payload: { cipher: 'opaque-ciphertext' }, baseRevision: 0, deviceName: 'laptop', stats: { hosts: 2 },
+        });
+        assert.strictEqual(push.conflict, false);
+        assert.strictEqual(push.revision, 1);
+
+        const pulled = await sc.snapshotGet();
+        assert.deepStrictEqual(pulled.payload, { cipher: 'opaque-ciphertext' });
+        assert.strictEqual(pulled.revision, 1);
+    });
+
+    test('a stale base revision reports a conflict with the current revision', async () => {
+        const sc = reset();
+        sc.configure('https://sync.example.com');
+        await sc.register('conflict@example.com', 'a good passphrase');
+
+        await sc.snapshotPut({ payload: { v: 1 }, baseRevision: 0 });
+
+        const result = await sc.snapshotPut({ payload: { v: 2 }, baseRevision: 0 });
+        assert.strictEqual(result.conflict, true);
+        assert.strictEqual(result.revision, 1);
+    });
+});

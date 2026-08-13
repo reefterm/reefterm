@@ -13,6 +13,7 @@ const path = require('path');
 const fs = require('fs');
 const os = require('os');
 const assert = require('assert');
+const { describe, test } = require('node:test');
 
 const ROOT = path.join(__dirname, '..', 'src', 'main');
 
@@ -49,149 +50,128 @@ const fresh = (name) => {
     return require(path.join(ROOT, name));
 };
 
-let passed = 0;
-const check = (label, fn) => {
-    try {
-        fn();
-        console.log(`  ok   ${label}`);
-        passed++;
-    } catch (error) {
-        console.log(`  FAIL ${label}`);
-        console.log(`       ${error.message}`);
-        process.exitCode = 1;
+const readLog = (filePath) => fs.readFileSync(filePath, 'utf8');
+
+/** Polls a condition instead of guessing how long an async flush takes. */
+const waitFor = async (predicate, timeoutMs = 2000) => {
+    const deadline = Date.now() + timeoutMs;
+    while (Date.now() < deadline) {
+        if (predicate()) return;
+        await new Promise(resolve => setTimeout(resolve, 5));
     }
+    throw new Error('timed out waiting for the session log to settle');
 };
 
-const checkAsync = async (label, fn) => {
-    try {
-        await fn();
-        console.log(`  ok   ${label}`);
-        passed++;
-    } catch (error) {
-        console.log(`  FAIL ${label}`);
-        console.log(`       ${error.message}`);
-        process.exitCode = 1;
-    }
-};
+/** Streams flush asynchronously; the file is only whole once the closing line has landed. */
+const settle = (filePath) => waitFor(() => fs.existsSync(filePath) && readLog(filePath).includes('# ended:'));
 
-/** Streams flush asynchronously; the file is only whole once `end` has landed. */
-const settle = () => new Promise(resolve => setTimeout(resolve, 60));
+/** For the case where a session is deliberately left open: just wait for the file to exist. */
+const settleOpen = (filePath) => waitFor(() => fs.existsSync(filePath));
 
 const sessionLog = fresh('session-log.js');
 
-/* ---------------- the stripper ---------------- */
+describe('session transcripts: stripping escape sequences', () => {
+    test('drops SGR colour runs and keeps the text', () => {
+        assert.strictEqual(
+            sessionLog.clean('\x1B[0;32muser@host\x1B[0m:\x1B[1;34m~\x1B[0m$ ls'),
+            'user@host:~$ ls'
+        );
+    });
 
-console.log('\nsession transcripts: stripping escape sequences');
+    test('drops cursor moves and erases', () => {
+        assert.strictEqual(sessionLog.clean('a\x1B[2Kb\x1B[3;7Hc\x1B[Jd'), 'abcd');
+    });
 
-check('drops SGR colour runs and keeps the text', () => {
-    assert.strictEqual(
-        sessionLog.clean('\x1B[0;32muser@host\x1B[0m:\x1B[1;34m~\x1B[0m$ ls'),
-        'user@host:~$ ls'
-    );
+    test('drops an OSC window title, both terminators', () => {
+        assert.strictEqual(sessionLog.clean('\x1B]0;bradp@web1\x07ready'), 'ready');
+        assert.strictEqual(sessionLog.clean('\x1B]0;bradp@web1\x1B\\ready'), 'ready');
+    });
+
+    test('drops an OSC 8 hyperlink but keeps its text', () => {
+        assert.strictEqual(
+            sessionLog.clean('\x1B]8;;https://example.com\x07click\x1B]8;;\x07'),
+            'click'
+        );
+    });
+
+    test('drops charset and keypad escapes', () => {
+        assert.strictEqual(sessionLog.clean('\x1B(Bplain\x1B=\x1B>'), 'plain');
+    });
+
+    test('drops a bare bell but keeps tabs and newlines', () => {
+        assert.strictEqual(sessionLog.clean('a\x07b\tc\nd'), 'ab\tc\nd');
+    });
+
+    test('leaves text with no sequences in it untouched', () => {
+        const line = 'total 24\ndrwxr-xr-x 3 root root 4096 Jul 26 14:25 .\n';
+        assert.strictEqual(sessionLog.clean(line), line);
+    });
 });
 
-check('drops cursor moves and erases', () => {
-    assert.strictEqual(sessionLog.clean('a\x1B[2Kb\x1B[3;7Hc\x1B[Jd'), 'abcd');
+describe('sequences split across two reads', () => {
+    test('holds back a partial CSI until it is complete', () => {
+        const [ready, held] = sessionLog.splitPending('done\x1B[0;3');
+        assert.strictEqual(ready, 'done');
+        assert.strictEqual(held, '\x1B[0;3');
+    });
+
+    test('releases a complete CSI', () => {
+        const [ready, held] = sessionLog.splitPending('done\x1B[0m');
+        assert.strictEqual(ready, 'done\x1B[0m');
+        assert.strictEqual(held, '');
+    });
+
+    test('holds back an OSC whose terminator has not arrived', () => {
+        const [ready, held] = sessionLog.splitPending('x\x1B]0;partial-tit');
+        assert.strictEqual(ready, 'x');
+        assert.strictEqual(held, '\x1B]0;partial-tit');
+    });
+
+    test('gives up on an unterminated sequence rather than holding forever', () => {
+        const long = `x\x1B]0;${'a'.repeat(600)}`;
+        const [ready, held] = sessionLog.splitPending(long);
+        assert.strictEqual(held, '', 'a sequence this long is never going to complete');
+        assert.strictEqual(ready, long);
+    });
+
+    test('a chunk with no escape at all is released whole', () => {
+        const [ready, held] = sessionLog.splitPending('nothing special here');
+        assert.strictEqual(ready, 'nothing special here');
+        assert.strictEqual(held, '');
+    });
 });
 
-check('drops an OSC window title, both terminators', () => {
-    assert.strictEqual(sessionLog.clean('\x1B]0;bradp@web1\x07ready'), 'ready');
-    assert.strictEqual(sessionLog.clean('\x1B]0;bradp@web1\x1B\\ready'), 'ready');
+describe('settings', () => {
+    test('defaults to off, readable, no timestamps', () => {
+        const config = sessionLog.getConfig();
+        assert.strictEqual(config.enabled, false);
+        assert.strictEqual(config.format, 'plain');
+        assert.strictEqual(config.timestamps, false);
+        assert.ok(config.usingDefaultDirectory, 'no directory chosen yet');
+        assert.ok(config.directory, 'a default directory is still resolved');
+    });
+
+    test('refuses timestamps on a verbatim log', () => {
+        // A timestamp in the middle of an escape sequence would corrupt the very
+        // thing the verbatim format exists to preserve, so the combination is not
+        // merely discouraged: it cannot be stored.
+        const config = sessionLog.sanitize({ format: 'raw', timestamps: true });
+        assert.strictEqual(config.timestamps, false);
+    });
+
+    test('falls back to the defaults for nonsense', () => {
+        const config = sessionLog.sanitize({ format: 'yaml', enabled: 'yes', directory: 42 });
+        assert.strictEqual(config.format, 'plain');
+        assert.strictEqual(config.enabled, true, 'a truthy string still means on');
+        assert.strictEqual(config.directory, '');
+    });
 });
 
-check('drops an OSC 8 hyperlink but keeps its text', () => {
-    assert.strictEqual(
-        sessionLog.clean('\x1B]8;;https://example.com\x07click\x1B]8;;\x07'),
-        'click'
-    );
-});
-
-check('drops charset and keypad escapes', () => {
-    assert.strictEqual(sessionLog.clean('\x1B(Bplain\x1B=\x1B>'), 'plain');
-});
-
-check('drops a bare bell but keeps tabs and newlines', () => {
-    assert.strictEqual(sessionLog.clean('a\x07b\tc\nd'), 'ab\tc\nd');
-});
-
-check('leaves text with no sequences in it untouched', () => {
-    const line = 'total 24\ndrwxr-xr-x 3 root root 4096 Jul 26 14:25 .\n';
-    assert.strictEqual(sessionLog.clean(line), line);
-});
-
-/* ---------------- split chunks ---------------- */
-
-console.log('\nsequences split across two reads');
-
-check('holds back a partial CSI until it is complete', () => {
-    const [ready, held] = sessionLog.splitPending('done\x1B[0;3');
-    assert.strictEqual(ready, 'done');
-    assert.strictEqual(held, '\x1B[0;3');
-});
-
-check('releases a complete CSI', () => {
-    const [ready, held] = sessionLog.splitPending('done\x1B[0m');
-    assert.strictEqual(ready, 'done\x1B[0m');
-    assert.strictEqual(held, '');
-});
-
-check('holds back an OSC whose terminator has not arrived', () => {
-    const [ready, held] = sessionLog.splitPending('x\x1B]0;partial-tit');
-    assert.strictEqual(ready, 'x');
-    assert.strictEqual(held, '\x1B]0;partial-tit');
-});
-
-check('gives up on an unterminated sequence rather than holding forever', () => {
-    const long = `x\x1B]0;${'a'.repeat(600)}`;
-    const [ready, held] = sessionLog.splitPending(long);
-    assert.strictEqual(held, '', 'a sequence this long is never going to complete');
-    assert.strictEqual(ready, long);
-});
-
-check('a chunk with no escape at all is released whole', () => {
-    const [ready, held] = sessionLog.splitPending('nothing special here');
-    assert.strictEqual(ready, 'nothing special here');
-    assert.strictEqual(held, '');
-});
-
-/* ---------------- settings ---------------- */
-
-console.log('\nsettings');
-
-check('defaults to off, readable, no timestamps', () => {
-    const config = sessionLog.getConfig();
-    assert.strictEqual(config.enabled, false);
-    assert.strictEqual(config.format, 'plain');
-    assert.strictEqual(config.timestamps, false);
-    assert.ok(config.usingDefaultDirectory, 'no directory chosen yet');
-    assert.ok(config.directory, 'a default directory is still resolved');
-});
-
-check('refuses timestamps on a verbatim log', () => {
-    // A timestamp in the middle of an escape sequence would corrupt the very
-    // thing the verbatim format exists to preserve, so the combination is not
-    // merely discouraged: it cannot be stored.
-    const config = sessionLog.sanitize({ format: 'raw', timestamps: true });
-    assert.strictEqual(config.timestamps, false);
-});
-
-check('falls back to the defaults for nonsense', () => {
-    const config = sessionLog.sanitize({ format: 'yaml', enabled: 'yes', directory: 42 });
-    assert.strictEqual(config.format, 'plain');
-    assert.strictEqual(config.enabled, true, 'a truthy string still means on');
-    assert.strictEqual(config.directory, '');
-});
-
-/* ---------------- writing a session ---------------- */
-
-console.log('\nwriting a transcript');
-
-const readLog = (filePath) => fs.readFileSync(filePath, 'utf8');
 /** Everything past the `#` header the transcript opens with. */
 const body = (text) => text.split('\n').filter(line => !line.startsWith('#')).join('\n');
 
-(async () => {
-    await checkAsync('records a readable transcript with the sequences gone', async () => {
+describe('writing a transcript', () => {
+    test('records a readable transcript with the sequences gone', async () => {
         sessionLog.setConfig({ enabled: true, format: 'plain', directory: userData });
 
         const filePath = sessionLog.start('tab-1', {
@@ -204,7 +184,7 @@ const body = (text) => text.split('\n').filter(line => !line.startsWith('#')).jo
         sessionLog.write('tab-1', '\x1B[0;32mroot@web1\x1B[0m:~$ uptime\r\n');
         sessionLog.write('tab-1', ' 14:25:31 up 40 days,  3:11\r\n');
         sessionLog.close('tab-1');
-        await settle();
+        await settle(filePath);
 
         const text = readLog(filePath);
         assert.ok(!text.includes('\x1B'), 'no escape character survives');
@@ -213,47 +193,47 @@ const body = (text) => text.split('\n').filter(line => !line.startsWith('#')).jo
         assert.ok(text.includes('# host: prod web 1 (root@10.0.0.4)'), 'the header names the host');
     });
 
-    await checkAsync('names the file after the host and the time', async () => {
+    test('names the file after the host and the time', async () => {
         const filePath = sessionLog.start('tab-2', { hostName: 'db/primary #2', address: 'x' });
         sessionLog.close('tab-2');
-        await settle();
+        await settle(filePath);
 
         const name = path.basename(filePath);
         assert.ok(/^db-primary-2_\d{4}-\d{2}-\d{2}_\d{6}\.log$/.test(name), `unexpected name: ${name}`);
     });
 
-    await checkAsync('reassembles a sequence split across two writes', async () => {
+    test('reassembles a sequence split across two writes', async () => {
         const filePath = sessionLog.start('tab-3', { hostName: 'split', address: 'x' });
 
         // The colour code arrives in two pieces, as it would off a real socket.
         sessionLog.write('tab-3', 'before\x1B[0');
         sessionLog.write('tab-3', ';32mafter\r\n');
         sessionLog.close('tab-3');
-        await settle();
+        await settle(filePath);
 
         const text = body(readLog(filePath));
         assert.ok(text.includes('beforeafter'), `the halves were not rejoined: ${JSON.stringify(text)}`);
         assert.ok(!text.includes('32m'), 'no fragment of the sequence was left behind');
     });
 
-    await checkAsync('keeps every byte in verbatim mode', async () => {
+    test('keeps every byte in verbatim mode', async () => {
         sessionLog.setConfig({ format: 'raw' });
 
         const filePath = sessionLog.start('tab-4', { hostName: 'raw', address: 'x' });
         sessionLog.write('tab-4', '\x1B[31mred\x1B[0m');
         sessionLog.close('tab-4');
-        await settle();
+        await settle(filePath);
 
         assert.ok(readLog(filePath).includes('\x1B[31mred\x1B[0m'), 'the sequences are preserved');
     });
 
-    await checkAsync('stamps each line when asked, and only at line starts', async () => {
+    test('stamps each line when asked, and only at line starts', async () => {
         sessionLog.setConfig({ format: 'plain', timestamps: true });
 
         const filePath = sessionLog.start('tab-5', { hostName: 'stamped', address: 'x' });
         sessionLog.write('tab-5', 'one\r\ntwo\r\n');
         sessionLog.close('tab-5');
-        await settle();
+        await settle(filePath);
 
         const lines = body(readLog(filePath)).split('\n').filter(Boolean);
         assert.strictEqual(lines.length, 2, `expected two lines, got ${lines.length}`);
@@ -265,7 +245,7 @@ const body = (text) => text.split('\n').filter(line => !line.startsWith('#')).jo
         }
     });
 
-    await checkAsync('a session written across two chunks is stamped once per line', async () => {
+    test('a session written across two chunks is stamped once per line', async () => {
         sessionLog.setConfig({ format: 'plain', timestamps: true });
 
         const filePath = sessionLog.start('tab-6', { hostName: 'partial', address: 'x' });
@@ -273,14 +253,14 @@ const body = (text) => text.split('\n').filter(line => !line.startsWith('#')).jo
         sessionLog.write('tab-6', 'half');
         sessionLog.write('tab-6', '-line\r\n');
         sessionLog.close('tab-6');
-        await settle();
+        await settle(filePath);
 
         const lines = body(readLog(filePath)).split('\n').filter(Boolean);
         assert.strictEqual(lines.length, 1, `expected one line, got ${lines.length}`);
         assert.ok(/^\[[^\]]+\] half-line$/.test(lines[0]), `unexpected: ${JSON.stringify(lines[0])}`);
     });
 
-    await checkAsync('writes nothing at all while recording is off', async () => {
+    test('writes nothing at all while recording is off', async () => {
         sessionLog.setConfig({ enabled: false });
 
         assert.strictEqual(sessionLog.start('tab-7', { hostName: 'ignored', address: 'x' }), null);
@@ -290,7 +270,7 @@ const body = (text) => text.split('\n').filter(line => !line.startsWith('#')).jo
         assert.strictEqual(sessionLog.status('tab-7').recording, false);
     });
 
-    await checkAsync('records one session on request while the setting is off', async () => {
+    test('records one session on request while the setting is off', async () => {
         const filePath = sessionLog.start('tab-8', { hostName: 'forced', address: 'x', force: true });
         assert.ok(filePath, 'force opens a log even with the setting off');
 
@@ -300,26 +280,26 @@ const body = (text) => text.split('\n').filter(line => !line.startsWith('#')).jo
 
         sessionLog.write('tab-8', 'captured\r\n');
         sessionLog.close('tab-8', { reason: 'stopped' });
-        await settle();
+        await settle(filePath);
 
         const text = readLog(filePath);
         assert.ok(body(text).includes('captured'));
         assert.ok(text.includes('Stopped from the session'), 'the reason is recorded');
     });
 
-    await checkAsync('turning recording off closes what is open', async () => {
+    test('turning recording off closes what is open', async () => {
         sessionLog.setConfig({ enabled: true, directory: userData });
         const filePath = sessionLog.start('tab-9', { hostName: 'closing', address: 'x' });
         assert.strictEqual(sessionLog.status('tab-9').recording, true);
 
         sessionLog.setConfig({ enabled: false });
-        await settle();
+        await settle(filePath);
 
         assert.strictEqual(sessionLog.status('tab-9').recording, false);
         assert.ok(readLog(filePath).includes('Recording turned off'), 'the reason is recorded');
     });
 
-    await checkAsync('lists what is on disk, newest first', async () => {
+    test('lists what is on disk, newest first', async () => {
         const { files } = sessionLog.list({ limit: 50 });
         assert.ok(files.length >= 5, `expected several logs, found ${files.length}`);
         for (let index = 1; index < files.length; index++) {
@@ -330,7 +310,7 @@ const body = (text) => text.split('\n').filter(line => !line.startsWith('#')).jo
         }
     });
 
-    await checkAsync('never records a password the shell did not echo', async () => {
+    test('never records a password the shell did not echo', async () => {
         // The transcript is fed only what the *server* sent. A `sudo` prompt
         // echoes nothing, so the password typed into it cannot reach the file;
         // this is the guarantee that makes transcripts safe to keep at all.
@@ -341,18 +321,16 @@ const body = (text) => text.split('\n').filter(line => !line.startsWith('#')).jo
         // Whatever was typed never comes through `write`; only the server's reply.
         sessionLog.write('tab-10', '\r\nSorry, try again.\r\n');
         sessionLog.close('tab-10');
-        await settle();
+        await settle(filePath);
 
         const text = readLog(filePath);
         assert.ok(text.includes('[sudo] password for bradp:'), 'the prompt is there');
         assert.ok(!text.includes('hunter2'), 'nothing typed at it could be');
     });
+});
 
-    /* ---------------- choosing what to record ---------------- */
-
-    console.log('\nchoosing what to record');
-
-    await checkAsync('skips a protocol turned off, records the rest', async () => {
+describe('choosing what to record', () => {
+    test('skips a protocol turned off, records the rest', async () => {
         sessionLog.setConfig({ enabled: true, protocols: { ssh: true, telnet: false, serial: true } });
 
         assert.strictEqual(
@@ -364,20 +342,20 @@ const body = (text) => text.split('\n').filter(line => !line.startsWith('#')).jo
         const filePath = sessionLog.start('tab-12', { hostName: 'router', address: 'x', protocol: 'ssh' });
         assert.ok(filePath, 'ssh is still on');
         sessionLog.close('tab-12');
-        await settle();
+        await settle(filePath);
         assert.ok(readLog(filePath).includes('# protocol: ssh'), 'the header names the protocol');
     });
 
-    await checkAsync('force records a protocol the blanket setting skips', async () => {
+    test('force records a protocol the blanket setting skips', async () => {
         const filePath = sessionLog.start('tab-13', {
             hostName: 'forced-telnet', address: 'x', protocol: 'telnet', force: true,
         });
         assert.ok(filePath, 'the header control speaks for this one session');
         sessionLog.close('tab-13');
-        await settle();
+        await settle(filePath);
     });
 
-    check('a protocol this module has never heard of is recorded', () => {
+    test('a protocol this module has never heard of is recorded', () => {
         // The safe failure for an audit trail is a transcript nobody asked
         // for, not a gap.
         const filePath = sessionLog.start('tab-14', { hostName: 'future', address: 'x', protocol: 'moon-modem' });
@@ -385,7 +363,7 @@ const body = (text) => text.split('\n').filter(line => !line.startsWith('#')).jo
         sessionLog.close('tab-14');
     });
 
-    check('sanitize keeps unknown protocol keys out and unmentioned ones on', () => {
+    test('sanitize keeps unknown protocol keys out and unmentioned ones on', () => {
         const config = sessionLog.sanitize({ protocols: { telnet: false, bogus: true } });
         assert.strictEqual(config.protocols.telnet, false);
         assert.strictEqual(config.protocols.ssh, true, 'unmentioned stays on');
@@ -393,20 +371,18 @@ const body = (text) => text.split('\n').filter(line => !line.startsWith('#')).jo
         assert.ok(!('bogus' in config.protocols));
     });
 
-    check('sanitize clamps the retention numbers', () => {
+    test('sanitize clamps the retention numbers', () => {
         assert.strictEqual(sessionLog.sanitize({ retentionDays: -3 }).retentionDays, 0);
         assert.strictEqual(sessionLog.sanitize({ retentionDays: '30' }).retentionDays, 30);
         assert.strictEqual(sessionLog.sanitize({ retentionDays: 2.9 }).retentionDays, 2);
         assert.strictEqual(sessionLog.sanitize({ maxTotalMB: 'lots' }).maxTotalMB, 0);
     });
+});
 
-    /* ---------------- retention ---------------- */
-
-    console.log('\nretention');
-
+describe('retention', () => {
     const DAY = 24 * 60 * 60 * 1000;
 
-    await checkAsync('deletes transcripts older than the retention window', async () => {
+    test('deletes transcripts older than the retention window', async () => {
         sessionLog.setConfig({
             enabled: true,
             protocols: { ssh: true, telnet: true, serial: true },
@@ -426,12 +402,13 @@ const body = (text) => text.split('\n').filter(line => !line.startsWith('#')).jo
         sessionLog.setConfig({ retentionDays: 0 });
     });
 
-    await checkAsync('never deletes a transcript still being written', async () => {
+    test('never deletes a transcript still being written', async () => {
         const filePath = sessionLog.start('tab-15', { hostName: 'live', address: 'x' });
         // start() opens its write stream asynchronously, so the file may not
-        // exist on disk the instant this call returns — wait for it, the same
-        // way every other async assertion in this file does.
-        await settle();
+        // exist on disk the instant this call returns — wait for it. The session
+        // is deliberately left open here, so this waits for existence only, not
+        // for the closing line `settle()` looks for.
+        await settleOpen(filePath);
         const old = new Date(Date.now() - 10 * DAY);
         fs.utimesSync(filePath, old, old);
 
@@ -440,10 +417,10 @@ const body = (text) => text.split('\n').filter(line => !line.startsWith('#')).jo
 
         sessionLog.close('tab-15');
         sessionLog.setConfig({ retentionDays: 0 });
-        await settle();
+        await settle(filePath);
     });
 
-    await checkAsync('deletes the oldest transcripts once the folder is over its cap', async () => {
+    test('deletes the oldest transcripts once the folder is over its cap', async () => {
         const newer = path.join(userData, 'cap-newer_2026-01-01_000000.log');
         const older = path.join(userData, 'cap-older_2026-01-01_000000.log');
         fs.writeFileSync(newer, 'x'.repeat(700 * 1024));
@@ -461,6 +438,4 @@ const body = (text) => text.split('\n').filter(line => !line.startsWith('#')).jo
         sessionLog.setConfig({ maxTotalMB: 0 });
         fs.rmSync(newer, { force: true });
     });
-
-    console.log(`\n${passed} checks passed`);
-})();
+});

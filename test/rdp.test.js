@@ -23,6 +23,7 @@ const fs = require('fs');
 const os = require('os');
 const assert = require('assert');
 const { PassThrough } = require('stream');
+const { describe, test } = require('node:test');
 
 const ROOT = path.join(__dirname, '..', 'src', 'main');
 
@@ -51,31 +52,6 @@ const fresh = (name) => {
         if (key.includes(`${path.sep}main${path.sep}`)) delete require.cache[key];
     }
     return require(path.join(ROOT, name));
-};
-
-let passed = 0;
-const check = (label, fn) => {
-    try {
-        fn();
-        console.log(`  ok   ${label}`);
-        passed++;
-    } catch (error) {
-        console.log(`  FAIL ${label}`);
-        console.log(`       ${error.message}`);
-        process.exitCode = 1;
-    }
-};
-
-const checkAsync = async (label, fn) => {
-    try {
-        await fn();
-        console.log(`  ok   ${label}`);
-        passed++;
-    } catch (error) {
-        console.log(`  FAIL ${label}`);
-        console.log(`       ${error.message}`);
-        process.exitCode = 1;
-    }
 };
 
 /**
@@ -109,14 +85,12 @@ function buildRequest({ version = 3390, destination = 'srv:3389', x224 = Buffer.
     ]));
 }
 
-async function run() {
-    /* ---------------- RDCleanPath ---------------- */
+/* ---------------- RDCleanPath ---------------- */
 
-    console.log('\nRDCleanPath');
+const rdcleanpath = fresh('rdcleanpath.js');
 
-    const rdcleanpath = fresh('rdcleanpath.js');
-
-    check('parses a request the client would send', () => {
+describe('RDCleanPath', () => {
+    test('parses a request the client would send', () => {
         const request = rdcleanpath.parseRequest(
             buildRequest({ destination: '10.0.0.5:3389', x224: Buffer.from('030000130ee0', 'hex') })
         );
@@ -124,14 +98,14 @@ async function run() {
         assert.strictEqual(request.x224ConnectionRequest.toString('hex'), '030000130ee0');
     });
 
-    check('refuses a version it does not implement', () => {
+    test('refuses a version it does not implement', () => {
         assert.throws(
             () => rdcleanpath.parseRequest(buildRequest({ version: 1 })),
             /Unsupported RDCleanPath version/
         );
     });
 
-    check('refuses a request with no X.224 PDU', () => {
+    test('refuses a request with no X.224 PDU', () => {
         // Same shape, minus the [6] field.
         const truncated = Buffer.concat([
             Buffer.from([0x30, 0x0a, 0xa0, 0x05, 0x02, 0x03]),
@@ -141,12 +115,12 @@ async function run() {
         assert.throws(() => rdcleanpath.parseRequest(truncated));
     });
 
-    check('rejects a truncated PDU rather than reading past it', () => {
+    test('rejects a truncated PDU rather than reading past it', () => {
         const full = buildRequest();
         assert.throws(() => rdcleanpath.parseRequest(full.subarray(0, full.length - 4)));
     });
 
-    check('round-trips a response through the long-form length', () => {
+    test('round-trips a response through the long-form length', () => {
         // A real certificate is well past 127 bytes, which is where DER stops
         // using the short form. This is the case the encoder has to get right.
         const cert = Buffer.alloc(900, 0xab);
@@ -161,7 +135,7 @@ async function run() {
         assert.ok(response.includes(cert), 'the certificate should survive');
     });
 
-    check('builds an error PDU', () => {
+    test('builds an error PDU', () => {
         const pdu = rdcleanpath.buildError(rdcleanpath.ERROR_GENERAL, 502);
         assert.strictEqual(pdu[0], 0x30);
         assert.ok(pdu.length > 8);
@@ -172,7 +146,7 @@ async function run() {
     // `set_cursor_style_callback missing` were why RDP could not connect at all.
     // The list is read out of the module rather than written down here, so a
     // version that requires something new fails this instead of a user's pane.
-    check('every field IronRDP requires of a session is supplied', () => {
+    test('every field IronRDP requires of a session is supplied', () => {
         const wasm = fs.readFileSync(
             path.join(__dirname, '..', 'node_modules', 'ironrdp-wasm', 'pkg', 'rdp_client_bg.wasm')
         ).toString('latin1');
@@ -212,18 +186,18 @@ async function run() {
         );
     });
 
-    check('splits host and port, including IPv6', () => {
+    test('splits host and port, including IPv6', () => {
         assert.deepStrictEqual(rdcleanpath.parseDestination('host:3390'), { host: 'host', port: 3390 });
         assert.deepStrictEqual(rdcleanpath.parseDestination('host'), { host: 'host', port: 3389 });
         assert.deepStrictEqual(rdcleanpath.parseDestination('[::1]:3391'), { host: '::1', port: 3391 });
     });
+});
 
-    /* ---------------- TPKT framing ---------------- */
+/* ---------------- TPKT framing ---------------- */
 
-    console.log('\nTPKT framing');
+const rdp = fresh('rdp.js');
 
-    const rdp = fresh('rdp.js');
-
+describe('TPKT framing', () => {
     /* ------------------------------------------------------------------ *
      * The certificate fallback
      *
@@ -240,7 +214,7 @@ async function run() {
      * edit could quietly undo it.
      * ------------------------------------------------------------------ */
 
-    check('the fallback offers only RSA key exchange', () => {
+    test('the fallback offers only RSA key exchange', () => {
         const suites = rdp.RSA_KEY_EXCHANGE.split(':');
         assert.ok(suites.length > 0, 'no cipher suites offered');
 
@@ -254,7 +228,7 @@ async function run() {
         }
     });
 
-    check('only a key-usage refusal triggers the fallback', () => {
+    test('only a key-usage refusal triggers the fallback', () => {
         assert.ok(rdp.isKeyUsageRefusal(
             new Error('TLS handshake failed: error:1000012e:SSL routines:'
                 + 'OPENSSL_internal:KEY_USAGE_BIT_INCORRECT')
@@ -272,8 +246,7 @@ async function run() {
         assert.ok(!rdp.isKeyUsageRefusal(undefined));
     });
 
-
-    await checkAsync('reads a frame that arrives in one chunk', async () => {
+    test('reads a frame that arrives in one chunk', async () => {
         const stream = new PassThrough();
         const promise = rdp.readTpkt(stream, 1000);
         stream.write(Buffer.from([3, 0, 0, 6, 0xaa, 0xbb]));
@@ -283,7 +256,7 @@ async function run() {
         assert.strictEqual(rest.length, 0);
     });
 
-    await checkAsync('reads a frame split across chunks', async () => {
+    test('reads a frame split across chunks', async () => {
         const stream = new PassThrough();
         const promise = rdp.readTpkt(stream, 1000);
 
@@ -300,7 +273,7 @@ async function run() {
         assert.strictEqual(pdu.toString('hex'), '0300000801020304');
     });
 
-    await checkAsync('hands back whatever followed the frame', async () => {
+    test('hands back whatever followed the frame', async () => {
         const stream = new PassThrough();
         const promise = rdp.readTpkt(stream, 1000);
         stream.write(Buffer.from([3, 0, 0, 5, 0x99, 0xde, 0xad]));
@@ -310,7 +283,7 @@ async function run() {
         assert.strictEqual(rest.toString('hex'), 'dead');
     });
 
-    await checkAsync('rejects something that is not TPKT', async () => {
+    test('rejects something that is not TPKT', async () => {
         const stream = new PassThrough();
         const promise = rdp.readTpkt(stream, 1000);
         stream.write(Buffer.from([0x16, 0x03, 0x01, 0x00]));
@@ -318,32 +291,32 @@ async function run() {
         await assert.rejects(promise, /does not look like an RDP server/);
     });
 
-    await checkAsync('gives up on a server that says nothing', async () => {
+    test('gives up on a server that says nothing', async () => {
         const stream = new PassThrough();
         await assert.rejects(rdp.readTpkt(stream, 40), /did not answer in time/);
     });
 
-    await checkAsync('fails rather than hangs when the server hangs up', async () => {
+    test('fails rather than hangs when the server hangs up', async () => {
         const stream = new PassThrough();
         const promise = rdp.readTpkt(stream, 1000);
         stream.end();
 
         await assert.rejects(promise, /closed the connection/);
     });
+});
 
-    /* ---------------- Config ---------------- */
+/* ---------------- Config ---------------- */
 
-    console.log('\nDesktop config');
+const config = fresh('desktop-config.js');
 
-    const config = fresh('desktop-config.js');
-
-    check('a record written before RDP existed is still VNC', () => {
+describe('Desktop config', () => {
+    test('a record written before RDP existed is still VNC', () => {
         const desktop = config.normalizeDesktop({ enabled: true, host: '127.0.0.1' });
         assert.strictEqual(desktop.protocol, 'vnc');
         assert.strictEqual(desktop.port, 5900);
     });
 
-    check('an RDP record defaults to 3389', () => {
+    test('an RDP record defaults to 3389', () => {
         const desktop = config.normalizeDesktop({ enabled: true, protocol: 'rdp' });
         assert.strictEqual(desktop.port, 3389);
     });
@@ -351,65 +324,65 @@ async function run() {
     // The bug this fixes: RDP inherited VNC's tunnelled default, which demands
     // an SSH server on a machine that is usually Windows and has none. The
     // desktop was then unreachable and the pane's Desktop tab stayed disabled.
-    check('RDP dials directly by default, rather than through SSH', () => {
+    test('RDP dials directly by default, rather than through SSH', () => {
         assert.strictEqual(
             config.normalizeDesktop({ enabled: true, protocol: 'rdp' }).transport,
             'direct'
         );
     });
 
-    check('VNC still tunnels by default', () => {
+    test('VNC still tunnels by default', () => {
         assert.strictEqual(config.normalizeDesktop({ enabled: true }).transport, 'tunnel');
     });
 
-    check('an explicit transport is not overridden', () => {
+    test('an explicit transport is not overridden', () => {
         assert.strictEqual(
             config.normalizeDesktop({ protocol: 'rdp', transport: 'tunnel' }).transport,
             'tunnel'
         );
     });
 
-    check('the desktop-only flag round-trips', () => {
+    test('the desktop-only flag round-trips', () => {
         assert.strictEqual(config.normalizeDesktop({ protocol: 'rdp', only: true }).only, true);
         assert.strictEqual(config.normalizeDesktop({ protocol: 'rdp' }).only, false);
     });
 
-    check('an explicit port survives normalisation', () => {
+    test('an explicit port survives normalisation', () => {
         const desktop = config.normalizeDesktop({ protocol: 'rdp', port: 13389 });
         assert.strictEqual(desktop.port, 13389);
     });
 
-    check('an unknown protocol falls back rather than being stored', () => {
+    test('an unknown protocol falls back rather than being stored', () => {
         assert.strictEqual(config.normalizeDesktop({ protocol: 'telnet' }).protocol, 'vnc');
     });
 
-    check('RDP will not open without a username', () => {
+    test('RDP will not open without a username', () => {
         const desktop = config.normalizeDesktop({
             enabled: true, protocol: 'rdp', host: '10.0.0.5',
         });
         assert.match(config.validateDesktop(desktop), /username/i);
     });
 
-    check('RDP with a username validates', () => {
+    test('RDP with a username validates', () => {
         const desktop = config.normalizeDesktop({
             enabled: true, protocol: 'rdp', host: '10.0.0.5', username: 'Administrator',
         });
         assert.strictEqual(config.validateDesktop(desktop), '');
     });
 
-    check('VNC still does not require a username', () => {
+    test('VNC still does not require a username', () => {
         const desktop = config.normalizeDesktop({ enabled: true, host: '127.0.0.1' });
         assert.strictEqual(config.validateDesktop(desktop), '');
     });
+});
 
-    /* ---------------- The store ---------------- */
+/* ---------------- The store ---------------- */
 
-    console.log('\nStored credentials');
-
+describe('Stored credentials', () => {
     userData = fs.mkdtempSync(path.join(os.tmpdir(), 'cb-test-r-'));
     const store = fresh('store.js');
 
-    check('resolves the password belonging to the protocol', () => {
+    test('resolves the password belonging to the protocol', () => {
         const rdpHost = store.saveHost({
             name: 'win', host: '10.0.0.20', username: 'root',
             desktop: { enabled: true, protocol: 'rdp', host: '127.0.0.1', username: 'Administrator' },
@@ -423,7 +396,7 @@ async function run() {
         assert.strictEqual(resolved.username, 'Administrator');
     });
 
-    check('a direct desktop with no address of its own uses the host\'s', () => {
+    test('a direct desktop with no address of its own uses the host\'s', () => {
         const created = store.saveHost({
             name: 'vm', host: '192.168.1.50', username: '',
             desktop: {
@@ -439,7 +412,7 @@ async function run() {
         assert.strictEqual(config.validateDesktop(resolved), '');
     });
 
-    check('a tunnelled desktop still means the server\'s own loopback', () => {
+    test('a tunnelled desktop still means the server\'s own loopback', () => {
         const created = store.saveHost({
             name: 'lin2', host: '192.168.1.60', username: 'root',
             desktop: { enabled: true, protocol: 'vnc', transport: 'tunnel' },
@@ -450,7 +423,7 @@ async function run() {
         assert.strictEqual(store.resolveDesktop(created.id).host, '127.0.0.1');
     });
 
-    check('a VNC host still resolves the VNC password', () => {
+    test('a VNC host still resolves the VNC password', () => {
         const vncHost = store.saveHost({
             name: 'lin', host: '10.0.0.21', username: 'root',
             desktop: { enabled: true, protocol: 'vnc', host: '127.0.0.1' },
@@ -461,7 +434,7 @@ async function run() {
         assert.strictEqual(store.resolveDesktop(vncHost.id).password, 'vnc-secret');
     });
 
-    check('the RDP password never appears in a host record', () => {
+    test('the RDP password never appears in a host record', () => {
         const created = store.saveHost({
             name: 'win2', host: '10.0.0.22', username: 'root',
             desktop: { enabled: true, protocol: 'rdp', host: '127.0.0.1', username: 'Administrator' },
@@ -474,7 +447,7 @@ async function run() {
         assert.strictEqual(listed.rdpPassword, undefined);
     });
 
-    check('the RDP password is redacted from the activity log', () => {
+    test('the RDP password is redacted from the activity log', () => {
         // Plain `require`, not `fresh`: the latter clears every main module, so
         // it would hand back a different activity instance than the one the
         // store above is already writing to.
@@ -492,15 +465,4 @@ async function run() {
         // The edit is still recorded, just without the value.
         assert.ok(text.includes('rdpPassword'), 'the change itself should still be logged');
     });
-
-    console.log(`\n${passed} checks passed`);
-}
-
-run().then(() => {
-    // Any listener the bridge or a scripted server left behind would hold the
-    // process open, which would look like a hang rather than a failure.
-    setTimeout(() => process.exit(process.exitCode || 0), 50);
-}).catch((error) => {
-    console.error('\nthe suite itself failed:', error);
-    process.exit(1);
 });
