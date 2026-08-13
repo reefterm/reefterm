@@ -324,7 +324,7 @@ describe('handshake against a scripted server', () => {
 
 /* ---------------- the bridge, end to end ---------------- */
 
-const store = fresh('store.js');
+const store = fresh('store');
 // vnc.js and store.js have to be the same instances the bridge uses, so the
 // module cache is not cleared again between here and the end of the file.
 const bridge = require(path.join(ROOT, 'vnc.js'));

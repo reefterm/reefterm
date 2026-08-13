@@ -36,7 +36,7 @@ Module._load = function (request, parent, isMain) {
     return realLoad.call(this, request, parent, isMain);
 };
 
-const store = require(path.join(ROOT, 'store.js'));
+const store = require(path.join(ROOT, 'store'));
 const { proxyJumpAliases } = require(path.join(ROOT, 'ssh-config.js'));
 
 /** A saved SSH host, with only the fields a chain reads. */

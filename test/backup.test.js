@@ -113,7 +113,7 @@ describe('backup envelope', () => {
 /* ---------------- export -> restore ---------------- */
 
 describe('export and restore', () => {
-    const storeA = fresh('store.js');
+    const storeA = fresh('store');
     const knownA = fresh('known-hosts.js');
 
     storeA.saveHost({
@@ -153,7 +153,7 @@ describe('export and restore', () => {
 
     // A second machine: new user-data directory, nothing in it.
     userData = fs.mkdtempSync(path.join(os.tmpdir(), 'cb-test-b-'));
-    const storeB = fresh('store.js');
+    const storeB = fresh('store');
     const knownB = fresh('known-hosts.js');
     const backupB = fresh('backup.js');
 

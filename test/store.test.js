@@ -49,7 +49,7 @@ function freshStore() {
         for (const key of Object.keys(require.cache)) {
             if (key.includes(`${path.sep}main${path.sep}`)) delete require.cache[key];
         }
-        return { store: require(path.join(ROOT, 'store.js')), userData };
+        return { store: require(path.join(ROOT, 'store')), userData };
     } finally {
         Module._load = realLoad;
     }
@@ -466,7 +466,7 @@ describe('store: migration and disk fallback', () => {
             for (const key of Object.keys(require.cache)) {
                 if (key.includes(`${path.sep}main${path.sep}`)) delete require.cache[key];
             }
-            store = require(path.join(ROOT, 'store.js'));
+            store = require(path.join(ROOT, 'store'));
         } finally {
             Mod._load = realLoad;
         }
@@ -509,7 +509,7 @@ describe('store: migration and disk fallback', () => {
             for (const key of Object.keys(require.cache)) {
                 if (key.includes(`${path.sep}main${path.sep}`)) delete require.cache[key];
             }
-            reloaded = require(path.join(ROOT, 'store.js'));
+            reloaded = require(path.join(ROOT, 'store'));
         } finally {
             Mod._load = realLoad;
         }

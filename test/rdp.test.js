@@ -380,7 +380,7 @@ describe('Desktop config', () => {
 
 describe('Stored credentials', () => {
     userData = fs.mkdtempSync(path.join(os.tmpdir(), 'cb-test-r-'));
-    const store = fresh('store.js');
+    const store = fresh('store');
 
     test('resolves the password belonging to the protocol', () => {
         const rdpHost = store.saveHost({

@@ -56,7 +56,7 @@ Module._load = function (request, parent, isMain) {
     return realLoad.call(this, request, parent, isMain);
 };
 
-const store = require(path.join(ROOT, 'store.js'));
+const store = require(path.join(ROOT, 'store'));
 const byId = (id) => store.getHosts().find(h => h.id === id);
 const backup = require(path.join(ROOT, 'backup.js'));
 const snapshot = require(path.join(ROOT, 'cloud-snapshot.js'));

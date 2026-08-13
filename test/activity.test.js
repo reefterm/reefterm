@@ -207,7 +207,7 @@ describe('change detection', () => {
 
 describe('store integration', () => {
     userData = fs.mkdtempSync(path.join(os.tmpdir(), 'cb-test-act-store-'));
-    const store = fresh('store.js');
+    const store = fresh('store');
     const log = require(path.join(ROOT, 'activity.js'));
 
     test('creating a host records who added what', () => {
