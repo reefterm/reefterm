@@ -1,18 +1,17 @@
 /**
  * The boundary between preload.js's exposed `window.api` and the channels
- * ipc/ registers. Splitting both of them into per-feature files (see
- * src/main/ipc/ and src/main/preload/) removed the one thing that used to
- * make a channel-name typo impossible to miss by accident: everything living
- * in the same two files, side by side. This is that safety net instead -
- * every channel preload can actually call has to have a matching handler
- * registered in ipc, or a typo on either side silently strands a feature
- * (the renderer call rejects with "No handler registered", the kind of
- * failure that only shows up when someone clicks the button).
- *
- * Runs both sides for real, under a stubbed `electron`, rather than grepping
- * for channel strings: a call spanning more than one line (there is exactly
- * one, sync-connection-recover-complete) defeats a regex but not an actual
- * function call.
+ * ipc/ registers. ipc.js is split into per-feature files (see src/main/ipc/);
+ * preload.js is not, and cannot be the same way - Electron's sandboxed
+ * preload (`sandbox: true` in main.js) can only require Node builtins and
+ * `electron` itself, not arbitrary local files, so a multi-file preload
+ * needs a bundler in front of it, which this project does not have. That
+ * makes this test worth more, not less: with everything ipc.js registers
+ * spread across nineteen files and everything preload.js calls sitting in
+ * one, a channel-name typo on either side has no nearby twin to catch it by
+ * eye. This runs both sides for real, under a stubbed `electron`, rather
+ * than grepping for channel strings: a call spanning more than one line
+ * (there is exactly one, sync-connection-recover-complete) defeats a regex
+ * but not an actual function call.
  */
 const path = require('path');
 const os = require('os');
@@ -29,7 +28,7 @@ class FakeEmitter {
 }
 
 /** Everything both preload.js's tree and ipc/'s tree touch on `electron`. */
-function buildElectronStub({ onRegister, onCall }) {
+function buildElectronStub({ onRegister, onCall, onExpose = () => {} }) {
     return {
         app: Object.assign(new FakeEmitter(), {
             getPath: () => os.tmpdir(),
@@ -50,7 +49,7 @@ function buildElectronStub({ onRegister, onCall }) {
             removeListener: () => {},
             setMaxListeners: () => {},
         },
-        contextBridge: { exposeInMainWorld: () => {} },
+        contextBridge: { exposeInMainWorld: (name, api) => onExpose(name, api) },
         webUtils: { getPathForFile: () => '' },
         dialog: {
             showOpenDialog: async () => ({ canceled: true }),
@@ -118,12 +117,16 @@ describe('ipc/preload channel contract', () => {
             .register(() => null);
 
         const invoked = new Set();
-        // preload.js calls contextBridge.exposeInMainWorld at require time, so
-        // the whole tree runs just by requiring it; walk the module's own
-        // namespace objects by re-requiring each preload/* file directly
-        // instead of trying to recover the exposed object from the stub.
-        const preloadDir = path.join(ROOT, 'preload');
-        const stub = buildElectronStub({ onRegister: () => {}, onCall: (c) => invoked.add(c) });
+        // preload.js calls contextBridge.exposeInMainWorld('api', {...}) at
+        // require time as a side effect rather than exporting anything, so
+        // the stub captures what it was called with and that object is what
+        // gets walked.
+        let exposedApi = null;
+        const stub = buildElectronStub({
+            onRegister: () => {},
+            onCall: (c) => invoked.add(c),
+            onExpose: (name, api) => { exposedApi = api; },
+        });
         const realLoad = Module._load;
         Module._load = function (request, parent, isMain) {
             if (request === 'electron') return stub;
@@ -133,14 +136,12 @@ describe('ipc/preload channel contract', () => {
             for (const key of Object.keys(require.cache)) {
                 if (key.includes(`${path.sep}main${path.sep}`)) delete require.cache[key];
             }
-            const fs = require('fs');
-            for (const file of fs.readdirSync(preloadDir)) {
-                if (file === 'channel.js' || !file.endsWith('.js')) continue;
-                callEveryFunction(require(path.join(preloadDir, file)));
-            }
+            require(path.join(ROOT, 'preload.js'));
         } finally {
             Module._load = realLoad;
         }
+        assert.ok(exposedApi, 'preload.js never called contextBridge.exposeInMainWorld');
+        callEveryFunction(exposedApi);
 
         const orphaned = [...invoked].filter((channel) => !registered.has(channel));
         assert.deepStrictEqual(
