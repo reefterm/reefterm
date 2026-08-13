@@ -1,66 +1,63 @@
 import { memo, useCallback, useEffect, useState } from 'react';
-import { UserCircleIcon } from 'hugeicons-react';
+import { RefreshIcon } from 'hugeicons-react';
 
 /**
- * Who is signed in, at the foot of the sidebar.
+ * The sync connection, at the foot of the sidebar.
  *
- * Clicking it goes to Settings → Account rather than opening a menu of its own:
+ * Clicking it goes to Settings → Sync rather than opening a menu of its own:
  * everything you would want to do from here already lives on that page, and a
  * second place to disconnect is a second place to keep in step.
+ *
+ * This is a connection to an optional, self-hosted sync server, not an
+ * account this app manages -- the label below says "connected", never
+ * "signed in", to keep that distinction visible where the user sees it most.
  */
 
-const initial = (account) => {
-    const source = account?.name || account?.email || '';
-    return source.trim().charAt(0).toUpperCase() || '?';
-};
+const initial = (email) => (email || '').trim().charAt(0).toUpperCase() || '?';
 
-function SidebarAccount({ onNavChange }) {
+function SidebarSync({ onNavChange }) {
     const [status, setStatus] = useState(null);
 
     useEffect(() => {
-        window.api.account.status().then(setStatus);
+        window.api.syncConnection.status().then(setStatus);
     }, []);
 
-    // Signing in happens on the settings page, not here.
-    useEffect(() => window.api.account.onState(setStatus), []);
+    // Connecting happens on the settings page, not here.
+    useEffect(() => window.api.syncConnection.onState(setStatus), []);
 
     const open = useCallback(() => {
         // The settings panel picks its page up from here when it mounts.
-        localStorage.setItem('settings.category', 'account');
+        localStorage.setItem('settings.category', 'sync');
         onNavChange('settings');
     }, [onNavChange]);
 
     if (!status) return null;
 
-    const label = status.connected
-        ? (status.account?.name || status.account?.email || 'CloudBlast account')
-        : 'Sign in';
-
-    const sub = status.connected
-        ? status.account?.email
-        : 'Connect your CloudBlast account';
+    const connected = status.connected && status.unlocked;
+    const label = connected ? (status.email || 'Sync connected') : 'Set up sync';
+    const sub = connected ? status.email : 'Optional -- sync your setup to a server you trust';
 
     return (
         <button
             type="button"
             onClick={open}
-            title={status.connected ? `Signed in as ${status.account?.email || label}` : 'Connect CloudBlast'}
+            title={connected ? `Sync connected as ${status.email}` : 'Set up sync'}
             className="mt-auto shrink-0 flex items-center gap-2.5 w-full px-2.5 py-2 rounded-xl text-left
                 outline-none transition-colors
                 text-gray-600 dark:text-gray-400
                 hover:bg-gray-900/[0.04] dark:hover:bg-surface-raised
                 focus-visible:ring-2 focus-visible:ring-gray-900/20 dark:focus-visible:ring-white/25"
         >
-            {status.connected ? (
+            {connected ? (
                 <span
                     aria-hidden="true"
                     className="w-7 h-7 shrink-0 rounded-full flex items-center justify-center
                         text-xs font-semibold bg-gray-900 text-white dark:bg-white dark:text-gray-900"
                 >
-                    {initial(status.account)}
+                    {initial(status.email)}
                 </span>
             ) : (
-                <UserCircleIcon size={26} strokeWidth={1.5} className="shrink-0" />
+                <RefreshIcon size={26} strokeWidth={1.5} className="shrink-0" />
             )}
 
             <span className="min-w-0 flex-1">
@@ -75,4 +72,4 @@ function SidebarAccount({ onNavChange }) {
     );
 }
 
-export default memo(SidebarAccount);
+export default memo(SidebarSync);

@@ -26,19 +26,20 @@ const electronStub = {
 };
 
 /**
- * A stand-in console. Stores exactly what the real one does -- the payload as
- * an opaque string -- so a push/pull pair that disagrees about serialisation
- * shows up here rather than on a second device.
+ * A stand-in sync server. Stores the payload exactly as reefterm/sync-server
+ * does -- as a real JSON value, not a stringified blob -- so a push and a
+ * pull that disagree about that would show up here rather than on a second
+ * device.
  */
 const remote = { key: Buffer.alloc(32, 3).toString('base64'), payload: null, revision: 0 };
 
-const accountStub = {
-    status: () => ({ connected: true }),
+const syncConnectionStub = {
+    status: () => ({ connected: true, unlocked: true }),
     deviceName: () => 'test device',
-    snapshotKey: async () => remote.key,
+    getSyncKey: () => remote.key,
     snapshotMeta: async () => ({ exists: Boolean(remote.payload), revision: remote.revision }),
     snapshotGet: async () =>
-        remote.payload ? { ...remote, updated_at: null, device_name: 'test device' } : null,
+        (remote.payload ? { payload: remote.payload, revision: remote.revision } : null),
     snapshotPut: async ({ payload, baseRevision }) => {
         if (baseRevision !== remote.revision) return { conflict: true, revision: remote.revision };
         remote.payload = payload;
@@ -50,7 +51,7 @@ const accountStub = {
 const realLoad = Module._load;
 Module._load = function (request, parent, isMain) {
     if (request === 'electron') return electronStub;
-    if (request === './account') return accountStub;
+    if (request === './sync-connection') return syncConnectionStub;
     return realLoad.call(this, request, parent, isMain);
 };
 
@@ -172,11 +173,19 @@ const checkAsync = async (label, fn) => {
 };
 
 (async () => {
-    await checkAsync('reports being signed out rather than uploading nothing', async () => {
-        const connected = accountStub.status;
-        accountStub.status = () => ({ connected: false });
+    await checkAsync('reports being disconnected rather than uploading nothing', async () => {
+        const connected = syncConnectionStub.status;
+        syncConnectionStub.status = () => ({ connected: false, unlocked: false });
         const result = await snapshot.push();
-        accountStub.status = connected;
+        syncConnectionStub.status = connected;
+        assert.ok(result.skipped, JSON.stringify(result));
+    });
+
+    await checkAsync('reports being locked rather than uploading nothing', async () => {
+        const connected = syncConnectionStub.status;
+        syncConnectionStub.status = () => ({ connected: true, unlocked: false });
+        const result = await snapshot.push();
+        syncConnectionStub.status = connected;
         assert.ok(result.skipped, JSON.stringify(result));
     });
 
@@ -184,15 +193,17 @@ const checkAsync = async (label, fn) => {
 
     console.log('\ncloud snapshot: push and pull');
 
-    await checkAsync('pushes to the console', async () => {
+    await checkAsync('pushes to the server', async () => {
         const result = await snapshot.push();
         assert.ok(result.pushed, JSON.stringify(result));
-        assert.strictEqual(typeof remote.payload, 'string', 'the console was handed a non-string');
+        assert.strictEqual(typeof remote.payload, 'object', 'the server was handed something other than a real JSON value');
+        assert.strictEqual(remote.payload.format, 'reefterm-snapshot', 'the stored payload is not a sealed envelope');
     });
 
-    // What a second device sees: the payload as the console stored it. This is
-    // the seam a push that serialises and a pull that does not would fall
-    // through, and it did.
+    // What a second device sees: the payload exactly as the server stored it.
+    // This is the seam a push and a pull that disagree about serialisation
+    // would fall through, and it did before the server stopped treating the
+    // payload as an opaque string.
     await checkAsync('pulls back what it pushed', async () => {
         store.deleteHost('mine-1');
         assert.strictEqual(byId('mine-1'), undefined, 'setup failed');
@@ -243,15 +254,15 @@ const checkAsync = async (label, fn) => {
     });
 
     /**
-     * Signing out and into a different account.
+     * Disconnecting from one server and connecting to a different one.
      *
      * Without the reset, this device's revision is whatever the previous
-     * account reached, and the new account's snapshot -- which starts its own
-     * count from 1 -- looks older than something already seen. The pull that
-     * should restore it decides there is nothing to do, and the user sees an
-     * empty app with no error to explain it.
+     * connection reached, and the new connection's snapshot -- which starts
+     * its own count from 1 -- looks older than something already seen. The
+     * pull that should restore it decides there is nothing to do, and the
+     * user sees an empty app with no error to explain it.
      */
-    await checkAsync('a different account still restores after sign-out', async () => {
+    await checkAsync('a different connection still restores after disconnecting', async () => {
         // Push a few times so this device's revision climbs.
         await snapshot.push();
         await snapshot.push();
@@ -262,26 +273,29 @@ const checkAsync = async (label, fn) => {
         assert.strictEqual(snapshot.status().revision, 0, 'reset left a revision behind');
         assert.strictEqual(snapshot.status().enabled, true, 'reset should keep the preference');
 
-        // The new account: its own key, its own snapshot, revision 1.
+        // The new connection: its own key, its own snapshot, revision 1.
         const fresh = Buffer.alloc(32, 5).toString('base64');
         remote.key = fresh;
         remote.revision = 1;
-        remote.payload = JSON.stringify(backup.sealWithKey({
+        remote.payload = backup.sealWithKey({
             version: 1,
-            hosts: [{ id: 'other-account-host', name: 'their box', host: '10.1.2.3', username: 'them' }],
+            hosts: [{ id: 'other-server-host', name: 'their box', host: '10.1.2.3', username: 'them' }],
             folders: [], keys: [], snippets: [], knownHosts: {}, settings: null,
-        }, fresh));
+        }, fresh);
 
         const result = await snapshot.pull();
 
         assert.ok(!result.error, `pull failed: ${result.error}`);
         assert.ok(result.pulled, `nothing was pulled: ${JSON.stringify(result)}`);
-        assert.ok(byId('other-account-host'), 'the new account\'s host did not arrive');
+        assert.ok(byId('other-server-host'), 'the new connection\'s host did not arrive');
     });
 
     await checkAsync('a corrupted payload is reported, not applied', async () => {
         const good = remote.payload;
-        remote.payload = 'not json at all';
+        // Not a sealed envelope at all -- backup.unsealWithKey() throws on a
+        // format it does not recognise, which pull()'s own catch turns into
+        // a reported error rather than a crash or a silent no-op.
+        remote.payload = { not: 'a real envelope' };
         remote.revision += 1;
 
         const result = await snapshot.pull({ force: true });
@@ -290,9 +304,15 @@ const checkAsync = async (label, fn) => {
         assert.ok(result.error, 'a corrupt payload was accepted');
     });
 
-    await checkAsync('a push with no key provisioned reports rather than throwing', async () => {
+    await checkAsync('a push with no key available reports rather than throwing', async () => {
+        const getSyncKey = syncConnectionStub.getSyncKey;
+        syncConnectionStub.getSyncKey = () => null;
+
         const result = await snapshot.push();
+        syncConnectionStub.getSyncKey = getSyncKey;
+
         assert.ok(result.pushed || result.error || result.skipped, JSON.stringify(result));
+        assert.ok(!result.pushed, 'a push with no key available must not report success');
     });
 
     console.log(`\n${passed} checks passed${process.exitCode ? ', with failures above' : ''}\n`);

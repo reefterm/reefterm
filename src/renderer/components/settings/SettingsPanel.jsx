@@ -7,7 +7,7 @@ import AssistantPage from './pages/AssistantPage';
 import MonitoringPage from './pages/MonitoringPage';
 import LoggingPage from './pages/LoggingPage';
 import SecurityPage from './pages/SecurityPage';
-import AccountPage from './pages/AccountPage';
+import SyncPage from './pages/SyncPage';
 import BackupPage from './pages/BackupPage';
 import AboutPage from './pages/AboutPage';
 
@@ -20,7 +20,7 @@ const PAGES = {
     monitoring: MonitoringPage,
     logging: LoggingPage,
     security: SecurityPage,
-    account: AccountPage,
+    sync: SyncPage,
     backup: BackupPage,
     about: AboutPage,
 };

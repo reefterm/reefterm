@@ -7,7 +7,7 @@ import {
     ShieldKeyIcon,
     Archive01Icon,
     InformationCircleIcon,
-    UserCircleIcon,
+    RefreshIcon,
     AiMagicIcon,
     PulseRectangle01Icon,
 } from 'hugeicons-react';
@@ -27,7 +27,7 @@ export const SETTINGS_CATEGORIES = [
     { id: 'monitoring', icon: PulseRectangle01Icon },
     { id: 'logging', icon: FileEditIcon },
     { id: 'security', icon: ShieldKeyIcon },
-    { id: 'account', icon: UserCircleIcon },
+    { id: 'sync', icon: RefreshIcon },
     { id: 'backup', icon: Archive01Icon },
     { id: 'about', icon: InformationCircleIcon },
 ];

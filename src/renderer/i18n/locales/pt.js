@@ -286,7 +286,7 @@ export default {
     'settings.nav.monitoring': 'Monitorização',
     'settings.nav.logging': 'Registo',
     'settings.nav.security': 'Segurança',
-    'settings.nav.account': 'Conta',
+    'settings.nav.sync': 'Sincronização',
     'settings.nav.backup': 'Cópia de segurança',
     'settings.nav.about': 'Acerca',
 
@@ -678,37 +678,8 @@ export default {
     'settings.knownHosts.forgotHost': '{host} esquecido',
     'settings.knownHosts.forgotKey': 'Esquecida a chave {type} de {host}',
 
-    /* ---- Settings: Account ---- */
-    'settings.account.title': 'Conta',
-    'settings.account.fallbackName': 'Conta Reef Terminal',
-    'settings.account.yourAccount': 'a sua conta Reef Terminal',
-    'settings.account.connectedAs': 'Ligado como {account}',
-    'settings.account.disconnect': 'Desligar',
-    'settings.account.disconnecting': 'A desligar…',
-    'settings.account.disconnected': 'Conta desligada',
-    'settings.account.disconnectedLocally': 'Sessão terminada neste dispositivo, mas não foi '
-        + 'possível contactar a consola para revogar o acesso. Remova o dispositivo em '
-        + 'Definições → API.',
-    'settings.account.connect': 'Ligue a sua conta',
-    'settings.account.connectAction': 'Ligar',
-    'settings.account.connectDesc': 'Sincronize os seus servidores e faça cópia da sua configuração.',
-    'settings.account.unlockFirst': 'Desbloqueie a aplicação primeiro.',
-    'settings.account.waitingForBrowser': 'A aguardar o navegador…',
-    'settings.account.cloudBackup': 'Cópia na nuvem',
-    'settings.account.cloudBackupDesc': 'Os seus anfitriões, pastas, chaves e definições, guardados '
-        + 'na sua conta para os seus outros dispositivos.',
-    'settings.account.backupOn': 'A cópia na nuvem está ligada',
-    'settings.account.backupOff': 'A cópia na nuvem está desligada. O que já está guardado fica até '
-        + 'que o substitua.',
-    'settings.account.backedUp': 'Guardado na sua conta Reef Terminal',
-    'settings.account.saveNow': 'Guardar agora',
-    'settings.account.saving': 'A guardar…',
-    'settings.account.savedAgo': 'Guardado {when}',
-    'settings.account.notSavedYet': 'Ainda não guardado',
-    'settings.account.justNow': 'agora mesmo',
-    'settings.account.minutesAgo': 'há {count} min',
-    'settings.account.hoursAgo': 'há {count} h',
-    'settings.account.daysAgo': 'há {count} d',
+    /* ---- Settings: Sync ----
+     * Not yet translated -- falls back to English. See settings.sync.* in en.js. */
 
     /* ---- Settings: Backup ---- */
     'settings.backup.title': 'Cópia de segurança',

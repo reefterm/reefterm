@@ -8,7 +8,7 @@ import {
     Settings01Icon,
 } from 'hugeicons-react';
 import { APP_GUTTER, SIDEBAR_WIDTH } from '../lib/layout';
-import SidebarAccount from './SidebarAccount';
+import SidebarSync from './SidebarSync';
 import { useT } from '../i18n';
 
 const NAV_ITEMS = [
@@ -82,7 +82,7 @@ function Sidebar({ activeNav, onNavChange, isTerminalView }) {
                     </div>
                 ))}
 
-                <SidebarAccount onNavChange={onNavChange} />
+                <SidebarSync onNavChange={onNavChange} />
             </div>
         </nav>
     );

@@ -320,7 +320,7 @@ export default {
     'settings.nav.monitoring': 'Monitoring',
     'settings.nav.logging': 'Logging',
     'settings.nav.security': 'Security',
-    'settings.nav.account': 'Account',
+    'settings.nav.sync': 'Sync',
     'settings.nav.backup': 'Backup',
     'settings.nav.about': 'About',
 
@@ -719,37 +719,59 @@ export default {
     'settings.knownHosts.forgotKey': 'Forgot the {type} key for {host}',
 
     /* ---------------------------------------------------------------- *
-     * Settings: Account
+     * Settings: Sync
      * ---------------------------------------------------------------- */
-    'settings.account.title': 'Account',
-    'settings.account.fallbackName': 'Reef Terminal account',
-    'settings.account.yourAccount': 'your Reef Terminal account',
-    'settings.account.connectedAs': 'Connected as {account}',
-    'settings.account.disconnect': 'Disconnect',
-    'settings.account.disconnecting': 'Disconnecting…',
-    'settings.account.disconnected': 'Account disconnected',
-    'settings.account.disconnectedLocally': 'Signed out on this device, but the console could not '
-        + 'be reached to revoke access. Remove the device from Settings → API.',
-    'settings.account.connect': 'Connect your account',
-    'settings.account.connectAction': 'Connect',
-    'settings.account.connectDesc': 'Sync your servers and back up your setup.',
-    'settings.account.unlockFirst': 'Unlock the app first.',
-    'settings.account.waitingForBrowser': 'Waiting for browser…',
-    'settings.account.cloudBackup': 'Cloud backup',
-    'settings.account.cloudBackupDesc': 'Your hosts, folders, keys and settings, saved to your '
-        + 'account for your other devices.',
-    'settings.account.backupOn': 'Cloud backup is on',
-    'settings.account.backupOff': 'Cloud backup is off. What is already saved stays until you '
-        + 'replace it.',
-    'settings.account.backedUp': 'Backed up to your Reef Terminal account',
-    'settings.account.saveNow': 'Save now',
-    'settings.account.saving': 'Saving…',
-    'settings.account.savedAgo': 'Saved {when}',
-    'settings.account.notSavedYet': 'Not saved yet',
-    'settings.account.justNow': 'just now',
-    'settings.account.minutesAgo': '{count}m ago',
-    'settings.account.hoursAgo': '{count}h ago',
-    'settings.account.daysAgo': '{count}d ago',
+    'settings.sync.title': 'Sync',
+    'settings.sync.intro': 'Optional. Point this app at a self-hosted sync server -- your own, or '
+        + 'one you trust -- to keep your setup in step across devices, encrypted before it ever leaves this one.',
+    'settings.sync.serverTitle': 'Sync server',
+    'settings.sync.serverDesc': 'Enter the address of a self-hosted Reef Terminal sync server.',
+    'settings.sync.serverPlaceholder': 'https://sync.example.com',
+    'settings.sync.serverConnect': 'Connect',
+    'settings.sync.connectedTo': 'Connected to {server}',
+    'settings.sync.loginTab': 'Log in',
+    'settings.sync.registerTab': 'Create account',
+    'settings.sync.emailPlaceholder': 'Email address',
+    'settings.sync.passphrasePlaceholder': 'Passphrase',
+    'settings.sync.confirmPassphrasePlaceholder': 'Confirm passphrase',
+    'settings.sync.passphraseMismatch': 'The passphrases do not match',
+    'settings.sync.loginAction': 'Log in',
+    'settings.sync.registerAction': 'Create account',
+    'settings.sync.unlockTitle': 'Unlock your synced data',
+    'settings.sync.unlockDesc': 'Connected, but your passphrase is needed to decrypt your setup on this device.',
+    'settings.sync.unlockAction': 'Unlock',
+    'settings.sync.useRecoveryCode': 'Use a recovery code instead',
+    'settings.sync.recoveryCodePlaceholder': 'XXXX-XXXX-XXXX-XXXX-XXXX-XXXX',
+    'settings.sync.recoveryCodeTitle': 'Save your recovery code',
+    'settings.sync.recoveryCodeDesc': 'This is shown once. If you ever forget your passphrase, this '
+        + 'code is the only way back into your synced data -- store it somewhere safe.',
+    'settings.sync.recoveryCodeSaved': "I've saved this",
+    'settings.sync.disconnect': 'Disconnect',
+    'settings.sync.disconnecting': 'Disconnecting…',
+    'settings.sync.disconnected': 'Disconnected',
+    'settings.sync.disconnectedLocally': 'Disconnected on this device, but the server could not be '
+        + 'reached to revoke the session.',
+    'settings.sync.enableSync': 'Sync',
+    'settings.sync.enableSyncDesc': 'Your hosts, folders, keys and settings, encrypted here and '
+        + 'saved to the sync server for your other devices.',
+    'settings.sync.saveNow': 'Sync now',
+    'settings.sync.savedNow': 'Synced',
+    'settings.sync.syncOn': 'Sync is on',
+    'settings.sync.syncOff': 'Sync is off. What is already saved stays until you replace it.',
+    'settings.sync.saving': 'Syncing…',
+    'settings.sync.savedAgo': 'Synced {when}',
+    'settings.sync.notSavedYet': 'Not synced yet',
+    'settings.sync.changePassphraseTitle': 'Change passphrase',
+    'settings.sync.changePassphraseDesc': 'Changes both your login password and the key that '
+        + 'protects your synced data -- they are the same secret.',
+    'settings.sync.currentPassphrasePlaceholder': 'Current passphrase',
+    'settings.sync.newPassphrasePlaceholder': 'New passphrase',
+    'settings.sync.changePassphraseAction': 'Change passphrase',
+    'settings.sync.passphraseChanged': 'Passphrase changed',
+    'settings.sync.justNow': 'just now',
+    'settings.sync.minutesAgo': '{count}m ago',
+    'settings.sync.hoursAgo': '{count}h ago',
+    'settings.sync.daysAgo': '{count}d ago',
 
     /* ---------------------------------------------------------------- *
      * Settings: Backup

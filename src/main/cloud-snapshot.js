@@ -3,24 +3,21 @@ const fs = require('fs');
 const path = require('path');
 const store = require('./store');
 const knownHosts = require('./known-hosts');
-const account = require('./account');
+const syncConnection = require('./sync-connection');
 const backup = require('./backup');
 const vault = require('./vault');
 const activity = require('./activity');
 
 /**
  * The setup snapshot: this machine's saved hosts, folders, keys, snippets,
- * proxies, known hosts and terminal settings, encrypted and kept on the account
- * so signing in elsewhere reproduces it.
+ * proxies, known hosts and terminal settings, encrypted and kept on a
+ * self-hosted sync server so connecting elsewhere reproduces it.
  *
- * The blob is encrypted on this machine with AES-256-GCM, under a per-account
- * key the console issues and holds in an APP_KEY-encrypted column, so a stolen
- * database alone cannot open it.
- *
- * The key is server-issued rather than derived from a user secret, because this
- * client authenticates by OAuth and so never sees a password to derive one
- * from. Worth knowing before building on this: the threat model it covers is a
- * database breach, not a compromise of the application server.
+ * The blob is encrypted on this machine with AES-256-GCM, under the Sync
+ * Master Key (see sync-keys.js) -- a key this machine derives locally and
+ * that the server never sees in any form. That is the whole point of a
+ * self-hosted instance: the operator, even if it is someone else's server
+ * you don't otherwise trust, cannot read what it stores.
  */
 
 const SCHEMA_VERSION = 1;
@@ -61,12 +58,9 @@ function load() {
             lastPushAt: raw.lastPushAt || null,
             lastPullAt: raw.lastPullAt || null,
             lastError: raw.lastError || null,
-            key: raw.key ? vault.decryptSecret(raw.key) : '',
         };
     } catch {
-        state = {
-            enabled: true, revision: 0, lastPushAt: null, lastPullAt: null, lastError: null, key: '',
-        };
+        state = { enabled: true, revision: 0, lastPushAt: null, lastPullAt: null, lastError: null };
     }
 
     return state;
@@ -81,9 +75,6 @@ function persist() {
             lastPushAt: current.lastPushAt,
             lastPullAt: current.lastPullAt,
             lastError: current.lastError,
-            // The account key opens every snapshot this user has, so it is held
-            // under the vault like any other credential rather than in the clear.
-            key: current.key ? vault.encryptSecret(current.key) : '',
         }, null, 2), { mode: 0o600 });
     } catch (error) {
         console.error('Failed to save snapshot state:', error.message);
@@ -164,18 +155,14 @@ function apply(payload) {
  * Key
  * ------------------------------------------------------------------ */
 
+/**
+ * The Sync Master Key, already unlocked -- never fetched from the server,
+ * which never holds it in any usable form. If this throws, the fix is to
+ * unlock (passphrase or recovery code), not to retry the network.
+ */
 async function ensureKey() {
-    const current = load();
-
-    if (current.key) return current.key;
-
-    const key = await account.snapshotKey();
-
-    if (!key) throw new Error('The console did not return an account key');
-
-    state = { ...current, key };
-    persist();
-
+    const key = syncConnection.getSyncKey();
+    if (!key) throw new Error('Unlock your synced data first');
     return key;
 }
 
@@ -185,8 +172,12 @@ async function ensureKey() {
 
 /** Why a sync cannot run right now, or '' when it can. */
 function blocked() {
-    if (!load().enabled) return 'Saving your setup is turned off';
-    if (!account.status().connected) return 'Not signed in to CloudBlast';
+    if (!load().enabled) return 'Syncing your setup is turned off';
+
+    const connection = syncConnection.status();
+    if (!connection.connected) return 'Not connected to a sync server';
+    if (!connection.unlocked) return 'Your synced data is locked';
+
     // exportAll and importAll both refuse while locked, and a snapshot written
     // with the secrets missing would be worse than no snapshot at all.
     if (vault.isLocked()) return 'The app is locked';
@@ -210,7 +201,7 @@ async function pull({ force = false } = {}) {
 /** The pull itself. Assumes the caller already holds `busy`. */
 async function pullLocked({ force = false } = {}) {
     try {
-        const meta = await account.snapshotMeta();
+        const meta = await syncConnection.snapshotMeta();
         const current = load();
 
         if (!meta.exists) return { pulled: false, reason: 'Nothing saved yet' };
@@ -219,31 +210,24 @@ async function pullLocked({ force = false } = {}) {
             return { pulled: false, reason: 'Already up to date', revision: current.revision };
         }
 
-        const remote = await account.snapshotGet();
+        const remote = await syncConnection.snapshotGet();
 
         if (!remote?.payload) return { pulled: false, reason: 'Nothing saved yet' };
 
-        const key = remote.key || await ensureKey();
+        const key = await ensureKey();
 
-        // The console stores the envelope as the opaque string it was handed,
-        // so it comes back as one and has to be parsed before it is an envelope
-        // again. Push serialises here, pull deserialises here; the two have to
-        // stay a pair.
-        let envelope;
-
-        try {
-            envelope = JSON.parse(remote.payload);
-        } catch {
-            throw new Error('Your saved setup could not be read and was left alone');
-        }
-
-        const payload = backup.unsealWithKey(envelope, key);
+        // Unlike the old CloudBlast console, this server stores payload as
+        // real JSON rather than an opaque string, so what comes back is
+        // already the envelope object sealWithKey() produced -- no parse
+        // step needed to get back to where push() left off.
+        const payload = backup.unsealWithKey(remote.payload, key);
 
         // A null here means the key does not open the blob. Not fatal and not
-        // silently ignorable either: it usually means the account key was
-        // replaced, and pushing over it would destroy whatever is up there.
+        // silently ignorable either: it usually means the Sync Master Key was
+        // replaced (a passphrase reset elsewhere, say), and pushing over it
+        // would destroy whatever is up there.
         if (!payload) {
-            throw new Error('Your saved setup could not be decrypted with this account key');
+            throw new Error('Your saved setup could not be decrypted with this device\'s key');
         }
 
         const summary = apply(payload);
@@ -253,7 +237,6 @@ async function pullLocked({ force = false } = {}) {
             revision: remote.revision,
             lastPullAt: new Date().toISOString(),
             lastError: null,
-            key,
         };
         persist();
 
@@ -264,9 +247,9 @@ async function pullLocked({ force = false } = {}) {
         if (added > 0) {
             activity.record({
                 category: 'data',
-                action: 'cloud.restore',
+                action: 'sync.restore',
                 outcome: 'success',
-                target: 'CloudBlast setup',
+                target: 'synced setup',
                 detail: `${summary.hosts?.added || 0} host(s), ${summary.keys?.added || 0} key(s) restored`,
             });
         }
@@ -312,10 +295,10 @@ async function pushLocked({ retry }) {
     const key = await ensureKey();
     const payload = collect();
 
-    const result = await account.snapshotPut({
-        payload: JSON.stringify(backup.sealWithKey(payload, key)),
+    const result = await syncConnection.snapshotPut({
+        payload: backup.sealWithKey(payload, key),
         baseRevision: load().revision,
-        deviceName: account.deviceName(),
+        deviceName: syncConnection.deviceName(),
         stats: describe(payload),
     });
 
@@ -380,15 +363,15 @@ function status() {
 }
 
 /**
- * Forget everything tied to the account that was signed in.
+ * Forget everything tied to the connection that was just disconnected.
  *
- * The revision and the key belong to one account, not to this machine. Left
- * behind at sign-out they would make the next account's snapshot look older
- * than what this device has already seen, and the pull that should restore it
- * would decide there was nothing to do.
+ * The revision belongs to one server connection, not to this machine. Left
+ * behind after disconnecting, it would make the next connection's snapshot
+ * look older than what this device has already seen, and the pull that
+ * should restore it would decide there was nothing to do.
  *
- * The preference itself survives: whether the user wants cloud backup is about
- * them, not about which account they were last in.
+ * The preference itself survives: whether the user wants sync on is about
+ * them, not about which server they were last connected to.
  */
 function reset() {
     if (pushTimer) clearTimeout(pushTimer);
@@ -400,7 +383,6 @@ function reset() {
         lastPushAt: null,
         lastPullAt: null,
         lastError: null,
-        key: '',
     };
     persist();
 

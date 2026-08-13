@@ -22,7 +22,7 @@ const importer = require('./import');
 const importCommon = require('./import-common');
 const vault = require('./vault');
 const backup = require('./backup');
-const account = require('./account');
+const syncConnection = require('./sync-connection');
 const monitor = require('./monitor');
 const cloudSnapshot = require('./cloud-snapshot');
 const activity = require('./activity');
@@ -191,8 +191,8 @@ function register(getWindow) {
     cloudSnapshot.start(notify);
 
     // Schedules the daily release check. Unlike the two above it does not care
-    // about the account at all, so a locked or signed-out app still finds out
-    // there is a new build.
+    // about the sync connection at all, so a locked or disconnected app still
+    // finds out there is a new build.
     updates.start(notify);
 
     remoteEdit.setNotifier(notify);
@@ -1066,44 +1066,87 @@ function register(getWindow) {
         return true;
     });
 
-    /* ---------------- CloudBlast account ----------------
+    /* ---------------- Sync server connection ----------------
      *
-     * The whole OAuth exchange happens in main: the verifier, the code and the
-     * resulting token never cross the bridge, so a renderer holding a reference
-     * to the API has no more access to the credential than the page next to it.
-     * Only the profile the user is looking at comes back.
+     * A connection to a self-hosted sync server -- not an account this app
+     * manages, and nothing here is required. The whole exchange happens in
+     * main: the passphrase, the recovery code and the session token never
+     * cross the bridge. Only status comes back.
      */
 
-    handle('account-status', () => account.status());
+    handle('sync-connection-status', () => syncConnection.status());
 
-    handle('account-sign-in', async () => {
+    handle('sync-connection-configure', (event, serverUrl) => {
         try {
-            const status = await account.signIn();
+            return { success: true, status: syncConnection.configure(serverUrl) };
+        } catch (error) {
+            return { success: false, message: error.message };
+        }
+    });
+
+    handle('sync-connection-register', async (event, { email, passphrase } = {}) => {
+        try {
+            const { status, recoveryCode } = await syncConnection.register(email, passphrase);
 
             activity.record({
                 category: 'security',
-                action: 'account.connect',
+                action: 'sync.connect',
                 outcome: 'success',
-                target: 'CloudBlast account',
-                detail: status.account?.email || '',
+                target: 'sync server',
+                detail: status.email || '',
             });
 
-            // The sidebar shows who is signed in, and it is not the thing that
-            // asked for this, so it has to be told.
-            notify('account-state', status);
+            notify('sync-connection-state', status);
+
+            // Symmetrical with sign-in below: a brand new connection has no
+            // data of its own yet to pull, but the next device that connects
+            // to this same account will, and force makes sure a stale local
+            // revision doesn't make that pull think there's nothing to do.
+            cloudSnapshot.pull({ force: true })
+                .catch(error => console.error('Post-registration restore failed:', error.message));
+
+            return { success: true, status, recoveryCode };
+        } catch (error) {
+            activity.record({
+                category: 'security',
+                action: 'sync.connect',
+                outcome: 'failure',
+                target: 'sync server',
+                message: error.message,
+            });
+
+            return { success: false, message: error.message };
+        }
+    });
+
+    handle('sync-connection-login', async (event, { email, passphrase } = {}) => {
+        try {
+            const status = await syncConnection.login(email, passphrase);
+
+            activity.record({
+                category: 'security',
+                action: 'sync.connect',
+                outcome: 'success',
+                target: 'sync server',
+                detail: status.email || '',
+            });
+
+            // The sidebar shows the connection status, and it is not the
+            // thing that asked for this, so it has to be told.
+            notify('sync-connection-state', status);
 
             /*
-             * Signing in is the one moment a device has an account and none of
-             * its data. Both of these normally run at launch, which for a fresh
-             * sign-in has already been and gone, so without this the setup only
-             * appears on the next poll or the next restart.
+             * Logging in is the one moment a device is connected and has none
+             * of its data yet. This normally runs at launch, which for a
+             * fresh login has already been and gone, so without this the
+             * setup only appears on the next poll or the next restart.
              *
-             * Forced, because a stale revision left by a previous account would
-             * otherwise make the pull decide it was already up to date.
+             * Forced, because a stale revision left by a previous connection
+             * would otherwise make the pull decide it was already up to date.
              *
-             * Not awaited: the browser round trip is already over and the user
-             * is looking at the app. Both report themselves through their own
-             * events when they land.
+             * Not awaited: the login round trip is already over and the user
+             * is looking at the app. The pull reports itself through its own
+             * event when it lands.
              */
             cloudSnapshot.pull({ force: true })
                 .catch(error => console.error('Post sign-in restore failed:', error.message));
@@ -1112,9 +1155,9 @@ function register(getWindow) {
         } catch (error) {
             activity.record({
                 category: 'security',
-                action: 'account.connect',
+                action: 'sync.connect',
                 outcome: 'failure',
-                target: 'CloudBlast account',
+                target: 'sync server',
                 message: error.message,
             });
 
@@ -1122,41 +1165,55 @@ function register(getWindow) {
         }
     });
 
-    handle('account-sign-in-cancel', () => {
-        account.cancelSignIn();
-        return true;
-    });
-
-    handle('account-sign-out', async () => {
-        const email = account.status().account?.email || '';
-        const { revoked } = await account.signOut();
+    handle('sync-connection-logout', async () => {
+        const email = syncConnection.status().email || '';
+        const { status, revoked } = await syncConnection.logout();
 
         activity.record({
             category: 'security',
-            action: 'account.disconnect',
-            // A local sign-out that could not reach the console leaves a live
-            // token behind, so it is not the same outcome as a clean one.
+            action: 'sync.disconnect',
+            // A local disconnect that could not reach the server leaves a
+            // live token behind, so it is not the same outcome as a clean one.
             outcome: revoked ? 'success' : 'failure',
-            target: 'CloudBlast account',
+            target: 'sync server',
             detail: email,
-            message: revoked ? '' : 'Signed out locally; the console could not be reached to revoke the token',
+            message: revoked ? '' : 'Disconnected locally; the server could not be reached to revoke the session',
         });
 
-        // The revision and key belong to the account that just left, not to
+        // The revision belongs to the connection that just ended, not to
         // this machine.
         cloudSnapshot.reset();
 
-        const status = account.status();
-        notify('account-state', status);
+        notify('sync-connection-state', status);
 
         return { success: true, revoked, status };
     });
 
-    handle('account-refresh', async () => {
+    handle('sync-connection-refresh', async () => {
         try {
-            return { success: true, status: await account.refresh() };
+            return { success: true, status: await syncConnection.refresh() };
         } catch (error) {
-            return { success: false, message: error.message, status: account.status() };
+            return { success: false, message: error.message, status: syncConnection.status() };
+        }
+    });
+
+    handle('sync-connection-unlock-with-recovery-code', async (event, recoveryCode) => {
+        try {
+            const { status, recoveryCode: newCode } = await syncConnection.unlockWithRecoveryCode(recoveryCode);
+            notify('sync-connection-state', status);
+            return { success: true, status, recoveryCode: newCode };
+        } catch (error) {
+            return { success: false, message: error.message };
+        }
+    });
+
+    handle('sync-connection-change-passphrase', async (event, { currentPassphrase, newPassphrase } = {}) => {
+        try {
+            const status = await syncConnection.changePassphrase(currentPassphrase, newPassphrase);
+            notify('sync-connection-state', status);
+            return { success: true, status };
+        } catch (error) {
+            return { success: false, message: error.message };
         }
     });
 

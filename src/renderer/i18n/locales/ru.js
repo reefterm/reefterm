@@ -301,7 +301,7 @@ export default {
     'settings.nav.monitoring': 'Мониторинг',
     'settings.nav.logging': 'Журналирование',
     'settings.nav.security': 'Безопасность',
-    'settings.nav.account': 'Учётная запись',
+    'settings.nav.sync': 'Синхронизация',
     'settings.nav.backup': 'Резервные копии',
     'settings.nav.about': 'О программе',
 
@@ -702,36 +702,8 @@ export default {
     'settings.knownHosts.forgotHost': '{host} забыт',
     'settings.knownHosts.forgotKey': 'Ключ {type} для {host} забыт',
 
-    /* ---- Settings: Account ---- */
-    'settings.account.title': 'Учётная запись',
-    'settings.account.fallbackName': 'Учётная запись Reef Terminal',
-    'settings.account.yourAccount': 'вашей учётной записи Reef Terminal',
-    'settings.account.connectedAs': 'Подключено как {account}',
-    'settings.account.disconnect': 'Отключить',
-    'settings.account.disconnecting': 'Отключение…',
-    'settings.account.disconnected': 'Учётная запись отключена',
-    'settings.account.disconnectedLocally': 'Выход на этом устройстве выполнен, но связаться с '
-        + 'консолью и отозвать доступ не удалось. Удалите устройство в разделе «Настройки → API».',
-    'settings.account.connect': 'Подключите свою учётную запись',
-    'settings.account.connectAction': 'Подключить',
-    'settings.account.connectDesc': 'Синхронизируйте свои серверы и сохраните свою конфигурацию.',
-    'settings.account.unlockFirst': 'Сначала разблокируйте приложение.',
-    'settings.account.waitingForBrowser': 'Ожидание браузера…',
-    'settings.account.cloudBackup': 'Резервная копия в облаке',
-    'settings.account.cloudBackupDesc': 'Ваши хосты, папки, ключи и настройки, сохранённые в учётной '
-        + 'записи для ваших других устройств.',
-    'settings.account.backupOn': 'Резервное копирование в облако включено',
-    'settings.account.backupOff': 'Резервное копирование в облако выключено. То, что уже сохранено, '
-        + 'останется, пока вы это не замените.',
-    'settings.account.backedUp': 'Сохранено в вашей учётной записи Reef Terminal',
-    'settings.account.saveNow': 'Сохранить сейчас',
-    'settings.account.saving': 'Сохранение…',
-    'settings.account.savedAgo': 'Сохранено {when}',
-    'settings.account.notSavedYet': 'Ещё не сохранено',
-    'settings.account.justNow': 'только что',
-    'settings.account.minutesAgo': '{count} мин назад',
-    'settings.account.hoursAgo': '{count} ч назад',
-    'settings.account.daysAgo': '{count} дн назад',
+    /* ---- Settings: Sync ----
+     * Not yet translated -- falls back to English. See settings.sync.* in en.js. */
 
     /* ---- Settings: Backup ---- */
     'settings.backup.title': 'Резервные копии',

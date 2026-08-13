@@ -270,7 +270,7 @@ export default {
     'settings.nav.monitoring': '监控',
     'settings.nav.logging': '日志记录',
     'settings.nav.security': '安全',
-    'settings.nav.account': '账户',
+    'settings.nav.sync': '同步',
     'settings.nav.backup': '备份',
     'settings.nav.about': '关于',
 
@@ -593,34 +593,8 @@ export default {
     'settings.knownHosts.forgotHost': '已忘记 {host}',
     'settings.knownHosts.forgotKey': '已忘记 {host} 的 {type} 密钥',
 
-    /* ---- Settings: Account ---- */
-    'settings.account.title': '账户',
-    'settings.account.fallbackName': 'Reef Terminal 账户',
-    'settings.account.yourAccount': '你的 Reef Terminal 账户',
-    'settings.account.connectedAs': '已以 {account} 连接',
-    'settings.account.disconnect': '断开连接',
-    'settings.account.disconnecting': '断开中…',
-    'settings.account.disconnected': '账户已断开连接',
-    'settings.account.disconnectedLocally': '已在本设备退出登录，但无法连接到控制台以吊销访问权限。'
-        + '请到“设置 → API”中移除该设备。',
-    'settings.account.connect': '连接你的账户',
-    'settings.account.connectAction': '连接',
-    'settings.account.connectDesc': '同步你的服务器并备份你的配置。',
-    'settings.account.unlockFirst': '请先解锁应用。',
-    'settings.account.waitingForBrowser': '正在等待浏览器…',
-    'settings.account.cloudBackup': '云备份',
-    'settings.account.cloudBackupDesc': '把你的主机、文件夹、密钥和设置保存到账户，供你的其他设备使用。',
-    'settings.account.backupOn': '云备份已开启',
-    'settings.account.backupOff': '云备份已关闭。已经保存的内容会一直保留，直到你把它替换掉。',
-    'settings.account.backedUp': '已备份到你的 Reef Terminal 账户',
-    'settings.account.saveNow': '立即保存',
-    'settings.account.saving': '保存中…',
-    'settings.account.savedAgo': '保存于 {when}',
-    'settings.account.notSavedYet': '尚未保存',
-    'settings.account.justNow': '刚刚',
-    'settings.account.minutesAgo': '{count} 分钟前',
-    'settings.account.hoursAgo': '{count} 小时前',
-    'settings.account.daysAgo': '{count} 天前',
+    /* ---- Settings: Sync ----
+     * Not yet translated -- falls back to English. See settings.sync.* in en.js. */
 
     /* ---- Settings: Backup ---- */
     'settings.backup.title': '备份',

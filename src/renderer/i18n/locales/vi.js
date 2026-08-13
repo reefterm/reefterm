@@ -276,7 +276,7 @@ export default {
     'settings.nav.monitoring': 'Theo dõi',
     'settings.nav.logging': 'Ghi nhật ký',
     'settings.nav.security': 'Bảo mật',
-    'settings.nav.account': 'Tài khoản',
+    'settings.nav.sync': 'Đồng bộ',
     'settings.nav.backup': 'Sao lưu',
     'settings.nav.about': 'Giới thiệu',
 
@@ -654,36 +654,8 @@ export default {
     'settings.knownHosts.forgotHost': 'Đã quên {host}',
     'settings.knownHosts.forgotKey': 'Đã quên khoá {type} của {host}',
 
-    /* ---- Settings: Account ---- */
-    'settings.account.title': 'Tài khoản',
-    'settings.account.fallbackName': 'Tài khoản Reef Terminal',
-    'settings.account.yourAccount': 'tài khoản Reef Terminal của bạn',
-    'settings.account.connectedAs': 'Đã kết nối với tư cách {account}',
-    'settings.account.disconnect': 'Ngắt kết nối',
-    'settings.account.disconnecting': 'Đang ngắt kết nối…',
-    'settings.account.disconnected': 'Đã ngắt kết nối tài khoản',
-    'settings.account.disconnectedLocally': 'Đã đăng xuất trên thiết bị này, nhưng không liên lạc '
-        + 'được với bảng điều khiển để thu hồi quyền truy cập. Hãy gỡ thiết bị trong Cài đặt → API.',
-    'settings.account.connect': 'Kết nối tài khoản của bạn',
-    'settings.account.connectAction': 'Kết nối',
-    'settings.account.connectDesc': 'Đồng bộ máy chủ và sao lưu thiết lập của bạn.',
-    'settings.account.unlockFirst': 'Hãy mở khoá ứng dụng trước.',
-    'settings.account.waitingForBrowser': 'Đang chờ trình duyệt…',
-    'settings.account.cloudBackup': 'Sao lưu đám mây',
-    'settings.account.cloudBackupDesc': 'Máy chủ, thư mục, khoá và cài đặt của bạn, được lưu vào '
-        + 'tài khoản để dùng trên các thiết bị khác.',
-    'settings.account.backupOn': 'Sao lưu đám mây đang bật',
-    'settings.account.backupOff': 'Sao lưu đám mây đang tắt. Những gì đã lưu vẫn còn cho tới khi '
-        + 'bạn thay thế nó.',
-    'settings.account.backedUp': 'Đã sao lưu vào tài khoản Reef Terminal của bạn',
-    'settings.account.saveNow': 'Lưu ngay',
-    'settings.account.saving': 'Đang lưu…',
-    'settings.account.savedAgo': 'Đã lưu {when}',
-    'settings.account.notSavedYet': 'Chưa lưu',
-    'settings.account.justNow': 'vừa xong',
-    'settings.account.minutesAgo': '{count} phút trước',
-    'settings.account.hoursAgo': '{count} giờ trước',
-    'settings.account.daysAgo': '{count} ngày trước',
+    /* ---- Settings: Sync ----
+     * Not yet translated -- falls back to English. See settings.sync.* in en.js. */
 
     /* ---- Settings: Backup ---- */
     'settings.backup.title': 'Sao lưu',

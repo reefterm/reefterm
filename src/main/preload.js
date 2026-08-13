@@ -407,18 +407,24 @@ contextBridge.exposeInMainWorld('api', {
         discard: (token) => ipcRenderer.invoke('backup-discard', token),
     },
 
-    account: {
-        // No token ever crosses this bridge. Main runs the OAuth exchange and
-        // holds the credential; the renderer only learns which account is
-        // connected and what the console said.
-        status: () => ipcRenderer.invoke('account-status'),
-        signIn: () => ipcRenderer.invoke('account-sign-in'),
-        cancelSignIn: () => ipcRenderer.invoke('account-sign-in-cancel'),
-        signOut: () => ipcRenderer.invoke('account-sign-out'),
-        refresh: () => ipcRenderer.invoke('account-refresh'),
-        // Signing in or out from Settings has to reach the sidebar, which did
-        // not ask for it.
-        onState: (callback) => subscribe('account-state', callback),
+    // A connection to a self-hosted sync server -- optional, and not an
+    // account this app manages. No secret ever crosses this bridge: main
+    // holds the passphrase, the recovery code and the session token; the
+    // renderer only learns the connection's status.
+    syncConnection: {
+        status: () => ipcRenderer.invoke('sync-connection-status'),
+        configure: (serverUrl) => ipcRenderer.invoke('sync-connection-configure', serverUrl),
+        register: (email, passphrase) => ipcRenderer.invoke('sync-connection-register', { email, passphrase }),
+        login: (email, passphrase) => ipcRenderer.invoke('sync-connection-login', { email, passphrase }),
+        logout: () => ipcRenderer.invoke('sync-connection-logout'),
+        refresh: () => ipcRenderer.invoke('sync-connection-refresh'),
+        unlockWithRecoveryCode: (recoveryCode) =>
+            ipcRenderer.invoke('sync-connection-unlock-with-recovery-code', recoveryCode),
+        changePassphrase: (currentPassphrase, newPassphrase) =>
+            ipcRenderer.invoke('sync-connection-change-passphrase', { currentPassphrase, newPassphrase }),
+        // Connecting or disconnecting from Settings has to reach the sidebar,
+        // which did not ask for it.
+        onState: (callback) => subscribe('sync-connection-state', callback),
     },
 
     /**
