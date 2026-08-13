@@ -770,275 +770,289 @@ function describeRoute(chain) {
  * case: this dials a list either way.
  */
 function connect({ tabId, hostId, cols, rows }, { window, requestTrust, requestKeyboardInteractive }) {
-    // FIXME: pre-existing; the executor never rejects (settle() only resolves),
-    // but an uncaught throw in here would become an unhandled rejection. Worth a
-    // real fix, out of scope here.
-    // eslint-disable-next-line no-async-promise-executor
-    return new Promise(async (resolve) => {
-        destroy(tabId, { reason: 'replaced' });
+    return new Promise((resolve) => {
+        dialChain({ tabId, hostId, cols, rows, window, requestTrust, requestKeyboardInteractive }, resolve)
+            .catch((error) => {
+                // A throw anywhere in dialChain is a bug, not a connection
+                // failure, but connect() still has to settle: a plain (non-async)
+                // executor is the only thing that can reject its own promise, so
+                // catching here is what stands between a stray throw and this
+                // promise hanging forever with an unhandled rejection logged
+                // beside it.
+                resolve({ success: false, message: error?.message || String(error) });
+            });
+    });
+}
 
-        const { chain, error } = store.resolveChain(hostId);
-        if (error) {
-            resolve({ success: false, message: error });
+/**
+ * The dial itself, run by connect() above. Split out into its own async
+ * function so that promise's executor can stay synchronous — see the catch
+ * in connect().
+ */
+async function dialChain({ tabId, hostId, cols, rows, window, requestTrust, requestKeyboardInteractive }, resolve) {
+    destroy(tabId, { reason: 'replaced' });
+
+    const { chain, error } = store.resolveChain(hostId);
+    if (error) {
+        resolve({ success: false, message: error });
+        return;
+    }
+
+    const target = chain[chain.length - 1];
+    const hops = chain.slice(0, -1);
+    const label = store.describeHost(hostId);
+
+    let settled = false;
+    const settle = (result) => {
+        if (settled) return;
+        settled = true;
+
+        // One entry per attempt, whichever path ended it. The close handler
+        // settles again after a successful session ends, and is a no-op
+        // here, so a session is never logged as both opened and refused.
+        activity.record({
+            category: 'connection',
+            action: 'session.open',
+            outcome: result.success ? 'success' : 'failure',
+            target: label.name,
+            subject: label.address,
+            // The relay is named on the line that succeeded as well as the
+            // one that failed: which servers a session was routed through is
+            // half of what this log is for.
+            detail: result.success
+                ? [
+                    `via ${target.authMethod}`,
+                    hops.length
+                        ? `relayed through ${hops.map(hop => hop.label.name).join(' → ')}`
+                        : '',
+                    // The proxy belongs to the hop that opened the socket,
+                    // which is the first of the chain however long it is.
+                    chain[0].proxyChain?.length
+                        ? `proxied by ${describeProxyChain(chain[0].proxyChain)}`
+                        : '',
+                ].filter(Boolean).join(' · ')
+                : '',
+            message: result.success ? '' : result.message,
+            hostId,
+            hostName: label.name,
+        });
+
+        resolve(result);
+    };
+
+    /* ---- dial the chain, outermost hop first ---- */
+
+    const clients = [];
+
+    /** Give up, taking down whatever part of the chain is already up. */
+    const abandon = (message) => {
+        // Innermost first, matching destroy(): a partial chain comes down
+        // the same way a whole one does, so no hop has its transport pulled
+        // out from under it by the hop below.
+        for (const open of [...clients].reverse()) {
+            try {
+                open.end();
+            } catch {
+                // Already gone. This is the failure path; there is nothing
+                // further to report about a client that is closed twice.
+            }
+        }
+        settle({ success: false, message });
+    };
+
+    let sock = null;
+    for (const [index, hop] of chain.entries()) {
+        const dialled = await dialHop(hop, { sock, requestTrust, requestKeyboardInteractive });
+
+        if (!dialled.success) {
+            // A failed jump host is named. Without that, "All configured
+            // authentication methods failed" reads as being about the host
+            // the user asked for, and they go and check the wrong key.
+            abandon(hop.isTarget ? dialled.message : `${hop.label.name}: ${dialled.message}`);
+            return;
+        }
+        clients.push(dialled.client);
+
+        if (hop.isTarget) break;
+
+        const next = chain[index + 1];
+        const relay = await openRelay(dialled.client, next);
+        if (!relay.success) {
+            // Distinct from a failure to authenticate: the bastion is fine
+            // and we are logged into it, it just cannot see the next hop.
+            // That is a firewall or a wrong address, not a credential.
+            abandon(`${hop.label.name} could not reach ${next.host}:${next.port}: ${relay.message}`);
+            return;
+        }
+        sock = relay.stream;
+    }
+
+    // Everything downstream (SFTP, forwards, the desktop views, detectOS)
+    // runs on the last hop, which is the host the user actually asked for.
+    const client = clients[clients.length - 1];
+
+    /**
+     * Any hop going away ends the session: a jump host that drops takes the
+     * channel every hop above it was running on with it.
+     *
+     * All of them share this one handler, which is written to run once. The
+     * first close tears the session down and the closes cascading from it
+     * find nothing left to do.
+     */
+    const handleClosed = () => {
+        const session = sessions.get(tabId);
+        // A reconnect may already have registered a fresh session under
+        // this tab id. A stale close from the replaced chain must not
+        // tear that one down or report a drop the renderer would chase.
+        if (session && session.client !== client) return;
+
+        if (window && !window.isDestroyed()) {
+            window.webContents.send('ssh-disconnected', tabId);
+        }
+        // Through destroy(), not sessions.delete(), because the teardown hooks
+        // must run on a network drop too, or transfers and remote-edit
+        // watchers keep holding a dead connection.
+        if (session) destroy(tabId, { reason: 'dropped' });
+
+        // Only reaches anything in the window between the chain coming up
+        // and the shell opening. After that the attempt is long settled.
+        settle({ success: false, message: 'Connection closed' });
+    };
+    for (const open of clients) open.on('close', handleClosed);
+
+    const shellOptions = {
+        term: 'xterm-256color',
+        cols: cols || 80,
+        rows: rows || 24,
+    };
+
+    client.shell(shellOptions, (err, stream) => {
+        if (err) {
+            // No session is registered yet, so destroy() would find nothing
+            // to close. The chain has to be ended here or it is left open
+            // with nothing holding a reference to it.
+            abandon(err.message);
             return;
         }
 
-        const target = chain[chain.length - 1];
-        const hops = chain.slice(0, -1);
-        const label = store.describeHost(hostId);
+        const { port1, port2 } = new MessageChannelMain();
+        // The host is carried on the session so anything holding only a
+        // tab id (SFTP, transfers, forwards) can name the server it
+        // is acting on without resolving credentials again.
+        sessions.set(tabId, {
+            client,
+            // Every hop, in dial order. Only teardown reads it; everything
+            // else wants `client`, the far end.
+            chain: clients,
+            stream,
+            port: port1,
+            hostId,
+            hostName: label.name,
+            address: label.address,
+            openedAt: Date.now(),
+        });
 
-        let settled = false;
-        const settle = (result) => {
-            if (settled) return;
-            settled = true;
+        // Decides for itself whether recording is on. Started before
+        // the first byte can arrive, so a transcript never begins
+        // mid-banner.
+        sessionLog.start(tabId, {
+            hostName: label.name,
+            address: label.address,
+            hostId,
+            protocol: 'ssh',
+        });
 
-            // One entry per attempt, whichever path ended it. The close handler
-            // settles again after a successful session ends, and is a no-op
-            // here, so a session is never logged as both opened and refused.
-            activity.record({
-                category: 'connection',
-                action: 'session.open',
-                outcome: result.success ? 'success' : 'failure',
-                target: label.name,
-                subject: label.address,
-                // The relay is named on the line that succeeded as well as the
-                // one that failed: which servers a session was routed through is
-                // half of what this log is for.
-                detail: result.success
-                    ? [
-                        `via ${target.authMethod}`,
-                        hops.length
-                            ? `relayed through ${hops.map(hop => hop.label.name).join(' → ')}`
-                            : '',
-                        // The proxy belongs to the hop that opened the socket,
-                        // which is the first of the chain however long it is.
-                        chain[0].proxyChain?.length
-                            ? `proxied by ${describeProxyChain(chain[0].proxyChain)}`
-                            : '',
-                    ].filter(Boolean).join(' · ')
-                    : '',
-                message: result.success ? '' : result.message,
-                hostId,
-                hostName: label.name,
-            });
+        // The in-memory tail the assistant reads. Unconditional, unlike the
+        // transcript above: it is bounded, never written down, and dies
+        // with the session.
+        transcript.open(tabId, {
+            hostName: label.name,
+            address: label.address,
+            hostId,
+            protocol: 'ssh',
+        });
 
-            resolve(result);
+        port1.on('message', (event) => {
+            const message = event.data;
+            if (message?.type === 'input' && stream.writable) {
+                stream.write(message.data);
+            } else if (message?.type === 'resize') {
+                stream.setWindow(message.rows, message.cols, 0, 0);
+            }
+        });
+        port1.start();
+
+        // Coalesce burst output into one post per tick.
+        let buffer = '';
+        let scheduled = false;
+        const flush = () => {
+            scheduled = false;
+            if (!buffer) return;
+            try {
+                port1.postMessage(buffer);
+            } catch {
+                // Port closed while data was in flight.
+            }
+            buffer = '';
+        };
+        const append = (data) => {
+            const text = data.toString('utf8');
+            buffer += text;
+            // The transcript is fed here rather than from the flush, so
+            // it records what the server sent even if the port has gone
+            // away: a reload leaves the window unable to receive while
+            // the session itself is still perfectly alive.
+            sessionLog.write(tabId, text);
+            transcript.record(tabId, text);
+            if (!scheduled) {
+                scheduled = true;
+                setImmediate(flush);
+            }
         };
 
-        /* ---- dial the chain, outermost hop first ---- */
+        stream.on('data', append);
+        stream.stderr.on('data', append);
 
-        const clients = [];
-
-        /** Give up, taking down whatever part of the chain is already up. */
-        const abandon = (message) => {
-            // Innermost first, matching destroy(): a partial chain comes down
-            // the same way a whole one does, so no hop has its transport pulled
-            // out from under it by the hop below.
-            for (const open of [...clients].reverse()) {
-                try {
-                    open.end();
-                } catch {
-                    // Already gone. This is the failure path; there is nothing
-                    // further to report about a client that is closed twice.
-                }
+        stream.on('close', () => {
+            flush();
+            try {
+                port1.postMessage({ type: 'disconnected' });
+            } catch {
+                // Already closed.
             }
-            settle({ success: false, message });
-        };
+            // Same guard as handleClosed: never tear down a session this
+            // stream no longer belongs to.
+            if (sessions.get(tabId)?.stream === stream) destroy(tabId);
+        });
 
-        let sock = null;
-        for (const [index, hop] of chain.entries()) {
-            const dialled = await dialHop(hop, { sock, requestTrust, requestKeyboardInteractive });
-
-            if (!dialled.success) {
-                // A failed jump host is named. Without that, "All configured
-                // authentication methods failed" reads as being about the host
-                // the user asked for, and they go and check the wrong key.
-                abandon(hop.isTarget ? dialled.message : `${hop.label.name}: ${dialled.message}`);
-                return;
-            }
-            clients.push(dialled.client);
-
-            if (hop.isTarget) break;
-
-            const next = chain[index + 1];
-            const relay = await openRelay(dialled.client, next);
-            if (!relay.success) {
-                // Distinct from a failure to authenticate: the bastion is fine
-                // and we are logged into it, it just cannot see the next hop.
-                // That is a firewall or a wrong address, not a credential.
-                abandon(`${hop.label.name} could not reach ${next.host}:${next.port}: ${relay.message}`);
-                return;
-            }
-            sock = relay.stream;
+        if (window && !window.isDestroyed()) {
+            window.webContents.postMessage('ssh-port', { tabId }, [port2]);
         }
 
-        // Everything downstream (SFTP, forwards, the desktop views, detectOS)
-        // runs on the last hop, which is the host the user actually asked for.
-        const client = clients[clients.length - 1];
-
-        /**
-         * Any hop going away ends the session: a jump host that drops takes the
-         * channel every hop above it was running on with it.
-         *
-         * All of them share this one handler, which is written to run once. The
-         * first close tears the session down and the closes cascading from it
-         * find nothing left to do.
-         */
-        const handleClosed = () => {
-            const session = sessions.get(tabId);
-            // A reconnect may already have registered a fresh session under
-            // this tab id. A stale close from the replaced chain must not
-            // tear that one down or report a drop the renderer would chase.
-            if (session && session.client !== client) return;
-
-            if (window && !window.isDestroyed()) {
-                window.webContents.send('ssh-disconnected', tabId);
+        // Whatever the host wants run as soon as its shell is up: a
+        // `cd`, an `export`, `tmux attach`. Written straight to the PTY,
+        // which buffers it until the shell reads, so there is no prompt
+        // to detect and nothing to wait for.
+        //
+        // It runs on reconnects too, which is the point of storing it on
+        // the host rather than typing it: a session that dropped comes
+        // back in the directory it was working in. The newline is added
+        // here rather than stored, so a record whose last line was
+        // trimmed still runs.
+        //
+        // The target's, not a jump host's: a bastion is passed through,
+        // never worked in, and its own shell is never opened.
+        if (target.initCommand) {
+            try {
+                stream.write(`${target.initCommand}\n`);
+            } catch (error) {
+                console.error(`Could not send the connect command for ${tabId}:`, error.message);
             }
-            // Through destroy(), not sessions.delete(), because the teardown hooks
-            // must run on a network drop too, or transfers and remote-edit
-            // watchers keep holding a dead connection.
-            if (session) destroy(tabId, { reason: 'dropped' });
+        }
 
-            // Only reaches anything in the window between the chain coming up
-            // and the shell opening. After that the attempt is long settled.
-            settle({ success: false, message: 'Connection closed' });
-        };
-        for (const open of clients) open.on('close', handleClosed);
-
-        const shellOptions = {
-            term: 'xterm-256color',
-            cols: cols || 80,
-            rows: rows || 24,
-        };
-
-        client.shell(shellOptions, (err, stream) => {
-            if (err) {
-                // No session is registered yet, so destroy() would find nothing
-                // to close. The chain has to be ended here or it is left open
-                // with nothing holding a reference to it.
-                abandon(err.message);
-                return;
-            }
-
-            const { port1, port2 } = new MessageChannelMain();
-            // The host is carried on the session so anything holding only a
-            // tab id (SFTP, transfers, forwards) can name the server it
-            // is acting on without resolving credentials again.
-            sessions.set(tabId, {
-                client,
-                // Every hop, in dial order. Only teardown reads it; everything
-                // else wants `client`, the far end.
-                chain: clients,
-                stream,
-                port: port1,
-                hostId,
-                hostName: label.name,
-                address: label.address,
-                openedAt: Date.now(),
-            });
-
-            // Decides for itself whether recording is on. Started before
-            // the first byte can arrive, so a transcript never begins
-            // mid-banner.
-            sessionLog.start(tabId, {
-                hostName: label.name,
-                address: label.address,
-                hostId,
-                protocol: 'ssh',
-            });
-
-            // The in-memory tail the assistant reads. Unconditional, unlike the
-            // transcript above: it is bounded, never written down, and dies
-            // with the session.
-            transcript.open(tabId, {
-                hostName: label.name,
-                address: label.address,
-                hostId,
-                protocol: 'ssh',
-            });
-
-            port1.on('message', (event) => {
-                const message = event.data;
-                if (message?.type === 'input' && stream.writable) {
-                    stream.write(message.data);
-                } else if (message?.type === 'resize') {
-                    stream.setWindow(message.rows, message.cols, 0, 0);
-                }
-            });
-            port1.start();
-
-            // Coalesce burst output into one post per tick.
-            let buffer = '';
-            let scheduled = false;
-            const flush = () => {
-                scheduled = false;
-                if (!buffer) return;
-                try {
-                    port1.postMessage(buffer);
-                } catch {
-                    // Port closed while data was in flight.
-                }
-                buffer = '';
-            };
-            const append = (data) => {
-                const text = data.toString('utf8');
-                buffer += text;
-                // The transcript is fed here rather than from the flush, so
-                // it records what the server sent even if the port has gone
-                // away: a reload leaves the window unable to receive while
-                // the session itself is still perfectly alive.
-                sessionLog.write(tabId, text);
-                transcript.record(tabId, text);
-                if (!scheduled) {
-                    scheduled = true;
-                    setImmediate(flush);
-                }
-            };
-
-            stream.on('data', append);
-            stream.stderr.on('data', append);
-
-            stream.on('close', () => {
-                flush();
-                try {
-                    port1.postMessage({ type: 'disconnected' });
-                } catch {
-                    // Already closed.
-                }
-                // Same guard as handleClosed: never tear down a session this
-                // stream no longer belongs to.
-                if (sessions.get(tabId)?.stream === stream) destroy(tabId);
-            });
-
-            if (window && !window.isDestroyed()) {
-                window.webContents.postMessage('ssh-port', { tabId }, [port2]);
-            }
-
-            // Whatever the host wants run as soon as its shell is up: a
-            // `cd`, an `export`, `tmux attach`. Written straight to the PTY,
-            // which buffers it until the shell reads, so there is no prompt
-            // to detect and nothing to wait for.
-            //
-            // It runs on reconnects too, which is the point of storing it on
-            // the host rather than typing it: a session that dropped comes
-            // back in the directory it was working in. The newline is added
-            // here rather than stored, so a record whose last line was
-            // trimmed still runs.
-            //
-            // The target's, not a jump host's: a bastion is passed through,
-            // never worked in, and its own shell is never opened.
-            if (target.initCommand) {
-                try {
-                    stream.write(`${target.initCommand}\n`);
-                } catch (error) {
-                    console.error(`Could not send the connect command for ${tabId}:`, error.message);
-                }
-            }
-
-            // The path travels with the result rather than being asked for
-            // separately: this is the one moment the whole of it is known.
-            settle({ success: true, message: 'Connected', route: describeRoute(chain) });
-        });
+        // The path travels with the result rather than being asked for
+        // separately: this is the one moment the whole of it is known.
+        settle({ success: true, message: 'Connected', route: describeRoute(chain) });
     });
 }
 

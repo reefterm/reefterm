@@ -103,168 +103,181 @@ function destroyAll() {
  * session's own business and reaches the renderer over the port.
  */
 function connect({ tabId, hostId, cols, rows }, { window } = {}) {
-    // FIXME: pre-existing, same pattern as ssh.js's connect(); worth a real fix,
-    // out of scope here.
-    // eslint-disable-next-line no-async-promise-executor
-    return new Promise(async (resolve) => {
-        destroy(tabId, { reason: 'replaced' });
-
-        const target = store.resolveCredentials(hostId);
-        if (!target) {
-            resolve({ success: false, message: 'Host not found' });
-            return;
-        }
-        if (!target.host) {
-            resolve({ success: false, message: 'This host has no address' });
-            return;
-        }
-        // A proxy this host names and that no longer exists. Reported rather
-        // than ignored: see the note in store.resolveCredentials.
-        if (target.error) {
-            resolve({ success: false, message: target.error });
-            return;
-        }
-
-        const label = store.describeHost(hostId);
-        const port = target.port || 23;
-
-        let settled = false;
-        const settle = (result) => {
-            if (settled) return;
-            settled = true;
-
-            recordOpen({
-                success: result.success,
-                message: result.message,
-                hostId,
-                hostName: label.name,
-                address: label.address,
-                detail: target.proxyChain?.length
-                    ? `over telnet, proxied by ${describeProxyChain(target.proxyChain)}`
-                    : 'over telnet',
+    return new Promise((resolve) => {
+        dialTelnet({ tabId, hostId, cols, rows, window }, resolve)
+            .catch((error) => {
+                // Same reasoning as ssh.js's connect(): a plain executor is the
+                // only thing that can reject its own promise, so a throw in
+                // dialTelnet is caught here rather than left to hang this
+                // promise forever with an unhandled rejection logged beside it.
+                resolve({ success: false, message: error?.message || String(error) });
             });
+    });
+}
 
-            resolve(result);
-        };
+/**
+ * The dial itself, run by connect() above. Split out into its own async
+ * function so that promise's executor can stay synchronous — see the catch
+ * in connect().
+ */
+async function dialTelnet({ tabId, hostId, cols, rows, window }, resolve) {
+    destroy(tabId, { reason: 'replaced' });
 
-        /*
-         * The socket, dialled straight out or through the host's proxy.
-         *
-         * `openSocket` owns the dial deadline and clears it once the connection
-         * is up, because a console that is quiet for twenty seconds is a console
-         * doing its job rather than a stall.
-         */
-        let socket;
-        try {
-            socket = await proxy.openSocket({
-                host: target.host,
-                port,
-                chain: target.proxyChain,
-                timeout: CONNECT_TIMEOUT,
-            });
-        } catch (error) {
-            settle({ success: false, message: describeError(error) });
-            return;
-        }
+    const target = store.resolveCredentials(hostId);
+    if (!target) {
+        resolve({ success: false, message: 'Host not found' });
+        return;
+    }
+    if (!target.host) {
+        resolve({ success: false, message: 'This host has no address' });
+        return;
+    }
+    // A proxy this host names and that no longer exists. Reported rather
+    // than ignored: see the note in store.resolveCredentials.
+    if (target.error) {
+        resolve({ success: false, message: target.error });
+        return;
+    }
 
-        socket.on('error', (error) => {
-            const message = describeError(error);
-            if (!settled) {
-                settle({ success: false, message });
-                return;
-            }
-            // A live session that failed: say so in the pane, since the close
-            // that follows only reports that it ended.
-            sessions.get(tabId)?.pipe.deliver(`\r\n\x1b[1;31m>> ${message}\x1b[0m\r\n`);
-        });
+    const label = store.describeHost(hostId);
+    const port = target.port || 23;
 
-        const negotiator = createNegotiator({
-            terminalType: 'xterm-256color',
-            // Protocol bytes go straight out. They are not application data
-            // and must not be escaped by `encode`, which is for what the
-            // user typed.
-            send: (bytes) => {
-                if (socket.writable) socket.write(bytes);
-            },
-        });
+    let settled = false;
+    const settle = (result) => {
+        if (settled) return;
+        settled = true;
 
-        const pipe = createPipe({
-            tabId,
-            window,
-            label: { hostName: label.name, address: label.address, hostId },
-            protocol: 'telnet',
-            onInput: (data) => {
-                if (socket.writable) socket.write(negotiator.encode(data));
-            },
-            onResize: (nextCols, nextRows) => negotiator.resize(nextCols, nextRows),
-        });
-
-        sessions.set(tabId, {
-            socket,
-            pipe,
-            negotiator,
+        recordOpen({
+            success: result.success,
+            message: result.message,
             hostId,
             hostName: label.name,
             address: label.address,
-            openedAt: Date.now(),
+            detail: target.proxyChain?.length
+                ? `over telnet, proxied by ${describeProxyChain(target.proxyChain)}`
+                : 'over telnet',
         });
 
-        // The size the pane already is, before the server has asked. Held
-        // by the negotiator and sent the moment NAWS is agreed.
-        negotiator.resize(cols || 80, rows || 24);
-        negotiator.start();
+        resolve(result);
+    };
 
-        socket.on('data', (chunk) => {
-            const output = negotiator.receive(chunk);
-            if (output.length) pipe.deliver(output);
+    /*
+     * The socket, dialled straight out or through the host's proxy.
+     *
+     * `openSocket` owns the dial deadline and clears it once the connection
+     * is up, because a console that is quiet for twenty seconds is a console
+     * doing its job rather than a stall.
+     */
+    let socket;
+    try {
+        socket = await proxy.openSocket({
+            host: target.host,
+            port,
+            chain: target.proxyChain,
+            timeout: CONNECT_TIMEOUT,
         });
+    } catch (error) {
+        settle({ success: false, message: describeError(error) });
+        return;
+    }
 
-        // A socket that came through a proxy is handed over paused, holding
-        // anything the device said before the handshake finished being read.
-        // The reader is attached now, so it is safe to let it flow. A no-op
-        // on a direct dial, which was never paused.
-        socket.resume();
-
-        socket.on('close', () => {
-            // A reconnect may already have registered a fresh session under
-            // this pane id; a stale close must not tear that one down.
-            const session = sessions.get(tabId);
-            if (!session || session.socket !== socket) return;
-            session.pipe.disconnected();
-            if (window && !window.isDestroyed()) {
-                window.webContents.send('ssh-disconnected', tabId);
-            }
-            destroy(tabId, { reason: 'dropped' });
-        });
-
-        // Same contract as SSH's: written as soon as the session is up,
-        // with no prompt detection, and replayed on every reconnect.
-        //
-        // Worth knowing what that means here. A telnet device usually opens
-        // with a login prompt, so a command set on a telnet host is typed
-        // into whatever the device happens to be showing, which is the
-        // login prompt unless the device has no login. That is the setting
-        // doing exactly what it says; it is only ever what was typed into
-        // it, and it is empty by default.
-        if (target.initCommand) {
-            try {
-                socket.write(negotiator.encode(`${target.initCommand}\r`));
-            } catch (error) {
-                console.error(`Could not send the connect command for ${tabId}:`, error.message);
-            }
+    socket.on('error', (error) => {
+        const message = describeError(error);
+        if (!settled) {
+            settle({ success: false, message });
+            return;
         }
+        // A live session that failed: say so in the pane, since the close
+        // that follows only reports that it ended.
+        sessions.get(tabId)?.pipe.deliver(`\r\n\x1b[1;31m>> ${message}\x1b[0m\r\n`);
+    });
 
-        // The path the socket took, for the pane header. The same shape ssh.js
-        // returns, minus any notion of a relay: telnet has no channel to open one
-        // on, so a proxy is the only thing that can stand in the way.
-        settle({
-            success: true,
-            message: 'Connected',
-            route: [
-                ...proxyHops(target.proxyChain),
-                { kind: 'host', label: label.name, detail: label.address },
-            ],
-        });
+    const negotiator = createNegotiator({
+        terminalType: 'xterm-256color',
+        // Protocol bytes go straight out. They are not application data
+        // and must not be escaped by `encode`, which is for what the
+        // user typed.
+        send: (bytes) => {
+            if (socket.writable) socket.write(bytes);
+        },
+    });
+
+    const pipe = createPipe({
+        tabId,
+        window,
+        label: { hostName: label.name, address: label.address, hostId },
+        protocol: 'telnet',
+        onInput: (data) => {
+            if (socket.writable) socket.write(negotiator.encode(data));
+        },
+        onResize: (nextCols, nextRows) => negotiator.resize(nextCols, nextRows),
+    });
+
+    sessions.set(tabId, {
+        socket,
+        pipe,
+        negotiator,
+        hostId,
+        hostName: label.name,
+        address: label.address,
+        openedAt: Date.now(),
+    });
+
+    // The size the pane already is, before the server has asked. Held
+    // by the negotiator and sent the moment NAWS is agreed.
+    negotiator.resize(cols || 80, rows || 24);
+    negotiator.start();
+
+    socket.on('data', (chunk) => {
+        const output = negotiator.receive(chunk);
+        if (output.length) pipe.deliver(output);
+    });
+
+    // A socket that came through a proxy is handed over paused, holding
+    // anything the device said before the handshake finished being read.
+    // The reader is attached now, so it is safe to let it flow. A no-op
+    // on a direct dial, which was never paused.
+    socket.resume();
+
+    socket.on('close', () => {
+        // A reconnect may already have registered a fresh session under
+        // this pane id; a stale close must not tear that one down.
+        const session = sessions.get(tabId);
+        if (!session || session.socket !== socket) return;
+        session.pipe.disconnected();
+        if (window && !window.isDestroyed()) {
+            window.webContents.send('ssh-disconnected', tabId);
+        }
+        destroy(tabId, { reason: 'dropped' });
+    });
+
+    // Same contract as SSH's: written as soon as the session is up,
+    // with no prompt detection, and replayed on every reconnect.
+    //
+    // Worth knowing what that means here. A telnet device usually opens
+    // with a login prompt, so a command set on a telnet host is typed
+    // into whatever the device happens to be showing, which is the
+    // login prompt unless the device has no login. That is the setting
+    // doing exactly what it says; it is only ever what was typed into
+    // it, and it is empty by default.
+    if (target.initCommand) {
+        try {
+            socket.write(negotiator.encode(`${target.initCommand}\r`));
+        } catch (error) {
+            console.error(`Could not send the connect command for ${tabId}:`, error.message);
+        }
+    }
+
+    // The path the socket took, for the pane header. The same shape ssh.js
+    // returns, minus any notion of a relay: telnet has no channel to open one
+    // on, so a proxy is the only thing that can stand in the way.
+    settle({
+        success: true,
+        message: 'Connected',
+        route: [
+            ...proxyHops(target.proxyChain),
+            { kind: 'host', label: label.name, detail: label.address },
+        ],
     });
 }
 
