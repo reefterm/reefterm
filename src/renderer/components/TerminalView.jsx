@@ -961,8 +961,6 @@ function TerminalView({
         }
     }, []);
 
-    if (!pane) return null;
-
     // `label` is the full account, which the status dot carries as its tooltip.
     // `short` is what fits in a header beside everything else, and it leaves
     // out whatever the neighbouring Reconnect button already says.
@@ -1052,13 +1050,6 @@ function TerminalView({
      * immediately, and making it queue behind a session would defeat the point
      * of asking for it.
      */
-    // FIXME: this component has an early `if (!pane) return null;` above, so
-    // every hook from here down is skipped on renders where `pane` is falsy.
-    // That's a real Rules-of-Hooks violation (risk of "rendered more/fewer hooks
-    // than previous render" if `pane` ever toggles falsy<->truthy for a mounted
-    // instance), pre-existing, not touched here — needs its own fix, not a
-    // lint-bootstrap side effect.
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
         const next = pendingView.current;
         if (!next) return;
@@ -1074,6 +1065,14 @@ function TerminalView({
         if (next === 'bmc') setBmcOpened(true);
         setViewMode(next);
     }, [desktopReady, sshHost, isLive, hasBmc]);
+
+    // Every hook is above this line, unconditionally, so it has to come after
+    // all of them: an early return before a hook is what skips it on some
+    // renders and not others, which is the Rules-of-Hooks violation this used
+    // to have. Everything above only computes plain values from `pane?.`, so
+    // running it when `pane` is null costs nothing and produces nothing this
+    // one depended on.
+    if (!pane) return null;
 
     // Splitting from the host you are already on is the common case, so it is
     // what the plain entries do; the "with…" pair opens the new pane on a
