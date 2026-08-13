@@ -18,8 +18,9 @@ pnpm run dev        # Vite + Electron in watch mode
 Useful scripts:
 
 ```sh
-pnpm run lint        # ESLint
-pnpm test            # the full test suite (plain Node scripts, no framework)
+pnpm run lint             # ESLint
+pnpm test                 # the full suite: node:test (main) + Vitest (renderer)
+pnpm run test:renderer    # renderer tests only
 pnpm run build:renderer   # build the renderer bundle
 pnpm run build            # full production build (Windows)
 ```
@@ -32,8 +33,8 @@ pnpm run build            # full production build (Windows)
 
 ## Tests
 
-- Tests live in `test/` as plain Node scripts (no Jest/Mocha) — each stubs `require('electron')` so main-process modules can run outside Electron. Look at an existing test file for the pattern before adding a new one.
-- Add or update a test alongside any behavioral change in `src/main/`.
+- Two runners, split by where the code runs: `src/main/**` (Electron main process, CommonJS) is tested with Node's built-in `node:test`, each file stubbing `require('electron')` so it runs outside Electron. `src/renderer/**` (React) is tested with Vitest + jsdom + React Testing Library, under `test-renderer/` — a sibling of `test/`, not a subfolder of it, since `node:test`'s own default discovery treats every `.js` file under a directory named `test` as a test to run. Look at an existing test file in the relevant style before adding a new one.
+- Add or update a test alongside any behavioral change, in either half.
 
 ## Commit messages and PRs
 
