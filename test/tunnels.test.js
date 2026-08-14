@@ -34,7 +34,12 @@ const ROOT = path.join(__dirname, '..', 'src', 'main');
 function startDestination() {
     return new Promise((resolve) => {
         const received = [];
+        const sockets = new Set();
+        let totalConnections = 0;
         const server = net.createServer((socket) => {
+            totalConnections += 1;
+            sockets.add(socket);
+            socket.on('close', () => sockets.delete(socket));
             socket.on('data', (chunk) => received.push(chunk));
             // Echo, so a test can observe a full round trip through the tunnel.
             socket.on('data', (chunk) => socket.write(chunk));
@@ -43,7 +48,18 @@ function startDestination() {
             server,
             port: server.address().port,
             received,
-            close: () => new Promise((r) => server.close(r)),
+            get totalConnections() { return totalConnections; },
+            get activeConnections() { return sockets.size; },
+            close: () => new Promise((r) => {
+                // A test's own teardown must never depend on the code under
+                // test having cleaned up correctly - that's backwards, and
+                // exactly the scenario a regression test needs to survive.
+                // Anything still open is force-destroyed first, so
+                // server.close()'s callback (which otherwise waits for every
+                // connection to end on its own) always fires promptly.
+                for (const socket of sockets) socket.destroy();
+                server.close(r);
+            }),
         }));
     });
 }
@@ -65,16 +81,20 @@ function getFreePort() {
  * driven by the test directly, since there is no real server to accept
  * an inbound remote forward from.
  */
-function makeFakeClient() {
+function makeFakeClient({ forwardOutDelayMs = 0 } = {}) {
     const routes = new Map();
     const client = new EventEmitter();
     client.routeTo = (host, port, destinationPort) => routes.set(`${host}:${port}`, destinationPort);
     client.forwardOut = (srcIP, srcPort, dstHost, dstPort, cb) => {
         const destinationPort = routes.get(`${dstHost}:${dstPort}`);
         if (!destinationPort) { cb(new Error(`No route to ${dstHost}:${dstPort}`)); return; }
-        const socket = net.connect(destinationPort, '127.0.0.1');
-        socket.once('connect', () => cb(null, socket));
-        socket.once('error', (error) => cb(error));
+        // Delayed so a test can call stop() while this dial is still in
+        // flight, the same window a real (slower) SSH round trip leaves open.
+        setTimeout(() => {
+            const socket = net.connect(destinationPort, '127.0.0.1');
+            socket.once('connect', () => cb(null, socket));
+            socket.once('error', (error) => cb(error));
+        }, forwardOutDelayMs);
     };
     client.forwardIn = (address, listenPort, cb) => {
         client._forwardInCalls = client._forwardInCalls || [];
@@ -315,9 +335,9 @@ describe('tunnels: local forward', () => {
         const socket = net.connect(port, '127.0.0.1');
         await new Promise((resolve) => socket.on('connect', resolve));
         // Wait for the bridge, not just the client-side TCP handshake: the
-        // server still has to dial the destination asynchronously, and a
-        // stop() that lands before that connection is registered leaks it
-        // (see the note on this file's known gaps at the end of the suite).
+        // server still has to dial the destination asynchronously. This test
+        // is specifically about a *bridged* connection getting torn down;
+        // stopping mid-dial is its own test below.
         await waitFor(() => tunnels.list('t1')[0].activeConnections === 1);
 
         const stopped = tunnels.stop('t1', 'a');
@@ -332,6 +352,64 @@ describe('tunnels: local forward', () => {
         }));
 
         await destination.close();
+    });
+
+    // A regression here doesn't fail fast: an un-cleaned-up connection makes
+    // this test's own destination.close() (in the finally below) hang too,
+    // since net.Server#close() waits for every open connection to end. An
+    // explicit timeout is what turns that back into a reported failure
+    // instead of a stuck CI job.
+    test('stopping while a connection is still mid-dial does not leak it', { timeout: 5000 }, async () => {
+        // Regression test: stop() used to only walk runtime.connections as it
+        // existed at that moment. A connection whose forwardOut dial was still
+        // in flight landed in that set *after* stop() had already run its
+        // cleanup loop, so nothing ever destroyed it - the socket to the
+        // destination lived for as long as the process did. Fixed via a
+        // generation counter: every async step from a start() carries the
+        // generation it began under, and checks it is still current before
+        // touching the runtime.
+        const { tunnels, store, ssh } = freshTunnels();
+        const client = withSession(ssh, 't1', makeFakeClient({ forwardOutDelayMs: 100 }));
+        const destination = await startDestination();
+        // Closed in a finally: a wrong assertion here must not leave this
+        // server open for the rest of the process's life - that is exactly
+        // the shape of hang this test exists to catch in tunnels.js itself,
+        // and it is just as capable of happening by accident in the test.
+        try {
+            client.routeTo('db', 5432, destination.port);
+            const port = await getFreePort();
+            const h = store.saveHost({
+                name: 'h1', host: 'h1.example.com',
+                tunnels: [{ id: 'a', type: 'local', listenPort: port, destHost: 'db', destPort: 5432 }],
+            });
+            tunnels.sync('t1', h.id);
+            tunnels.start('t1', 'a');
+            await waitFor(() => tunnels.list('t1')[0].state === 'active');
+
+            const socket = net.connect(port, '127.0.0.1');
+            await new Promise((resolve) => socket.on('connect', resolve));
+            // The dial to the destination is still pending (forwardOutDelayMs):
+            // stop() lands squarely inside the window that used to leak.
+            assert.strictEqual(tunnels.list('t1')[0].activeConnections, 0);
+
+            tunnels.stop('t1', 'a');
+
+            // The destination has to stay reachable past forwardOutDelayMs, or
+            // the stale dial fails for an unrelated reason (nothing listening)
+            // and the bug never gets a chance to reproduce.
+            await new Promise((r) => setTimeout(r, 200));
+
+            // The TCP connect to the destination still completes - that part
+            // isn't ours to prevent, the dial was already in flight - but it
+            // must never have been bridged, and it must not still be open:
+            // tunnels.js has to have destroyed it once it recognised the dial
+            // as stale.
+            assert.strictEqual(destination.totalConnections, 1);
+            assert.strictEqual(destination.activeConnections, 0);
+            assert.strictEqual(tunnels.list('t1')[0].activeConnections, 0);
+        } finally {
+            await destination.close();
+        }
     });
 });
 

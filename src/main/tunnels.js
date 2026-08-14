@@ -127,6 +127,15 @@ function makeRuntime(tabId, config) {
         totalConnections: 0,
         bytesUp: 0,
         bytesDown: 0,
+        // Bumped on every start(). A connection can be mid-dial (openChannel,
+        // forwardIn, a direct net.connect for a remote forward) when stop()
+        // runs, or even when a later start() supersedes this one before the
+        // dial settles; without this, that stale callback would bridge a
+        // connection nothing is tracking any more, or overwrite a newer
+        // attempt's state with a result that no longer applies. Every async
+        // callback that touches the runtime checks its captured generation
+        // against the current one before acting.
+        generation: 0,
     };
 }
 
@@ -208,11 +217,20 @@ function openChannel(runtime, socket, host, port, callback) {
  * Local forwarding
  * ------------------------------------------------------------------ */
 
-function handleLocalConnection(runtime, socket) {
+function handleLocalConnection(runtime, socket, generation) {
     const { destHost, destPort } = runtime.config;
 
     socket.pause();
     openChannel(runtime, socket, destHost, destPort, (error, channel) => {
+        // Superseded by a stop() (or a stop() and a fresh start()) while the
+        // dial was in flight: nothing is tracking this connection any more,
+        // so it is torn down here rather than bridged into a runtime that has
+        // moved on.
+        if (runtime.generation !== generation) {
+            socket.destroy();
+            channel?.destroy?.();
+            return;
+        }
         if (error) {
             runtime.lastError = error.message;
             markDirty(runtime.tabId);
@@ -269,7 +287,7 @@ function readSocksTarget(buffer) {
     return { host, port, rest: buffer.subarray(offset + 2) };
 }
 
-function handleSocksConnection(runtime, socket) {
+function handleSocksConnection(runtime, socket, generation) {
     let stage = 'greeting';
     let buffer = Buffer.alloc(0);
 
@@ -323,6 +341,11 @@ function handleSocksConnection(runtime, socket) {
         socket.pause();
 
         openChannel(runtime, socket, target.host, target.port, (error, channel) => {
+            if (runtime.generation !== generation) {
+                socket.destroy();
+                channel?.destroy?.();
+                return;
+            }
             if (error) {
                 runtime.lastError = `${target.host}:${target.port}: ${error.message}`;
                 markDirty(runtime.tabId);
@@ -371,7 +394,7 @@ function ensureDispatcher(tabId, client) {
             reject();
             return;
         }
-        acceptRemote(runtime, accept, reject);
+        acceptRemote(runtime, accept, reject, runtime.generation);
     };
 
     client.on('tcp connection', entry.dispatcher);
@@ -382,7 +405,7 @@ function ensureDispatcher(tabId, client) {
  * what OpenSSH does, and it lets the far end see a refused connection rather
  * than one that opens and immediately dies.
  */
-function acceptRemote(runtime, accept, reject) {
+function acceptRemote(runtime, accept, reject, generation) {
     const { destHost, destPort } = runtime.config;
     const socket = net.connect(destPort, destHost);
     let settled = false;
@@ -390,6 +413,14 @@ function acceptRemote(runtime, accept, reject) {
     socket.once('connect', () => {
         if (settled) return;
         settled = true;
+        // Stopped (or stopped and restarted) while the dial to the
+        // destination was in flight: reject the forward request rather than
+        // accepting a channel for a runtime that has moved on.
+        if (runtime.generation !== generation) {
+            socket.destroy();
+            reject();
+            return;
+        }
         bridge(runtime, socket, accept());
     });
 
@@ -399,14 +430,16 @@ function acceptRemote(runtime, accept, reject) {
             return;
         }
         settled = true;
-        runtime.lastError = `${destHost}:${destPort}: ${error.message}`;
-        markDirty(runtime.tabId);
+        if (runtime.generation === generation) {
+            runtime.lastError = `${destHost}:${destPort}: ${error.message}`;
+            markDirty(runtime.tabId);
+        }
         socket.destroy();
         reject();
     });
 }
 
-function startRemote(runtime) {
+function startRemote(runtime, generation) {
     const client = clientFor(runtime.tabId);
     if (!client) {
         setState(runtime, 'error', 'The SSH connection is no longer open');
@@ -420,6 +453,7 @@ function startRemote(runtime) {
 
     try {
         client.forwardIn(address, listenPort, (error, assignedPort) => {
+            if (runtime.generation !== generation) return; // superseded
             if (error) {
                 setState(
                     runtime,
@@ -441,15 +475,19 @@ function startRemote(runtime) {
  * Lifecycle
  * ------------------------------------------------------------------ */
 
-function startListener(runtime) {
+function startListener(runtime, generation) {
     const { type, listenHost, listenPort } = runtime.config;
 
     const server = net.createServer((socket) => {
-        if (type === 'dynamic') handleSocksConnection(runtime, socket);
-        else handleLocalConnection(runtime, socket);
+        if (type === 'dynamic') handleSocksConnection(runtime, socket, generation);
+        else handleLocalConnection(runtime, socket, generation);
     });
 
     server.on('error', (error) => {
+        // Superseded: stop() (or stop()+start()) has already moved the
+        // runtime on, and closed the server this callback belongs to.
+        if (runtime.generation !== generation) return;
+
         const reason = error.code === 'EADDRINUSE'
             ? `Port ${listenPort} is already in use on this machine`
             : error.code === 'EACCES'
@@ -466,6 +504,16 @@ function startListener(runtime) {
     });
 
     server.listen(listenPort, bindAddress(listenHost), () => {
+        if (runtime.generation !== generation) {
+            // stop() already ran, or a fresh start() has superseded this one.
+            // Either way this listener has to go, not report itself active.
+            try {
+                server.close();
+            } catch {
+                // Already gone.
+            }
+            return;
+        }
         runtime.boundPort = server.address()?.port || listenPort;
         setState(runtime, 'active');
     });
@@ -494,8 +542,15 @@ function start(tabId, tunnelId) {
     runtime.lastError = '';
     setState(runtime, 'starting');
 
-    if (runtime.config.type === 'remote') startRemote(runtime);
-    else startListener(runtime);
+    // Every async step this attempt kicks off (a dial, forwardIn, a listen)
+    // carries this number, so a callback that outlives the attempt it came
+    // from - because stop() ran, or a fresh start() beat it to the punch -
+    // can tell it no longer applies before touching the runtime.
+    runtime.generation += 1;
+    const generation = runtime.generation;
+
+    if (runtime.config.type === 'remote') startRemote(runtime, generation);
+    else startListener(runtime, generation);
 
     return { success: true };
 }
@@ -507,6 +562,11 @@ function start(tabId, tunnelId) {
 function stop(tabId, tunnelId, { silent = false } = {}) {
     const runtime = byTab.get(tabId)?.runtimes.get(tunnelId);
     if (!runtime) return { success: false, message: 'Tunnel not found' };
+
+    // Invalidates every callback any dial/listen/forwardIn still in flight
+    // from the current start() is carrying, whether or not this stop() is
+    // followed by a restart: see the comment on `generation` in makeRuntime.
+    runtime.generation += 1;
 
     if (runtime.server) {
         try {
