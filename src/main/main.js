@@ -4,6 +4,7 @@ const path = require('path');
 const ipc = require('./ipc');
 const transport = require('./transport');
 const cloudSnapshot = require('./cloud-snapshot');
+const plugins = require('./plugins');
 
 let mainWindow = null;
 
@@ -175,6 +176,12 @@ app.whenReady().then(() => {
     ipc.register(getWindow);
     createWindow();
 
+    // Not awaited: a plugin failing to discover or start must never hold up
+    // the window a user is waiting to see. Per-plugin failures already
+    // report themselves (see plugins/manager.js's 'plugin-start-failed');
+    // this only guards the scan itself (e.g. an unwritable plugins folder).
+    plugins.init().catch((error) => console.error('Failed to initialize plugins:', error.message));
+
     app.on('activate', () => {
         if (BrowserWindow.getAllWindows().length === 0) createWindow();
     });
@@ -186,6 +193,7 @@ app.on('before-quit', () => {
     // effort: nothing here delays the quit waiting on the network.
     cloudSnapshot.flush();
     transport.destroyAll();
+    plugins.shutdown();
 });
 
 app.on('window-all-closed', () => {

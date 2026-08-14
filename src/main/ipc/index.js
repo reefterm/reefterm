@@ -12,6 +12,7 @@ const rdp = require('../rdp');
 const bmc = require('../bmc');
 const activity = require('../activity');
 const ssh = require('../ssh');
+const plugins = require('../plugins');
 
 const hostsIpc = require('./hosts');
 const keysIpc = require('./keys');
@@ -32,6 +33,7 @@ const auditIpc = require('./audit');
 const osIntegrationIpc = require('./os-integration');
 const updatesIpc = require('./updates');
 const assistantIpc = require('./assistant');
+const pluginsIpc = require('./plugins');
 
 /**
  * Channels that still answer while the app is locked: the unlock flow itself,
@@ -108,6 +110,7 @@ function register(getWindow) {
     rdp.setNotifier(notify);
     bmc.setNotifier(notify);
     activity.setNotifier(notify);
+    plugins.setNotifier(notify);
 
     // Waking from sleep is when a session is most likely to be dead and a
     // retry most likely to succeed, so tabs are told rather than waiting out
@@ -234,6 +237,7 @@ function register(getWindow) {
     osIntegrationIpc.register(ctx);
     updatesIpc.register(ctx);
     assistantIpc.register(ctx);
+    pluginsIpc.register(ctx);
 }
 
 /** Deny any prompt still waiting when the window goes away, and drop unsaved keys. */

@@ -21,6 +21,7 @@ const {
 } = require('./os-integration');
 const { updates } = require('./updates');
 const { ai } = require('./assistant');
+const { plugins } = require('./plugins');
 
 contextBridge.exposeInMainWorld('api', {
     hosts,
@@ -60,6 +61,7 @@ contextBridge.exposeInMainWorld('api', {
     screenshot,
     updates,
     ai,
+    plugins,
 
     // Which OS this is, for the handful of places the interface has to differ:
     // macOS draws its own window controls, and Pageant and the registry
