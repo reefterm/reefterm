@@ -80,7 +80,7 @@ jobs:
             args: --linux AppImage --x64
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: pnpm/action-setup@v4
 
@@ -215,7 +215,7 @@ jobs:
       # For scripts/merge-update-manifests.js, and nothing else. No install
       # step: the script has no dependencies precisely so this step can stay
       # this cheap.
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: actions/download-artifact@v4
         with:
