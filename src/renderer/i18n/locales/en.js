@@ -322,6 +322,7 @@ export default {
     'settings.nav.security': 'Security',
     'settings.nav.sync': 'Sync',
     'settings.nav.backup': 'Backup',
+    'settings.nav.plugins': 'Plugins',
     'settings.nav.about': 'About',
 
     /* ---------------------------------------------------------------- *
@@ -845,6 +846,42 @@ export default {
         + 'type. Check Security, then Known hosts.',
     'settings.backup.duplicateKeys_other': '{count} hosts now trust more than one key of the same '
         + 'type. Check Security, then Known hosts.',
+
+    /* ---------------------------------------------------------------- *
+     * Settings: Plugins
+     * ---------------------------------------------------------------- */
+    'settings.plugins.title': 'Plugins',
+    'settings.plugins.desc': 'Code dropped into the plugins folder, each in its own sandboxed '
+        + 'process with no access to anything of yours beyond what you approve below.',
+    'settings.plugins.installed': 'Installed',
+    'settings.plugins.none': 'Nothing found in the plugins folder yet.',
+    'settings.plugins.count_one': '{count} plugin found.',
+    'settings.plugins.count_other': '{count} plugins found.',
+    'settings.plugins.rescan': 'Rescan',
+    'settings.plugins.scanning': 'Scanning…',
+    'settings.plugins.rescanFailed': 'Could not scan the plugins folder',
+    'settings.plugins.toggleFailed': 'Could not change that plugin',
+    'settings.plugins.consentFailed': 'Could not save that decision',
+    'settings.plugins.review': 'Review',
+    'settings.plugins.enableAria': 'Enable {name}',
+    'settings.plugins.emptyFolder': 'Drop a plugin folder into the app’s plugins directory and '
+        + 'select Rescan to find it.',
+    'settings.plugins.state.running': 'Running',
+    'settings.plugins.state.pending-consent': 'Needs review',
+    'settings.plugins.state.crashed': 'Crashed',
+    'settings.plugins.state.invalid': 'Invalid',
+    'settings.plugins.state.disabled': 'Disabled',
+    'settings.plugins.state.stopped': 'Stopped',
+    'settings.plugins.notice.crash': 'Crashed: {message}',
+    'settings.plugins.notice.exit': 'Exited unexpectedly ({message})',
+    'settings.plugins.notice.start-failed': 'Could not start: {message}',
+    'settings.plugins.consent.title': 'Allow {name}?',
+    'settings.plugins.consent.subtitle': '{id}',
+    'settings.plugins.consent.asksFor': 'This plugin is asking for',
+    'settings.plugins.consent.approve': 'Approve',
+    'settings.plugins.consent.deny': 'Deny',
+    'settings.plugins.consent.footnote': 'Denying turns the plugin off rather than leaving it '
+        + 'waiting; you can turn it back on later, which asks again for whatever is still needed.',
 
     /* ---------------------------------------------------------------- *
      * Settings: About

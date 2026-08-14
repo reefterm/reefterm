@@ -10,6 +10,7 @@ import {
     RefreshIcon,
     AiMagicIcon,
     PulseRectangle01Icon,
+    PuzzleIcon,
 } from 'hugeicons-react';
 import { useT } from '../../i18n';
 
@@ -29,6 +30,7 @@ export const SETTINGS_CATEGORIES = [
     { id: 'security', icon: ShieldKeyIcon },
     { id: 'sync', icon: RefreshIcon },
     { id: 'backup', icon: Archive01Icon },
+    { id: 'plugins', icon: PuzzleIcon },
     { id: 'about', icon: InformationCircleIcon },
 ];
 

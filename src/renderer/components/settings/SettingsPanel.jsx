@@ -9,6 +9,7 @@ import LoggingPage from './pages/LoggingPage';
 import SecurityPage from './pages/SecurityPage';
 import SyncPage from './pages/SyncPage';
 import BackupPage from './pages/BackupPage';
+import PluginsPage from './pages/PluginsPage';
 import AboutPage from './pages/AboutPage';
 
 /** Keyed by the ids in SETTINGS_CATEGORIES, so every category needs an entry. */
@@ -22,6 +23,7 @@ const PAGES = {
     security: SecurityPage,
     sync: SyncPage,
     backup: BackupPage,
+    plugins: PluginsPage,
     about: AboutPage,
 };
 
