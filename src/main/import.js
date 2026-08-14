@@ -7,6 +7,7 @@ const sshConfig = require('./ssh-config');
 const common = require('./import-common');
 const puttyImport = require('./putty-import');
 const mobaxtermImport = require('./mobaxterm-import');
+const { createRegistry } = require('./plugins/registry');
 
 /**
  * Bring an existing setup into the app.
@@ -261,23 +262,73 @@ function scanOpenSsh({ configPath, knownHostsPath } = {}) {
 
 /* ------------------------------------------------------------------ *
  * Source dispatch
+ *
+ * One registry entry per source this file can bring hosts in from, built on
+ * the same primitive the AI provider registry uses (see
+ * src/main/plugins/registry.js). Unlike the AI providers, `import` itself
+ * stays a single togglable feature rather than one entry per source: nobody
+ * picks between PuTTY and MobaXterm the way they pick an assistant agent,
+ * they run an import once and move on. What the registry buys here is a
+ * seam for a source this app does not ship yet - Warpgate, Consul, whatever
+ * someone actually wants - to register itself the same way OpenSSH, PuTTY,
+ * KiTTY and MobaXterm already do, instead of a new branch in an `if/else`
+ * chain that used to live here.
  * ------------------------------------------------------------------ */
 
-/** Which sources have anything to offer, for the Backup page to show. */
+/** Every source must offer the same three operations, however it gets there. */
+function validateSource(impl, id) {
+    for (const method of ['detect', 'scan', 'apply']) {
+        if (typeof impl?.[method] !== 'function') {
+            throw new Error(`import.sources: "${id}" must have a ${method}() function`);
+        }
+    }
+}
+
+const sources = createRegistry('import.sources', { validate: validateSource });
+
+sources.register('openssh', {
+    detect: defaultPaths,
+    scan: scanOpenSsh,
+    apply: applyOpenSsh,
+}, { name: 'OpenSSH config' });
+
+// PuTTY and KiTTY share one implementation module, told apart by the source
+// string threaded through it; each still gets its own entry here; so a
+// caller of this registry never has to know that.
+sources.register('putty', {
+    detect: () => puttyImport.detect('putty'),
+    scan: () => puttyImport.scan('putty'),
+    apply: (options) => puttyImport.apply('putty', options),
+}, { name: 'PuTTY' });
+
+sources.register('kitty', {
+    detect: () => puttyImport.detect('kitty'),
+    scan: () => puttyImport.scan('kitty'),
+    apply: (options) => puttyImport.apply('kitty', options),
+}, { name: 'KiTTY' });
+
+sources.register('mobaxterm', mobaxtermImport, { name: 'MobaXterm' });
+
+/**
+ * Which sources have anything to offer, for the Backup page to show.
+ *
+ * Every registered source, not only the enabled ones: a source that is off
+ * still has an opinion about what is on disk, and hiding that would read as
+ * "nothing found" rather than "found, but this importer is disabled".
+ */
 function detect() {
-    return {
-        openssh: defaultPaths(),
-        putty: puttyImport.detect('putty'),
-        kitty: puttyImport.detect('kitty'),
-        mobaxterm: mobaxtermImport.detect(),
-    };
+    const result = {};
+    for (const { id, impl } of sources.all()) {
+        result[id] = impl.detect();
+    }
+    return result;
 }
 
 function scan(options = {}) {
     const source = options.source || 'openssh';
-    if (source === 'putty' || source === 'kitty') return puttyImport.scan(source);
-    if (source === 'mobaxterm') return mobaxtermImport.scan(options);
-    return scanOpenSsh(options);
+    const impl = sources.get(source);
+    if (!impl) throw new Error(`No import source named "${source}" is available`);
+    return impl.scan(options);
 }
 
 /* ------------------------------------------------------------------ *
@@ -423,9 +474,9 @@ function applyOpenSsh({
 
 function apply(options = {}) {
     const source = options.source || 'openssh';
-    if (source === 'putty' || source === 'kitty') return puttyImport.apply(source, options);
-    if (source === 'mobaxterm') return mobaxtermImport.apply(options);
-    return applyOpenSsh(options);
+    const impl = sources.get(source);
+    if (!impl) throw new Error(`No import source named "${source}" is available`);
+    return impl.apply(options);
 }
 
 module.exports = {

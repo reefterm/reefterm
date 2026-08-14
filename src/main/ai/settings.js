@@ -17,7 +17,19 @@ const fs = require('fs');
 
 const CONFIG_VERSION = 1;
 
-const PROVIDERS = new Set(['claude-code', 'codex', 'opencode']);
+/**
+ * Required lazily, inside sanitize() rather than up here: claude-code.js and
+ * codex.js both read `EFFORTS` off this file's own exports at their top
+ * level, so a top-level require of the provider registry here would deadlock
+ * on itself the moment either of them loaded (this file, mid-load, asked for
+ * a provider, which asked back for this file, which Node hands back
+ * half-built - `undefined.EFFORTS`). By the time sanitize() actually runs,
+ * everything has finished loading and the require just returns the cached
+ * module.
+ */
+function providerRegistry() {
+    return require('./providers');
+}
 
 /**
  * Every level any agent here offers, low to high. The union, not one agent's
@@ -117,7 +129,7 @@ function sanitize(raw) {
     };
     if (raw && typeof raw === 'object') {
         if ('enabled' in raw) next.enabled = Boolean(raw.enabled);
-        if (PROVIDERS.has(raw.provider)) next.provider = raw.provider;
+        if (providerRegistry().has(raw.provider)) next.provider = raw.provider;
         if (typeof raw.model === 'string') next.model = raw.model.trim().slice(0, 80);
         if (EFFORTS.has(raw.effort)) next.effort = raw.effort;
         if (APPROVALS.has(raw.approval)) next.approval = raw.approval;
@@ -276,5 +288,4 @@ module.exports = {
     APPROVALS,
     COMMAND_MODES,
     EFFORTS,
-    PROVIDERS,
 };

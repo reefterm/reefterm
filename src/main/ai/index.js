@@ -4,6 +4,7 @@ const catalog = require('./tools');
 const archive = require('./archive');
 const transcript = require('../transcript');
 const activity = require('../activity');
+const providers = require('./providers');
 
 /**
  * The assistant, from the app's point of view.
@@ -24,11 +25,8 @@ const activity = require('../activity');
  * query again on the next message, exactly as a parked one does.
  */
 
-const PROVIDERS = {
-    'claude-code': require('./providers/claude-code'),
-    codex: require('./providers/codex'),
-    opencode: require('./providers/opencode'),
-};
+// Which agent runs a conversation. See providers/index.js for the registry
+// itself and the shape a provider has to implement.
 
 /** Kept per conversation, so a long session cannot grow without bound. */
 const MAX_EVENTS = 4000;
@@ -453,7 +451,7 @@ function ensureProvider(conversation) {
     if (conversation.starting) return conversation.starting;
 
     const current = resolved();
-    const provider = PROVIDERS[current.provider];
+    const provider = providers.get(current.provider);
     if (!provider) {
         return Promise.reject(new Error(`No provider named "${current.provider}" is available`));
     }
@@ -795,7 +793,7 @@ function models({ refresh = false } = {}) {
     if (modelCatalogs.has(asked)) return Promise.resolve(modelCatalogs.get(asked));
     if (modelsPending?.provider === asked && !refresh) return modelsPending.promise;
 
-    const provider = PROVIDERS[asked];
+    const provider = providers.get(asked);
     if (!provider?.listModels) return Promise.resolve(null);
 
     const promise = provider.listModels({ settings: resolved() })
@@ -827,9 +825,11 @@ function models({ refresh = false } = {}) {
 function status() {
     const current = settings.get();
     return {
-        ready: Boolean(PROVIDERS[current.provider]),
+        ready: Boolean(providers.get(current.provider)),
         provider: current.provider,
-        providers: Object.keys(PROVIDERS),
+        // Enabled ones only: this is "what a person could pick", the same
+        // question ProviderPicker.jsx asks of it with `available.includes`.
+        providers: providers.list().filter(entry => entry.enabled).map(entry => entry.id),
         settings: current,
         // Null until a conversation has run once. The settings page says so
         // rather than guessing, because "no plan found" and "not asked yet"
