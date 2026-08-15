@@ -1,5 +1,6 @@
 const { fork } = require('child_process');
 const path = require('path');
+const uiExtensions = require('./ui-extensions');
 
 /**
  * Runs a plugin's own code in a separate, locked-down process, and is the
@@ -33,6 +34,9 @@ const START_TIMEOUT = 10000;
 
 /** How long a stop() gets to end cleanly before the process is killed outright. */
 const STOP_TIMEOUT = 3000;
+
+/** How long a plugin gets to answer an invoked action before it is treated as hung. */
+const ACTION_TIMEOUT = 10000;
 
 const RUNTIME_FILE = path.join(__dirname, 'host-runtime.js');
 
@@ -116,7 +120,18 @@ function createPluginHost() {
                 serialization: 'json',
             });
 
-            const record = { child, state: 'starting', granted: new Set(capabilities) };
+            const record = {
+                child,
+                state: 'starting',
+                granted: new Set(capabilities),
+                // key (`${pointName}:${contributionId}`) -> { pointName, id, node }.
+                contributions: new Map(),
+                // callId -> { resolve, reject }, for an invokeAction() this process is
+                // still waiting on a reply to - the mirror image of host-runtime.js's
+                // own `pending`, one direction earlier down the same round trip.
+                pendingActions: new Map(),
+                nextActionCallId: 0,
+            };
             plugins.set(id, record);
 
             let settled = false;
@@ -161,6 +176,7 @@ function createPluginHost() {
                 if (record.state !== 'stopping' && plugins.get(id) === record) {
                     record.state = 'crashed';
                     notify('plugin-exit', { id, code, signal, expected: false });
+                    clearContributions(id, record);
                 }
             });
 
@@ -185,6 +201,14 @@ function createPluginHost() {
         }
         if (message.type === 'capability-call') {
             handleCapabilityCall(id, record, message);
+            return;
+        }
+        if (message.type === 'contribute') {
+            handleContribute(id, record, message);
+            return;
+        }
+        if (message.type === 'action-result' || message.type === 'action-error') {
+            handleActionResponse(record, message);
         }
     }
 
@@ -210,6 +234,70 @@ function createPluginHost() {
         }
     }
 
+    /** Every current contribution for one plugin, in the shape listContributions() also uses. */
+    function pluginContributions(id, record) {
+        return [...record.contributions.values()].map(({ pointName, id: contributionId, node }) => (
+            { pluginId: id, pointName, id: contributionId, node }
+        ));
+    }
+
+    function clearContributions(id, record) {
+        if (record.contributions.size === 0) return;
+        record.contributions.clear();
+        notify('plugin-contribution', { id, contributions: [] });
+    }
+
+    /** A plugin declaring or updating one piece of UI - validated here, not trusted from the child's own shape-check. */
+    function handleContribute(id, record, { callId, pointName, id: contributionId, node }) {
+        const { child } = record;
+        const error = uiExtensions.validateNode(pointName, node);
+        if (error) {
+            child.send({ type: 'contribute-error', callId, message: error });
+            return;
+        }
+        record.contributions.set(`${pointName}:${contributionId}`, { pointName, id: contributionId, node });
+        child.send({ type: 'contribute-result', callId, result: { success: true } });
+        notify('plugin-contribution', { id, contributions: pluginContributions(id, record) });
+    }
+
+    /** A reply to an invokeAction() this process itself sent - see invokeAction() below. */
+    function handleActionResponse(record, message) {
+        const entry = record.pendingActions.get(message.callId);
+        if (!entry) return;
+        record.pendingActions.delete(message.callId);
+        if (message.type === 'action-result') entry.resolve(message.result);
+        else entry.reject(new Error(message.message));
+    }
+
+    /** The app-initiated mirror of handleCapabilityCall: invokes a handler the plugin registered via onAction(). */
+    function invokeAction(id, actionId, args) {
+        const record = plugins.get(id);
+        if (!record || record.state !== 'ready') {
+            return Promise.reject(new Error(`Plugin "${id}" is not running`));
+        }
+
+        return new Promise((resolve, reject) => {
+            record.nextActionCallId += 1;
+            const callId = `a${record.nextActionCallId}`;
+
+            const timer = setTimeout(() => {
+                record.pendingActions.delete(callId);
+                reject(new Error(`Plugin "${id}" did not respond to action "${actionId}" in time`));
+            }, ACTION_TIMEOUT);
+
+            record.pendingActions.set(callId, {
+                resolve: (result) => { clearTimeout(timer); resolve(result); },
+                reject: (error) => { clearTimeout(timer); reject(error); },
+            });
+            record.child.send({ type: 'invoke-action', callId, actionId, args });
+        });
+    }
+
+    /** Every plugin's current contributions, flattened, for the renderer to draw from. */
+    function listContributions() {
+        return [...plugins.entries()].flatMap(([id, record]) => pluginContributions(id, record));
+    }
+
     /** End a plugin's process. Resolves once it is gone, however that happened. */
     function stop(id) {
         const record = plugins.get(id);
@@ -229,6 +317,7 @@ function createPluginHost() {
             const finish = () => {
                 if (done) return;
                 done = true;
+                clearContributions(id, record);
                 plugins.delete(id);
                 resolve({ success: true });
             };
@@ -269,6 +358,8 @@ function createPluginHost() {
         stopAll,
         status,
         list,
+        invokeAction,
+        listContributions,
     };
 }
 

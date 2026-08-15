@@ -17,11 +17,11 @@
  *      because the permission model does not cover networking at all:
  *      `require('net')`, `require('http')`, `require('https')` and
  *      `require('dns')` all work unless something stops them. A plugin's
- *      only door to anything the app actually holds - a host list, a live
- *      session, a network request made on its behalf - is the `call()`
- *      function handed to `activate()`, which round-trips through the
- *      parent process and is checked there against exactly what that
- *      plugin was granted. See host.js's `capabilityHandlers`.
+ *      only doors out are `call()` (checked against granted capabilities,
+ *      see host.js) and `contribute()` (checked against ui-extensions.js's
+ *      node shapes), both round-tripped through the parent. A contributed
+ *      node's `onAction` names a handler the plugin registered on itself
+ *      via `onAction()`, never a capability or a raw function.
  *
  * A plugin that gets past both of these has found a real bug, not a gap
  * left by design - which is the honest bar this is held to: this is a much
@@ -59,25 +59,52 @@ Module.prototype.require = function guardedRequire(request) {
 
 let granted = new Set();
 let nextCallId = 0;
-/** callId -> { resolve, reject } */
+/** callId -> { resolve, reject }, for a request this process is waiting on a reply to. */
 const pending = new Map();
+/** actionId -> async (...args) => result, registered by the plugin's own code via onAction(). */
+const actionHandlers = new Map();
+
+/** Sends a request to the parent, resolved or rejected once its callId-matched reply arrives. */
+function sendRequest(type, payload) {
+    return new Promise((resolve, reject) => {
+        nextCallId += 1;
+        const callId = String(nextCallId);
+        pending.set(callId, { resolve, reject });
+        process.send({ type, callId, ...payload });
+    });
+}
 
 /**
- * The plugin's one door back into the app. Checked here as well as in the
- * parent (see host.js) so a plugin gets a clear, immediate rejection for a
- * capability it was never granted, rather than a round trip that ends the
- * same way.
+ * The plugin's door to whatever the app already holds. Checked here as well
+ * as in the parent (see host.js) so a plugin gets a clear, immediate
+ * rejection for a capability it was never granted, rather than a round trip
+ * that ends the same way.
  */
 function call(name, ...args) {
     if (!granted.has(name)) {
         return Promise.reject(new Error(`This plugin was not granted the "${name}" capability`));
     }
-    return new Promise((resolve, reject) => {
-        nextCallId += 1;
-        const callId = String(nextCallId);
-        pending.set(callId, { resolve, reject });
-        process.send({ type: 'capability-call', callId, name, args });
-    });
+    return sendRequest('capability-call', { name, args });
+}
+
+/**
+ * Declares, or updates (call again with the same `id`), one piece of UI
+ * this plugin wants shown at `pointName`. Rejects if the parent refuses
+ * `node`'s shape - see host.js's `contribute` handling.
+ */
+function contribute(pointName, id, node) {
+    return sendRequest('contribute', { pointName, id, node });
+}
+
+/** Registers what runs when `actionId` (named from a contributed node's `onAction`) is invoked from the UI. */
+function onAction(actionId, handler) {
+    if (!actionId || typeof actionId !== 'string') {
+        throw new Error('onAction needs a non-empty string actionId');
+    }
+    if (typeof handler !== 'function') {
+        throw new Error(`onAction("${actionId}") needs a handler function`);
+    }
+    actionHandlers.set(actionId, handler);
 }
 
 async function handleInit(message) {
@@ -87,7 +114,7 @@ async function handleInit(message) {
         // this one, not supplied by the plugin itself.
         const plugin = realRequire.call(module, message.entryFile);
         if (typeof plugin?.activate === 'function') {
-            await plugin.activate({ call });
+            await plugin.activate({ call, contribute, onAction });
         }
         process.send({ type: 'ready' });
     } catch (error) {
@@ -95,19 +122,38 @@ async function handleInit(message) {
     }
 }
 
-function handleCapabilityResponse(message) {
+/** A reply to something this process itself asked for - see sendRequest(). */
+function handleResponse(message) {
     const entry = pending.get(message.callId);
     if (!entry) return;
     pending.delete(message.callId);
-    if (message.type === 'capability-result') entry.resolve(message.result);
+    if (message.type.endsWith('-result')) entry.resolve(message.result);
     else entry.reject(new Error(message.message));
 }
 
+/** The parent invoking a handler this plugin registered via onAction() - unprompted, not a reply. */
+async function handleInvokeAction({ callId, actionId, args }) {
+    const handler = actionHandlers.get(actionId);
+    if (!handler) {
+        process.send({ type: 'action-error', callId, message: `No handler registered for action "${actionId}"` });
+        return;
+    }
+    try {
+        const result = await handler(...(args || []));
+        process.send({ type: 'action-result', callId, result });
+    } catch (error) {
+        process.send({ type: 'action-error', callId, message: error.message });
+    }
+}
+
+const RESPONSE_TYPES = new Set([
+    'capability-result', 'capability-error', 'contribute-result', 'contribute-error',
+]);
+
 process.on('message', (message) => {
     if (message.type === 'init') { handleInit(message); return; }
-    if (message.type === 'capability-result' || message.type === 'capability-error') {
-        handleCapabilityResponse(message);
-    }
+    if (RESPONSE_TYPES.has(message.type)) { handleResponse(message); return; }
+    if (message.type === 'invoke-action') { handleInvokeAction(message); }
 });
 
 // A plugin's own bug must not look like a silent hang: the parent is told,

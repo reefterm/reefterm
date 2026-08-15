@@ -308,3 +308,170 @@ describe('plugin host: crashes and lifecycle', () => {
         assert.deepStrictEqual(host.list(), []);
     });
 });
+
+/* ------------------------------------------------------------------ *
+ * UI contributions: a plugin declaring interface elements, and the app
+ * invoking whatever the plugin registered for them - see ui-extensions.js
+ * for the node shapes and PluginConsentDialog.jsx for where the sample side
+ * of this is shown before a plugin ever runs.
+ * ------------------------------------------------------------------ */
+
+describe('plugin host: UI contributions', () => {
+    test('a valid contribution round-trips and shows up in listContributions()', async () => {
+        const host = freshHost();
+        const entry = writeScript(`
+            module.exports = {
+                activate: async ({ contribute }) => {
+                    await contribute('pane.headerAction', 'containers', {
+                        type: 'button', label: 'Containers', onAction: 'showContainers',
+                    });
+                },
+            };
+        `);
+        await host.start({ id: 'a', entryFile: entry, capabilities: [] });
+
+        assert.deepStrictEqual(host.listContributions(), [{
+            pluginId: 'a',
+            pointName: 'pane.headerAction',
+            id: 'containers',
+            node: { type: 'button', label: 'Containers', onAction: 'showContainers' },
+        }]);
+    });
+
+    test('an invalid contribution is rejected with a clear reason, and never appears in the list', async () => {
+        const host = freshHost();
+        const entry = writeScript(`
+            module.exports = {
+                activate: async ({ contribute }) => {
+                    try {
+                        await contribute('pane.headerAction', 'bad', { type: 'button' });
+                        throw new Error('should have been refused');
+                    } catch (error) {
+                        if (!/"label"/.test(error.message)) throw error;
+                    }
+                },
+            };
+        `);
+        await assert.doesNotReject(host.start({ id: 'a', entryFile: entry, capabilities: [] }));
+        assert.deepStrictEqual(host.listContributions(), []);
+    });
+
+    test('contributing to an unknown extension point is rejected', async () => {
+        const host = freshHost();
+        const entry = writeScript(`
+            module.exports = {
+                activate: async ({ contribute }) => {
+                    try {
+                        await contribute('does.not.exist', 'x', { type: 'button', label: 'x', onAction: 'x' });
+                        throw new Error('should have been refused');
+                    } catch (error) {
+                        if (!/not a known extension point/.test(error.message)) throw error;
+                    }
+                },
+            };
+        `);
+        await assert.doesNotReject(host.start({ id: 'a', entryFile: entry, capabilities: [] }));
+    });
+
+    test('contributing again with the same id updates it rather than adding a second one', async () => {
+        const host = freshHost();
+        let secondReported;
+        host.registerCapability('report', async (value) => { secondReported = value; });
+
+        const entry = writeScript(`
+            module.exports = {
+                activate: async ({ call, contribute }) => {
+                    await contribute('pane.headerAction', 'containers', {
+                        type: 'button', label: 'Containers', badge: 1, onAction: 'x',
+                    });
+                    const result = await contribute('pane.headerAction', 'containers', {
+                        type: 'button', label: 'Containers', badge: 2, onAction: 'x',
+                    });
+                    await call('report', result);
+                },
+            };
+        `);
+        await host.start({ id: 'a', entryFile: entry, capabilities: ['report'] });
+
+        assert.deepStrictEqual(secondReported, { success: true });
+        const contributions = host.listContributions();
+        assert.strictEqual(contributions.length, 1);
+        assert.strictEqual(contributions[0].node.badge, 2);
+    });
+
+    test('invokeAction() calls the handler the plugin registered on itself, and returns its result', async () => {
+        const host = freshHost();
+        const entry = writeScript(`
+            module.exports = {
+                activate: async ({ onAction }) => {
+                    onAction('deploy', async (hostId) => 'deployed:' + hostId);
+                },
+            };
+        `);
+        await host.start({ id: 'a', entryFile: entry, capabilities: [] });
+
+        const result = await host.invokeAction('a', 'deploy', ['host-1']);
+        assert.strictEqual(result, 'deployed:host-1');
+    });
+
+    test('invokeAction() rejects for an actionId the plugin never registered', async () => {
+        const host = freshHost();
+        const entry = writeScript('module.exports = { activate: async () => {} };');
+        await host.start({ id: 'a', entryFile: entry, capabilities: [] });
+
+        await assert.rejects(host.invokeAction('a', 'nope', []), /No handler registered/);
+    });
+
+    test('invokeAction() rejects immediately for a plugin that is not running', async () => {
+        const host = freshHost();
+        await assert.rejects(host.invokeAction('does-not-exist', 'anything', []), /is not running/);
+    });
+
+    test('a plugin whose own action handler throws reports that error back to invokeAction()', async () => {
+        const host = freshHost();
+        const entry = writeScript(`
+            module.exports = {
+                activate: async ({ onAction }) => {
+                    onAction('boom', async () => { throw new Error('deliberate action failure'); });
+                },
+            };
+        `);
+        await host.start({ id: 'a', entryFile: entry, capabilities: [] });
+
+        await assert.rejects(host.invokeAction('a', 'boom', []), /deliberate action failure/);
+    });
+
+    test('contributions are cleared on a deliberate stop()', async () => {
+        const host = freshHost();
+        const entry = writeScript(`
+            module.exports = {
+                activate: async ({ contribute }) => {
+                    await contribute('host.contextMenuItem', 'x', { type: 'menuItem', label: 'x', onAction: 'x' });
+                },
+            };
+        `);
+        await host.start({ id: 'a', entryFile: entry, capabilities: [] });
+        assert.strictEqual(host.listContributions().length, 1);
+
+        await host.stop('a');
+        assert.deepStrictEqual(host.listContributions(), []);
+    });
+
+    test('contributions are cleared when a plugin crashes', async () => {
+        const host = freshHost();
+        const entry = writeScript(`
+            module.exports = {
+                activate: async ({ contribute }) => {
+                    await contribute('host.contextMenuItem', 'x', { type: 'menuItem', label: 'x', onAction: 'x' });
+                    setTimeout(() => { throw new Error('crashed after contributing'); }, 10);
+                },
+            };
+        `);
+        await host.start({ id: 'a', entryFile: entry, capabilities: [] });
+        assert.strictEqual(host.listContributions().length, 1);
+
+        await new Promise((resolve) => setTimeout(resolve, 200));
+        assert.strictEqual(host.status('a').state, 'crashed');
+        assert.deepStrictEqual(host.listContributions(), []);
+    });
+});
