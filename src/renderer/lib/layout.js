@@ -23,6 +23,17 @@ export const SIDEBAR_WIDTH = 172;
 // Height of a terminal pane's own header row.
 export const PANE_HEADER_HEIGHT = 44;
 
+// Width of QuickAccessGutter, the vertical strip of tool buttons (assistant,
+// theme switcher, ...) pinned to the right edge. Wide enough to centre a
+// 32px button, and no wider.
+export const QUICK_ACCESS_GUTTER_WIDTH = 40;
+
+// Timing for PanelDock's open/close/switch slide, shared with
+// QuickAccessGutter so the gap it opens up beside the dock eases in on the
+// same clock as the card sliding into it, rather than snapping ahead of it.
+export const PANEL_REVEAL_MS = 180;
+export const PANEL_REVEAL_EASE = 'cubic-bezier(0.4, 0, 0.2, 1)';
+
 // Where a panel that belongs to one pane starts: just under that pane's header,
 // close enough to read as having come out of it. Find and the snippet palette
 // both hang from here, so they line up with each other and neither covers the

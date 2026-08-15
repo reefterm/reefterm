@@ -10,7 +10,7 @@ import AgentMark from './AgentMark';
 import Markdown from '../../lib/markdown';
 import useAssistant from '../../hooks/useAssistant';
 import useTypewriter from '../../hooks/useTypewriter';
-import { APP_GUTTER, PANE_HEADER_HEIGHT } from '../../lib/layout';
+import { PANE_HEADER_HEIGHT } from '../../lib/layout';
 import ToolCall from './ToolCall';
 import ApprovalRequest from './ApprovalRequest';
 import ScopeMenu from './ScopeMenu';
@@ -30,53 +30,11 @@ import {
 } from '../../lib/assistant-scope';
 
 /**
- * The assistant panel.
- *
- * A column beside the terminal rather than an overlay on top of it, because
- * almost everything it is useful for involves reading the screen it would
- * otherwise be covering. It is one panel for the whole window, not one per
- * pane: a conversation about a server usually turns into a conversation about
- * the one next to it, and a per-pane panel would mean starting again.
- *
- * It is built as its own card, the way `#main-content` is, with the shell's
- * gutter between the two rather than a border against it. Butting a flat
- * panel up against a rounded card leaves a sliver of background trapped in the
- * corner, which is the one arrangement that looks like a mistake rather than a
- * choice.
- *
- * Everything inside is laid out on one spacing step, and the transcript owns
- * the rhythm through a single `space-y` rather than each kind of item carrying
- * its own margins. That is what stops a run of tool calls and replies from
- * drifting into uneven bands.
+ * The assistant's conversation: everything that goes inside PanelDock's card
+ * when the assistant is the panel showing. One panel for the whole window, not
+ * one per pane - a conversation about a server usually turns into one about
+ * the pane next to it, and a per-pane panel would mean starting over.
  */
-
-const MIN_WIDTH = 340;
-const MAX_WIDTH = 720;
-
-/** Wide enough to centre a 32px button, and no wider. */
-const RAIL_WIDTH = 40;
-
-/**
- * The open and shut motion.
- *
- * The sidebar does the same thing on the other side of the window, so this is
- * its easing (tailwind's `ease-in-out`) at roughly half the duration. The
- * sidebar is a place you go and stay; this is a panel you flick in and out of
- * mid-sentence while reading the terminal, and 300ms of that gets old fast.
- * Short enough to feel like the column simply widened, long enough that the
- * eye follows the edge rather than being handed a new layout.
- */
-const REVEAL_MS = 180;
-const REVEAL_EASE = 'cubic-bezier(0.4, 0, 0.2, 1)';
-
-/**
- * The card, matching `#main-content`'s 16px radius and surface.
- *
- * Deliberately not `overflow-hidden`: nothing inside paints into the corners,
- * and clipping the card would cut the shadow off the scope menu that opens
- * inside it.
- */
-const CARD = 'rounded-2xl bg-white/60 dark:bg-surface-raised';
 
 /** The rule inside a card, which is lighter than the one between two cards. */
 const HAIRLINE = 'border-black/[0.06] dark:border-white/[0.06]';
@@ -99,8 +57,8 @@ function HeaderButton({ title, hint, icon, onClick, placement = 'bottom' }) {
                 onClick={onClick}
                 className="w-8 h-8 shrink-0 flex items-center justify-center rounded-xl transition-colors
                     outline-none text-gray-500 dark:text-gray-400
-                    hover:bg-gray-100 hover:text-gray-900
-                    dark:hover:bg-surface-control dark:hover:text-white
+                    hover:bg-surface-control hover:text-gray-900
+                    dark:hover:text-white
                     focus-visible:ring-2 focus-visible:ring-gray-900/20 dark:focus-visible:ring-white/25"
             >
                 {icon}
@@ -216,12 +174,13 @@ function StreamingText({ text, onReveal }) {
 /**
  * The conversation itself: everything inside the card.
  *
- * Split from the column around it because the column is what animates, and it
- * has to stay in the layout while shut. This is mounted only while the panel is
- * open or on its way out, so closing it still drops the transcript, the draft
- * and the subscription behind it exactly as unmounting always did.
+ * Split from PanelDock, the column around it, because the column is what
+ * animates and has to stay in the layout while shut. This is mounted only
+ * while the assistant is the panel showing, so switching away from it drops
+ * the transcript, the draft and the subscription behind it exactly as
+ * unmounting always did.
  */
-function AssistantConversation({
+export default function AssistantConversation({
     sessions,
     hosts = [],
     activeSessionId,
@@ -608,8 +567,8 @@ function AssistantConversation({
                 into it. */}
             <div className="shrink-0 p-3">
                 <div className="rounded-2xl transition-colors
-                    border border-gray-300 dark:border-surface-control
-                    focus-within:border-gray-400 dark:focus-within:border-neutral-600">
+                    border border-surface-control
+                    focus-within:border-surface-hover">
                     <textarea
                         ref={inputRef}
                         rows={1}
@@ -664,9 +623,9 @@ function AssistantConversation({
                                         onClick={assistant.interrupt}
                                         className="w-7 h-7 shrink-0 flex items-center justify-center
                                             rounded-full transition-colors
-                                            bg-gray-100 dark:bg-surface-control
+                                            bg-surface-control
                                             text-gray-600 dark:text-gray-300
-                                            hover:bg-gray-200 dark:hover:bg-surface-hover"
+                                            hover:bg-surface-hover"
                                     >
                                         <StopCircleIcon size={15} strokeWidth={2} />
                                     </button>
@@ -694,185 +653,3 @@ function AssistantConversation({
     );
 }
 
-/**
- * The column the assistant lives in, open or shut.
- *
- * One element that changes width, not two swapped for each other: a swap has
- * nothing to animate between, and the rail is the same column with everything
- * but the button clipped off. That is how the sidebar opens on the other side
- * of the window, and this is the same motion mirrored and shortened.
- *
- * The card keeps its full width the whole way and the column clips it, rather
- * than the card being squeezed and stretched. Reflowing a transcript, a
- * markdown block and a growing textarea on every frame of a 180ms slide is
- * both expensive and ugly: the text rewraps four times on the way in. Clipped,
- * the panel is laid out once and then revealed.
- *
- * It is pinned to the right edge for the same reason the sidebar's items are
- * pinned to the left: whatever is already on screen should stay where it is
- * while the rest arrives beside it.
- */
-export default function AssistantPanel({
-    open,
-    sessions,
-    hosts,
-    activeSessionId,
-    width,
-    onWidthChange,
-    onOpenSettings,
-    onOpen,
-    onClose,
-}) {
-    const t = useT();
-
-    // The width the column is actually drawn at. It lags `open` by a couple of
-    // frames on the way in, which is what gives the transition an old value to
-    // start from.
-    const [wide, setWide] = useState(open);
-
-    // The card, which outlives `open` by the length of the slide so there is
-    // something to collapse. Everything in it is dropped at the end, exactly as
-    // it was when the panel was mounted and unmounted outright.
-    const [mounted, setMounted] = useState(open);
-
-    // True from the moment `open` changes until the column has arrived. It
-    // carries the transition and the clip, and a settled column has neither:
-    // the resize handle has to move the edge on the frame it is dragged, and
-    // the menus inside the card have to be able to cast a shadow past it.
-    const [sliding, setSliding] = useState(false);
-
-    // The state the column has been told about, so the first render does not
-    // animate from itself to itself.
-    const drawn = useRef(open);
-
-    useEffect(() => {
-        if (drawn.current === open) return undefined;
-        drawn.current = open;
-
-        setSliding(true);
-        if (open) setMounted(true);
-
-        /**
-         * Two frames: one to paint the column where it is now, one to send it
-         * where it is going. Both in the same paint and it jumps instead of
-         * sliding. Both handles are cancelled, because StrictMode's second
-         * mount would otherwise leave the first one's inner frame running.
-         */
-        let inner = 0;
-        const outer = requestAnimationFrame(() => {
-            inner = requestAnimationFrame(() => setWide(open));
-        });
-
-        // The two frames plus the slide, with a frame in hand.
-        const landed = setTimeout(() => {
-            setSliding(false);
-            if (!open) setMounted(false);
-        }, REVEAL_MS + 50);
-
-        return () => {
-            cancelAnimationFrame(outer);
-            cancelAnimationFrame(inner);
-            clearTimeout(landed);
-        };
-    }, [open]);
-
-    /** The grab strip, which lives in the gutter between the two cards. */
-    const startResize = useCallback((event) => {
-        event.preventDefault();
-        const startX = event.clientX;
-        const startWidth = width;
-
-        const onMove = (move) => {
-            // Dragging left widens, so the delta is inverted.
-            const next = Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, startWidth + (startX - move.clientX)));
-            onWidthChange(next);
-        };
-        const onUp = () => {
-            document.removeEventListener('mousemove', onMove);
-            document.removeEventListener('mouseup', onUp);
-            document.body.style.cursor = '';
-            document.body.style.userSelect = '';
-        };
-
-        document.addEventListener('mousemove', onMove);
-        document.addEventListener('mouseup', onUp);
-        document.body.style.cursor = 'col-resize';
-        document.body.style.userSelect = 'none';
-    }, [width, onWidthChange]);
-
-    return (
-        <div
-            className="relative shrink-0 bg-gray-100 dark:bg-surface-base"
-            style={{
-                width: (wide ? width : RAIL_WIDTH) + APP_GUTTER,
-                paddingLeft: APP_GUTTER,
-                transition: sliding ? `width ${REVEAL_MS}ms ${REVEAL_EASE}` : undefined,
-                overflow: sliding ? 'hidden' : 'visible',
-            }}
-        >
-            {/* In the gutter, over the gap rather than over either card. Not
-                there mid-slide, where it would only offer to resize a panel
-                that has not finished arriving. */}
-            {wide && !sliding && (
-                <div
-                    className="absolute left-0 inset-y-0 z-10 cursor-col-resize group"
-                    style={{ width: APP_GUTTER }}
-                    onMouseDown={startResize}
-                >
-                    <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-0.5 rounded-full
-                        bg-transparent group-hover:bg-gray-900/15 dark:group-hover:bg-white/15 transition-colors" />
-                </div>
-            )}
-
-            {/* The button that is there when the panel is not. Drawn on the
-                shell background rather than as a card, exactly as the sidebar
-                is on the other side: it is chrome holding a gutter, not a
-                surface. It sits in a block the height of a pane header, on the
-                edge the card's own header buttons land on, so the two cross
-                fade in place instead of one sliding out from under the other. */}
-            {(!wide || sliding) && (
-                <div
-                    className="absolute right-0 top-0 flex items-center justify-center"
-                    style={{
-                        width: RAIL_WIDTH,
-                        height: PANE_HEADER_HEIGHT,
-                        opacity: wide ? 0 : 1,
-                        pointerEvents: wide ? 'none' : 'auto',
-                        transition: `opacity ${REVEAL_MS}ms ${REVEAL_EASE}`,
-                    }}
-                >
-                    <HeaderButton
-                        title={t('assistant.title')}
-                        hint="Ctrl+Shift+A"
-                        placement="left"
-                        icon={<AgentMark size={20} mono />}
-                        onClick={onOpen}
-                    />
-                </div>
-            )}
-
-            {mounted && (
-                <aside
-                    className={`absolute inset-y-0 right-0 flex flex-col ${CARD}`}
-                    style={{
-                        width,
-                        opacity: wide ? 1 : 0,
-                        // Nothing to click on a panel that is on its way in or
-                        // out, and the half of it hanging outside the clip is
-                        // not there to be aimed at.
-                        pointerEvents: wide ? 'auto' : 'none',
-                        transition: `opacity ${REVEAL_MS}ms ${REVEAL_EASE}`,
-                    }}
-                >
-                    <AssistantConversation
-                        sessions={sessions}
-                        hosts={hosts}
-                        activeSessionId={activeSessionId}
-                        onOpenSettings={onOpenSettings}
-                        onClose={onClose}
-                    />
-                </aside>
-            )}
-        </div>
-    );
-}

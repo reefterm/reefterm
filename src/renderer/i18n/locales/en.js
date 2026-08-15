@@ -409,6 +409,14 @@ export default {
     'settings.appearance.quickSwitcherShown': 'Quick theme switcher shown',
     'settings.appearance.quickSwitcherHidden': 'Quick theme switcher hidden',
 
+    'themeSwitcher.title': 'Quick Themes',
+    'themeSwitcher.appTheme': 'App theme',
+    'themeSwitcher.appTint': 'App tint',
+    'themeSwitcher.terminalTheme': 'Terminal theme',
+    'themeSwitcher.appThemeOption': 'App theme: {theme}',
+    'themeSwitcher.appTintOption': 'App tint: {tint}',
+    'themeSwitcher.terminalThemeOption': 'Terminal theme: {theme}',
+
     /* ---------------------------------------------------------------- *
      * Settings: Terminal
      * ---------------------------------------------------------------- */

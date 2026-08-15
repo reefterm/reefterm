@@ -11,7 +11,8 @@ import FolderModal from './components/FolderModal';
 import SessionScreen from './components/ui/SessionScreen';
 import SplitLayout from './components/panes/SplitLayout';
 import PanePicker from './components/panes/PanePicker';
-import AssistantPanel from './components/assistant/AssistantPanel';
+import PanelDock from './components/PanelDock';
+import QuickAccessGutter, { TOOL_IDS } from './components/QuickAccessGutter';
 import BuiltinRestartBanner from './components/BuiltinRestartBanner';
 import { useTheme } from './hooks/useTheme';
 import { useSessions } from './hooks/useSessions';
@@ -93,13 +94,40 @@ function App() {
         });
     }, []);
 
-    // The assistant column. Its width is remembered because it is the kind of
+    // The assistant column's width. Remembered because it is the kind of
     // thing someone sets once to suit their screen and never touches again.
-    const [assistantOpen, setAssistantOpen] = useState(false);
     const [assistantWidth, setAssistantWidth] = useState(() => {
         const stored = Number(window.localStorage.getItem('assistant.width'));
         return Number.isFinite(stored) && stored >= 320 ? stored : 400;
     });
+
+    // Which tool's panel PanelDock is showing, if any - one flag, not one
+    // per tool, since QuickAccessGutter only ever wants at most one open.
+    const [activePanel, setActivePanel] = useState(null);
+
+    // If the tool behind the open panel gets disabled out from under it,
+    // there is no rail button left to close it with.
+    useEffect(() => {
+        if (activePanel === TOOL_IDS.ASSISTANT && !aiEnabled) setActivePanel(null);
+        if (activePanel === TOOL_IDS.THEME_SWITCHER && !quickThemeSwitcherEnabled) setActivePanel(null);
+    }, [activePanel, aiEnabled, quickThemeSwitcherEnabled]);
+
+    // The changing half of QuickAccessGutter's contents; the fixed half
+    // (icon, title, hint) lives with the component itself, keyed by the same
+    // id. Not memoized: cheap enough to rebuild every render.
+    const quickAccessToolState = {
+        [TOOL_IDS.ASSISTANT]: {
+            enabled: aiEnabled,
+            open: activePanel === TOOL_IDS.ASSISTANT,
+            onToggle: () => setActivePanel(current => (current === TOOL_IDS.ASSISTANT ? null : TOOL_IDS.ASSISTANT)),
+        },
+        [TOOL_IDS.THEME_SWITCHER]: {
+            enabled: quickThemeSwitcherEnabled,
+            open: activePanel === TOOL_IDS.THEME_SWITCHER,
+            onToggle: () => setActivePanel(current => (current === TOOL_IDS.THEME_SWITCHER ? null : TOOL_IDS.THEME_SWITCHER)),
+        },
+    };
+
     // paneId -> resolve, for a connection the assistant asked for and is
     // waiting on. Opening a tab is not the same as being connected, and the
     // tool cannot hand back a session id until it is.
@@ -326,7 +354,7 @@ function App() {
             if (event.ctrlKey && event.shiftKey && !event.altKey && event.code === 'KeyA') {
                 event.preventDefault();
                 event.stopPropagation();
-                setAssistantOpen(open => !open);
+                setActivePanel(current => (current === TOOL_IDS.ASSISTANT ? null : TOOL_IDS.ASSISTANT));
             }
         };
         document.addEventListener('keydown', handler, true);
@@ -897,27 +925,35 @@ function App() {
                     })}
                 </main>
 
-                {/* A column beside the content, not over it. The terminal gives
-                    up the width rather than being covered, which matters for a
-                    panel whose whole job is talking about what is on screen.
-
-                    Always here, open or shut, because the two states are one
-                    column at two widths and it animates between them. Shut, it
-                    is the rail: the button and nothing else. Mounting is a
-                    separate axis, gated on the AI builtin below. */}
-                {aiEnabled && (
-                    <AssistantPanel
-                        open={assistantOpen}
-                        sessions={assistantSessions}
-                        hosts={hosts}
+                {/* Gated on either tool being enabled, matching QuickAccessGutter's
+                    own hide-itself-when-empty rule - a build with both off
+                    contributes no gutter at all. */}
+                {(aiEnabled || quickThemeSwitcherEnabled) && (
+                    <PanelDock
+                        activePanel={activePanel}
+                        onClose={() => setActivePanel(null)}
+                        assistantSessions={assistantSessions}
+                        assistantHosts={hosts}
                         activeSessionId={activeSessionId}
-                        width={assistantWidth}
-                        onWidthChange={setAssistantWidth}
-                        onOpenSettings={handleOpenAssistantSettings}
-                        onOpen={() => setAssistantOpen(true)}
-                        onClose={() => setAssistantOpen(false)}
+                        assistantWidth={assistantWidth}
+                        onAssistantWidthChange={setAssistantWidth}
+                        onOpenAssistantSettings={handleOpenAssistantSettings}
+                        theme={theme}
+                        darkTint={darkTint}
+                        lightTint={lightTint}
+                        appColors={appColors}
+                        lightAppColors={lightAppColors}
+                        resolvedDark={resolvedDark}
+                        onThemeChange={setTheme}
+                        onDarkTintChange={setDarkTint}
+                        onLightTintChange={setLightTint}
+                        terminalTheme={terminalTheme}
+                        customTerminalTheme={customTerminalTheme}
+                        onTerminalThemeChange={setTerminalTheme}
                     />
                 )}
+
+                <QuickAccessGutter toolState={quickAccessToolState} />
             </div>
 
             {/* Mounted only while open. The sheet animates itself out and calls
