@@ -178,8 +178,8 @@ export default function Sheet({ title, subtitle, footer, onClose, dismiss, child
             <div
                 ref={panelRef}
                 className="absolute left-0 right-0 bottom-0 flex flex-col
-                    bg-white dark:bg-surface-raised
-                    border-t border-x border-gray-200 dark:border-surface-control
+                    bg-surface-raised
+                    border-t border-x border-surface-control/60
                     rounded-t-2xl overflow-hidden"
                 style={{
                     top: TOP_OFFSET,
@@ -197,7 +197,7 @@ export default function Sheet({ title, subtitle, footer, onClose, dismiss, child
                     boxShadow: '0 -6px 20px -6px rgba(0, 0, 0, 0.3)',
                 }}
             >
-                <div className="shrink-0 flex items-start justify-between gap-4 px-6 pt-5 pb-4 border-b border-gray-100 dark:border-surface-control">
+                <div className="shrink-0 flex items-start justify-between gap-4 px-6 pt-5 pb-4 border-b border-surface-control">
                     <div className="min-w-0">
                         <h2 className="text-lg font-bold text-gray-900 dark:text-white truncate">
                             {title}
@@ -214,7 +214,7 @@ export default function Sheet({ title, subtitle, footer, onClose, dismiss, child
                         onClick={close}
                         aria-label="Close"
                         title="Close (Esc)"
-                        className="shrink-0 w-8 h-8 flex items-center justify-center rounded-xl text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-surface-control transition-colors"
+                        className="shrink-0 w-8 h-8 flex items-center justify-center rounded-xl text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-surface-control transition-colors"
                     >
                         <Cancel01Icon size={16} strokeWidth={2} />
                     </button>
@@ -227,7 +227,7 @@ export default function Sheet({ title, subtitle, footer, onClose, dismiss, child
                 </div>
 
                 {footer && (
-                    <div className="shrink-0 border-t border-gray-100 dark:border-surface-control px-6 py-4">
+                    <div className="shrink-0 border-t border-surface-control px-6 py-4">
                         <div className="max-w-2xl mx-auto flex items-center justify-end gap-2">
                             {render(footer)}
                         </div>

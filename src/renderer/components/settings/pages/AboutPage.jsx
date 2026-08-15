@@ -101,7 +101,7 @@ export default function AboutPage() {
 
     return (
         <SettingsPage title={t('settings.about.title')}>
-            <div className="bg-gray-100 dark:bg-neutral-800 text-gray-900 dark:text-white rounded-xl p-8 flex items-center justify-between">
+            <div className="bg-surface-control text-gray-900 dark:text-white rounded-xl p-8 flex items-center justify-between">
                 <div>
                     <h4 className="text-2xl font-bold mb-1">Reef Terminal</h4>
                     {/* Read from the packaged app rather than written here, so
@@ -162,8 +162,8 @@ export default function AboutPage() {
                                 onClick={() => run(check)}
                                 disabled={checking || spent || status?.downloading || status?.ready}
                                 className="shrink-0 flex items-center gap-2 px-4 h-9 rounded-xl text-sm font-medium
-                                    text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-neutral-700
-                                    hover:bg-gray-50 dark:hover:bg-neutral-800 disabled:opacity-50
+                                    text-gray-700 dark:text-gray-200 border border-surface-active/60
+                                    hover:bg-surface-control disabled:opacity-50
                                     disabled:cursor-not-allowed transition-colors"
                             >
                                 {checking ? t('settings.about.checkingShort') : t('settings.about.checkNow')}
@@ -183,7 +183,7 @@ export default function AboutPage() {
                             aria-valuenow={status.progress}
                             aria-valuemin={0}
                             aria-valuemax={100}
-                            className="h-1.5 rounded-full bg-gray-200 dark:bg-neutral-700 overflow-hidden"
+                            className="h-1.5 rounded-full bg-surface-active overflow-hidden"
                         >
                             <div
                                 className="h-full rounded-full bg-gray-900 dark:bg-white transition-[width] duration-300 ease-out"

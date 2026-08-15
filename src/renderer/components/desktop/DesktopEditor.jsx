@@ -134,7 +134,7 @@ export default function DesktopEditor({
                         <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">
                             Protocol
                         </span>
-                        <div className="grid grid-cols-2 gap-1 p-1 bg-gray-100 dark:bg-surface-base rounded-xl">
+                        <div className="grid grid-cols-2 gap-1 p-1 bg-surface-base rounded-xl">
                             {PROTOCOLS.map(option => (
                                 <button
                                     key={option.id}
@@ -143,7 +143,7 @@ export default function DesktopEditor({
                                     onClick={() => setProtocol(option.id)}
                                     className={`px-2 py-1.5 rounded-lg text-sm font-medium transition-all ${
                                         protocol === option.id
-                                            ? 'bg-white dark:bg-surface-active text-gray-900 dark:text-white shadow-sm'
+                                            ? 'bg-surface-active text-gray-900 dark:text-white shadow-sm'
                                             : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
                                     }`}
                                 >
@@ -164,7 +164,7 @@ export default function DesktopEditor({
                         <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">
                             How to reach it
                         </span>
-                        <div className="grid grid-cols-2 gap-1 p-1 bg-gray-100 dark:bg-surface-base rounded-xl">
+                        <div className="grid grid-cols-2 gap-1 p-1 bg-surface-base rounded-xl">
                             {TRANSPORTS.map(option => (
                                 <button
                                     key={option.id}
@@ -173,7 +173,7 @@ export default function DesktopEditor({
                                     onClick={() => set('transport', option.id)}
                                     className={`px-2 py-1.5 rounded-lg text-sm font-medium transition-all ${
                                         transport === option.id
-                                            ? 'bg-white dark:bg-surface-active text-gray-900 dark:text-white shadow-sm'
+                                            ? 'bg-surface-active text-gray-900 dark:text-white shadow-sm'
                                             : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
                                     }`}
                                 >

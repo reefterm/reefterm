@@ -68,8 +68,8 @@ function SourceCard({ source, info, active, scanning, onScan }) {
         <div
             className={`flex flex-col gap-3 p-3 rounded-xl border min-w-0 transition-colors ${
                 active
-                    ? 'border-gray-400 dark:border-neutral-600 bg-gray-50 dark:bg-surface-control/40'
-                    : 'border-gray-200 dark:border-surface-control'
+                    ? 'border-surface-hover bg-surface-control/40'
+                    : 'border-surface-control/60'
             }`}
         >
             <div className="flex items-center gap-3 min-w-0">
@@ -86,7 +86,7 @@ function SourceCard({ source, info, active, scanning, onScan }) {
                         <span
                             aria-hidden="true"
                             className={`w-1.5 h-1.5 rounded-full shrink-0 ${
-                                found ? 'bg-emerald-500' : 'bg-gray-300 dark:bg-neutral-700'
+                                found ? 'bg-emerald-500' : 'bg-surface-active'
                             }`}
                         />
                         <span className="truncate">{sourceSubtitle(t, source.id, info)}</span>
@@ -97,9 +97,9 @@ function SourceCard({ source, info, active, scanning, onScan }) {
             <button
                 onClick={() => onScan(source.id)}
                 disabled={!found || scanning}
-                className="h-8 rounded-lg border border-gray-300 dark:border-surface-control text-xs
-                    font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100
-                    dark:hover:bg-surface-control transition-colors
+                className="h-8 rounded-lg border border-surface-control text-xs
+                    font-semibold text-gray-700 dark:text-gray-300 hover:bg-surface-control
+                    transition-colors
                     disabled:opacity-40 disabled:cursor-not-allowed
                     flex items-center justify-center gap-1.5"
             >
@@ -306,7 +306,7 @@ export default function AppImportSection({ onImported }) {
                     ))}
 
                     {hosts.length > 0 && (
-                        <div className="border border-gray-200 dark:border-surface-control rounded-xl overflow-hidden">
+                        <div className="border border-surface-control/60 rounded-xl overflow-hidden">
                             <GroupHeader
                                 icon={<ServerStack01Icon size={15} strokeWidth={2} />}
                                 title={t('appImport.sessionsOf', { app: scan.label })}
@@ -318,9 +318,9 @@ export default function AppImportSection({ onImported }) {
                                 {hosts.map(host => (
                                     <div
                                         key={host.key}
-                                        className="border-b border-gray-100 dark:border-surface-control/60 last:border-b-0"
+                                        className="border-b border-surface-control/60 last:border-b-0"
                                     >
-                                        <label className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-surface-control/30">
+                                        <label className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-surface-control/30">
                                             <Checkbox
                                                 size="sm"
                                                 checked={selected.has(host.key)}
@@ -329,7 +329,7 @@ export default function AppImportSection({ onImported }) {
                                             <span className="text-sm font-semibold text-gray-900 dark:text-white truncate max-w-[10rem]">
                                                 {host.name}
                                             </span>
-                                            <span className="shrink-0 px-1.5 py-0.5 rounded bg-gray-100 dark:bg-surface-control text-[10px] font-mono text-gray-500 dark:text-gray-400">
+                                            <span className="shrink-0 px-1.5 py-0.5 rounded bg-surface-control text-[10px] font-mono text-gray-500 dark:text-gray-400">
                                                 {PROTOCOL_LABELS[host.protocol] || host.protocol}
                                             </span>
                                             <span className="flex-1 min-w-0 text-xs font-mono text-gray-500 dark:text-gray-400 truncate">

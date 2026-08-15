@@ -61,8 +61,8 @@ export default function SegmentedControl({
             aria-label={ariaLabel}
             onKeyDown={handleKeyDown}
             className={`relative inline-grid p-[3px] rounded-[10px] border
-                bg-gray-100 dark:bg-surface-base
-                border-gray-200/70 dark:border-surface-control ${className}`}
+                bg-surface-base
+                border-surface-control/60 ${className}`}
             style={{ gridTemplateColumns: `repeat(${segments.length}, minmax(0, 1fr))` }}
         >
             {/* The thumb. One segment wide, moved by whole multiples of itself,
@@ -70,7 +70,7 @@ export default function SegmentedControl({
             <span
                 aria-hidden="true"
                 className="absolute top-[3px] bottom-[3px] left-[3px] rounded-[7px]
-                    bg-white dark:bg-surface-control
+                    bg-surface-control
                     shadow-[0_1px_2px_rgba(0,0,0,0.07)]
                     ring-1 ring-black/[0.04] dark:ring-white/[0.06]
                     transition-[transform,opacity] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]

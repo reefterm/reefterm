@@ -25,8 +25,8 @@ import { useT } from '../../i18n';
  */
 
 /** The field look this page uses: the two text areas and the key input. */
-const FIELD_CLASS = `w-full px-3 py-2 rounded-xl text-sm bg-white dark:bg-neutral-800
-    border border-gray-300 dark:border-neutral-700
+const FIELD_CLASS = `w-full px-3 py-2 rounded-xl text-sm bg-surface-control
+    border border-surface-active
     text-gray-900 dark:text-gray-100 outline-none
     focus-visible:ring-2 focus-visible:ring-gray-900/20 dark:focus-visible:ring-white/25`;
 
@@ -384,7 +384,7 @@ export default function AssistantSection() {
                 >
                     {settings.provider === 'opencode' ? (
                         <code className="inline-flex px-3 py-2 rounded-xl text-xs font-jetbrains
-                            bg-gray-50 dark:bg-neutral-800 text-gray-700 dark:text-gray-300">
+                            bg-surface-control text-gray-700 dark:text-gray-300">
                             opencode auth login
                         </code>
                     ) : (

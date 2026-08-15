@@ -45,7 +45,7 @@ function SidebarSync({ onNavChange }) {
             className="mt-auto shrink-0 flex items-center gap-2.5 w-full px-2.5 py-2 rounded-xl text-left
                 outline-none transition-colors
                 text-gray-600 dark:text-gray-400
-                hover:bg-gray-900/[0.04] dark:hover:bg-surface-raised
+                hover:bg-surface-raised
                 focus-visible:ring-2 focus-visible:ring-gray-900/20 dark:focus-visible:ring-white/25"
         >
             {connected ? (

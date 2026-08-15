@@ -16,8 +16,8 @@ const STATE_STYLES = {
     'pending-consent': { dot: 'bg-amber-500', text: 'text-amber-600 dark:text-amber-500' },
     crashed: { dot: 'bg-rose-500', text: 'text-rose-600 dark:text-rose-400' },
     invalid: { dot: 'bg-rose-500', text: 'text-rose-600 dark:text-rose-400' },
-    disabled: { dot: 'bg-gray-300 dark:bg-neutral-600', text: 'text-gray-400 dark:text-neutral-500' },
-    stopped: { dot: 'bg-gray-300 dark:bg-neutral-600', text: 'text-gray-400 dark:text-neutral-500' },
+    disabled: { dot: 'bg-surface-hover', text: 'text-gray-400 dark:text-neutral-500' },
+    stopped: { dot: 'bg-surface-hover', text: 'text-gray-400 dark:text-neutral-500' },
 };
 
 function StateBadge({ state }) {
@@ -185,7 +185,7 @@ export default function PluginsSection() {
                             {t('settings.plugins.builtin.restartNote')}
                         </p>
                     </div>
-                    <div className="divide-y divide-gray-100 dark:divide-neutral-800 border-t border-gray-100 dark:border-neutral-800">
+                    <div className="divide-y divide-gray-100 dark:divide-neutral-800 border-t border-surface-control">
                         {builtins.map(builtin => (
                             <BuiltinRow key={builtin.id} builtin={builtin} onToggle={toggleBuiltin} />
                         ))}
@@ -217,7 +217,7 @@ export default function PluginsSection() {
                 </div>
 
                 {plugins.length > 0 ? (
-                    <div className="divide-y divide-gray-100 dark:divide-neutral-800 border-t border-gray-100 dark:border-neutral-800">
+                    <div className="divide-y divide-gray-100 dark:divide-neutral-800 border-t border-surface-control">
                         {plugins.map(plugin => (
                             <PluginRow
                                 key={plugin.id}
@@ -229,7 +229,7 @@ export default function PluginsSection() {
                         ))}
                     </div>
                 ) : (
-                    <div className="flex flex-col items-center gap-2 px-6 py-10 text-center border-t border-gray-100 dark:border-neutral-800">
+                    <div className="flex flex-col items-center gap-2 px-6 py-10 text-center border-t border-surface-control">
                         <FolderOpenIcon size={24} className="text-gray-300 dark:text-neutral-600" strokeWidth={1.5} />
                         <p className="text-sm text-gray-400 dark:text-neutral-500 max-w-sm">
                             {t('settings.plugins.emptyFolder')}

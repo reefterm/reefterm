@@ -17,7 +17,7 @@ function Field({ label, value, onChange, autoFocus = false, ...rest }) {
                 onChange={(event) => onChange(event.target.value)}
                 autoFocus={autoFocus}
                 spellCheck={false}
-                className="h-9 px-3 rounded-xl border border-gray-200 dark:border-surface-control bg-white dark:bg-surface-base text-gray-900 dark:text-white text-sm outline-none focus:border-gray-400 dark:focus:border-neutral-600 transition-colors"
+                className="h-9 px-3 rounded-xl border border-surface-control/60 bg-surface-base text-gray-900 dark:text-white text-sm outline-none focus:border-surface-hover transition-colors"
                 {...rest}
             />
         </label>
@@ -84,7 +84,7 @@ function LockForm({ mode, onCancel, onDone }) {
         : t('settings.lock.removePassword');
 
     return (
-        <form onSubmit={submit} className="mt-5 pt-5 border-t border-gray-200 dark:border-neutral-700 flex flex-col gap-3">
+        <form onSubmit={submit} className="mt-5 pt-5 border-t border-surface-active/60 flex flex-col gap-3">
             {needsCurrent && (
                 <Field
                     label={t('settings.lock.currentPassword')}
@@ -128,7 +128,7 @@ function LockForm({ mode, onCancel, onDone }) {
                 <button
                     type="button"
                     onClick={onCancel}
-                    className="px-3 h-9 rounded-xl border border-gray-300 dark:border-surface-control text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-surface-control transition-colors"
+                    className="px-3 h-9 rounded-xl border border-surface-control text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-surface-control transition-colors"
                 >
                     {t('common.cancel')}
                 </button>
@@ -205,7 +205,7 @@ export default function AppLockSection() {
                                 <>
                                     <button
                                         onClick={() => setConfirmLock(true)}
-                                        className="px-3 h-9 rounded-xl border border-gray-300 dark:border-surface-control text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-surface-control transition-colors"
+                                        className="px-3 h-9 rounded-xl border border-surface-control text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-surface-control transition-colors"
                                     >
                                         {t('settings.lock.lockNow')}
                                     </button>

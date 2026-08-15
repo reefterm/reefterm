@@ -23,7 +23,7 @@ const SELECTION_SUFFIX = '4d';
 function ThemePreview({ colors }) {
     return (
         <div
-            className="rounded-xl border border-gray-200 dark:border-surface-control overflow-hidden"
+            className="rounded-xl border border-surface-control/60 overflow-hidden"
             style={{ backgroundColor: colors.background }}
         >
             <div
@@ -122,8 +122,8 @@ export default function CustomThemeDialog({ colors, onSave, onClose }) {
                         value={preset}
                         onChange={startFrom}
                         containerClassName="flex-1"
-                        className="w-full px-3 py-2 rounded-xl text-sm border border-gray-300
-                            dark:border-surface-control bg-white dark:bg-neutral-800 text-gray-900 dark:text-white
+                        className="w-full px-3 py-2 rounded-xl text-sm border border-surface-control
+                            bg-surface-control text-gray-900 dark:text-white
                             outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-white"
                         options={[
                             { value: '', label: t('common.keepCurrentColors') },

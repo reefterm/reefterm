@@ -64,10 +64,10 @@ const KEY_TYPES = [
 const OPTION_CARD = 'p-3 rounded-xl border text-left transition-colors outline-none '
     + 'focus-visible:ring-2 focus-visible:ring-gray-900/25 dark:focus-visible:ring-white/30';
 
-const OPTION_CARD_PICKED = 'border-gray-900 dark:border-white bg-gray-50 dark:bg-surface-control/40';
+const OPTION_CARD_PICKED = 'border-gray-900 dark:border-white bg-surface-control/40';
 
-const OPTION_CARD_RESTING = 'border-gray-200 dark:border-surface-control '
-    + 'hover:border-gray-300 dark:hover:border-neutral-600';
+const OPTION_CARD_RESTING = 'border-surface-control/60 '
+    + 'hover:border-surface-hover';
 
 const shortDate = (value) => new Date(value).toLocaleDateString(undefined, {
     year: 'numeric', month: 'short', day: 'numeric',
@@ -551,7 +551,7 @@ function KeyModal({ keyData, initialMode = 'generate', dismiss, onClose, onSave,
                             private key field alone, because one pick answers all
                             four of them. */}
                         {mode === 'import' && !formData.pendingKeyId && (
-                            <div className="rounded-xl border border-gray-200 dark:border-surface-control bg-gray-50 dark:bg-surface-base/60 p-3 flex items-center gap-3">
+                            <div className="rounded-xl border border-surface-control/60 bg-surface-base/60 p-3 flex items-center gap-3">
                                 <div className="min-w-0 flex flex-col gap-0.5">
                                     <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">
                                         Import from a file
@@ -609,7 +609,7 @@ function KeyModal({ keyData, initialMode = 'generate', dismiss, onClose, onSave,
                             one read from a file both stay in the main process,
                             so there is nothing to show but what they are. */}
                         {formData.pendingKeyId ? (
-                            <div className="rounded-lg border border-gray-200 dark:border-surface-control bg-gray-50 dark:bg-surface-base/60 p-3 flex flex-col gap-1">
+                            <div className="rounded-lg border border-surface-control/60 bg-surface-base/60 p-3 flex flex-col gap-1">
                                 <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">
                                     {imported ? `Private key read from ${imported.file}` : 'Private key generated'}
                                 </span>

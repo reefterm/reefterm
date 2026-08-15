@@ -255,7 +255,7 @@ function SnippetsPanel({ isActive = true, reachedForPage = 0, allHosts = [] }) {
                                 aria-pressed={tag === entry}
                                 className={`h-6 px-2 rounded-md text-[11px] font-medium border transition-colors ${tag === entry
                                     ? 'border-gray-900 dark:border-white text-gray-900 dark:text-white'
-                                    : 'border-gray-200 dark:border-surface-control text-gray-500 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white'}`}
+                                    : 'border-surface-control/60 text-gray-500 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white'}`}
                             >
                                 {entry}
                             </button>
@@ -288,7 +288,7 @@ function SnippetsPanel({ isActive = true, reachedForPage = 0, allHosts = [] }) {
                 {snippets.length > 0 && (
                     <p className="hidden md:block text-[11px] text-gray-400 dark:text-neutral-500 shrink-0">
                         Press{' '}
-                        <kbd className="px-1.5 py-0.5 rounded-md bg-gray-100 dark:bg-surface-control font-mono text-[10px] text-gray-600 dark:text-gray-300">
+                        <kbd className="px-1.5 py-0.5 rounded-md bg-surface-control font-mono text-[10px] text-gray-600 dark:text-gray-300">
                             Ctrl+Shift+K
                         </kbd>{' '}
                         in a session to send one in

@@ -305,8 +305,8 @@ export default function Select({
                     tabIndex={-1}
                     aria-activedescendant={options[active] ? `${id || 'select'}-option-${active}` : undefined}
                     className={`fixed z-[9999] p-1 rounded-xl overflow-y-auto outline-none
-                        bg-white dark:bg-surface-raised
-                        border border-gray-200 dark:border-surface-control
+                        bg-surface-raised
+                        border border-surface-control/60
                         shadow-xl shadow-black/10 dark:shadow-black/40
                         animate-dialog-in ${menuClassName}`}
                     style={{
@@ -338,7 +338,7 @@ export default function Select({
                                     text-sm text-left transition-colors
                                     disabled:opacity-40 disabled:cursor-not-allowed ${
                                     index === active
-                                        ? 'bg-gray-100 dark:bg-surface-control text-gray-900 dark:text-white'
+                                        ? 'bg-surface-control text-gray-900 dark:text-white'
                                         : 'text-gray-700 dark:text-gray-300'
                                 }`}
                             >

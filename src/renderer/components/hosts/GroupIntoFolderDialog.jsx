@@ -42,7 +42,7 @@ export default function GroupIntoFolderDialog({ count, parentLabel, onCreate, on
             onClose={busy ? undefined : onCancel}
             icon={
                 <span className="w-9 h-9 rounded-xl flex items-center justify-center
-                    bg-gray-100 dark:bg-surface-control text-gray-500 dark:text-gray-300">
+                    bg-surface-control text-gray-500 dark:text-gray-300">
                     <FolderAddIcon size={20} strokeWidth={2} />
                 </span>
             }

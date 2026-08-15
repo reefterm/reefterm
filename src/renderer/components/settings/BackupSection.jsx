@@ -14,17 +14,17 @@ import { useT } from '../../i18n';
 
 const MIN_PASSPHRASE = 8;
 
-const INPUT_CLASS = 'h-9 px-3 rounded-xl border border-gray-200 dark:border-surface-control '
-    + 'bg-white dark:bg-surface-base text-gray-900 dark:text-white text-sm outline-none '
-    + 'focus:border-gray-400 dark:focus:border-neutral-600 transition-colors';
+const INPUT_CLASS = 'h-9 px-3 rounded-xl border border-surface-control/60 '
+    + 'bg-surface-base text-gray-900 dark:text-white text-sm outline-none '
+    + 'focus:border-surface-hover transition-colors';
 
 const PRIMARY_BUTTON = 'px-4 h-9 rounded-xl bg-gray-900 dark:bg-white text-white dark:text-black '
     + 'font-semibold text-sm hover:opacity-90 active:scale-95 transition-all shadow-md '
     + 'disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100';
 
-const SECONDARY_BUTTON = 'px-3 h-9 rounded-xl border border-gray-300 dark:border-surface-control '
-    + 'text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 '
-    + 'dark:hover:bg-surface-control transition-colors';
+const SECONDARY_BUTTON = 'px-3 h-9 rounded-xl border border-surface-control '
+    + 'text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-surface-control '
+    + 'transition-colors';
 
 function Field({ label, value, onChange, ...rest }) {
     return (
@@ -143,7 +143,7 @@ function ExportCard() {
             {open && (
                 <form
                     onSubmit={submit}
-                    className="mt-5 pt-5 border-t border-gray-200 dark:border-neutral-700 flex flex-col gap-3"
+                    className="mt-5 pt-5 border-t border-surface-active/60 flex flex-col gap-3"
                 >
                     <Field
                         label={t('settings.backup.passphrase')}
@@ -208,8 +208,8 @@ function RestoreSummary({ report, overwrite }) {
         : t('settings.backup.unknownDate');
 
     return (
-        <div className="rounded-xl border border-gray-200 dark:border-surface-control overflow-hidden">
-            <div className="px-3 h-10 flex items-center gap-2 border-b border-gray-200 dark:border-surface-control bg-gray-50 dark:bg-surface-base/60">
+        <div className="rounded-xl border border-surface-control/60 overflow-hidden">
+            <div className="px-3 h-10 flex items-center gap-2 border-b border-surface-control/60 bg-surface-base/60">
                 <ArchiveIcon size={15} strokeWidth={2} className="text-gray-400" />
                 <span className="text-sm font-semibold text-gray-900 dark:text-white">
                     {t('settings.backup.from', { when: created })}
@@ -391,7 +391,7 @@ function RestoreCard({ onRestored }) {
             </div>
 
             {filePath && (
-                <div className="mt-5 pt-5 border-t border-gray-200 dark:border-neutral-700 flex flex-col gap-3">
+                <div className="mt-5 pt-5 border-t border-surface-active/60 flex flex-col gap-3">
                     <div className="flex items-center gap-2 min-w-0">
                         <span className="text-xs text-gray-400 dark:text-neutral-500 shrink-0">
                             {t('settings.backup.file')}

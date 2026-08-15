@@ -126,8 +126,8 @@ export default function MenuButton({
                 className={`relative w-8 h-8 flex items-center justify-center rounded-xl transition-colors
                     disabled:opacity-40 disabled:cursor-not-allowed ${
                     open || active
-                        ? 'bg-gray-100 text-gray-900 dark:bg-surface-control dark:text-white'
-                        : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-surface-control dark:hover:text-white'
+                        ? 'bg-surface-control text-gray-900 dark:text-white'
+                        : 'text-gray-500 dark:text-gray-400 hover:bg-surface-control hover:text-gray-900 dark:hover:text-white'
                 } ${className}`}
             >
                 {icon}
@@ -154,8 +154,8 @@ export default function MenuButton({
                     ref={menuRef}
                     role="menu"
                     className={`fixed rounded-xl z-[9999]
-                        bg-white dark:bg-surface-raised
-                        border border-gray-200 dark:border-surface-control
+                        bg-surface-raised
+                        border border-surface-control/60
                         shadow-xl shadow-black/10 dark:shadow-black/40
                         animate-dialog-in
                         ${children ? menuClassName : `min-w-[220px] p-1 ${menuClassName}`}`}
@@ -173,7 +173,7 @@ export default function MenuButton({
                         item.separator ? (
                             <div
                                 key={`separator-${index}`}
-                                className="-mx-1 my-1.5 border-t border-gray-100 dark:border-surface-control"
+                                className="-mx-1 my-1.5 border-t border-surface-control"
                             />
                         ) : (
                             <button
@@ -186,7 +186,7 @@ export default function MenuButton({
                                     disabled:opacity-40 disabled:cursor-not-allowed ${
                                     item.danger
                                         ? 'text-red-600 dark:text-red-400 enabled:hover:bg-red-50 dark:enabled:hover:bg-red-900/20'
-                                        : 'text-gray-700 dark:text-gray-300 enabled:hover:bg-gray-100 dark:enabled:hover:bg-surface-control'
+                                        : 'text-gray-700 dark:text-gray-300 enabled:hover:bg-surface-control'
                                 }`}
                             >
                                 {item.icon && (

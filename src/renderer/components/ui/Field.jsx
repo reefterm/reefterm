@@ -13,9 +13,9 @@
  * `sm`: it belongs to h-8 controls, and these are h-9 and taller.
  */
 
-export const FIELD_CLASS = 'w-full px-3 py-2 rounded-xl border border-gray-300 dark:border-surface-control '
-    + 'bg-white dark:bg-surface-base text-gray-900 dark:text-white text-sm outline-none '
-    + 'transition-colors focus:border-gray-400 dark:focus:border-neutral-600 '
+export const FIELD_CLASS = 'w-full px-3 py-2 rounded-xl border border-surface-control '
+    + 'bg-surface-base text-gray-900 dark:text-white text-sm outline-none '
+    + 'transition-colors focus:border-surface-hover '
     + 'placeholder:text-gray-400 disabled:opacity-50';
 
 /** Same box, for anything the user reads as code: paths, keys, commands. */

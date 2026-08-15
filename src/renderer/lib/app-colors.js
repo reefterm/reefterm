@@ -1,17 +1,19 @@
 /**
  * The colours the app's own chrome is made of.
  *
- * Every dark surface in the shell is one step of a single ramp, and the Tailwind
- * palette names those steps through CSS variables rather than baking hexes into
- * the utilities (see `tailwind.config.js` and the `:root` block in `input.css`).
- * Setting the six variables here is therefore enough to retint the whole app:
- * `bg-surface-raised`, `dark:bg-neutral-800`, `dark:border-neutral-700` and the
- * rest all follow, without a single class having to change.
+ * Every themeable surface in the shell is one step of a single six-colour ramp,
+ * named through CSS variables rather than baked into the utilities (see
+ * `tailwind.config.js` and the `:root` block in `input.css`), so setting the
+ * six variables here retints the whole app without a class having to change.
  *
- * Only the dark ramp is themeable. It is the one the app was designed on, and
- * light mode is Tailwind's own greys against black text; a palette that had to
- * work as both would be neither.
+ * Both modes share that one ramp - which mode is active just decides which
+ * tint's colours get written there. Dark's tint and light's tint are tracked
+ * and remembered independently against their own preset list below, so
+ * switching modes never loses either one's pick.
  */
+
+/** The one tint id that means "the user's own hand-edited colours", on either side. */
+export const CUSTOM_TINT_ID = 'custom';
 
 /**
  * The steps, in the order the editor lists them. The words are catalog keys, so
@@ -37,7 +39,7 @@ const CSS_VARIABLES = {
 };
 
 /**
- * The app's own colours, and what an untouched custom theme starts as.
+ * Dark mode's own colours, and what an untouched dark custom theme starts as.
  *
  * Tokyo Night, the same palette the terminal defaults to (see
  * hooks/useTerminalTheme.js), so the shell and what runs inside it are one
@@ -53,9 +55,9 @@ export const DEFAULT_APP_COLORS = {
 };
 
 /**
- * Palettes to start from. Each is the same six-step ramp as the default, so
- * picking one is a complete theme rather than a hue the rest has to be matched
- * to by hand.
+ * Palettes to start from in dark mode. Each is the same six-step ramp as the
+ * default, so picking one is a complete theme rather than a hue the rest has
+ * to be matched to by hand.
  */
 export const APP_COLOR_PRESETS = [
     { id: 'tokyo-night', label: 'Tokyo Night', colors: DEFAULT_APP_COLORS },
@@ -122,11 +124,102 @@ export const APP_COLOR_PRESETS = [
 ];
 
 /**
- * How much lighter each step is than the window behind it, in HSL lightness
- * points. Measured off the default palette, so a ramp derived from one colour
- * has the same spacing the app was drawn with.
+ * Light mode's own colours, and what an untouched light custom theme starts
+ * as. Its `muted` deliberately matches Tokyo Night's, so the app's two brand
+ * defaults share one anchor colour.
  */
-const LIGHTNESS_STEPS = [0, 4.5, 10, 15, 21, 34];
+export const DEFAULT_LIGHT_APP_COLORS = {
+    base: '#f7f7fb',
+    raised: '#eef0f8',
+    control: '#ecedf3',
+    hover: '#dbdfec',
+    active: '#b7bfdc',
+    muted: '#565f89',
+};
+
+/**
+ * Palettes to start from in light mode. A mix on purpose: some are close to
+ * paper-white with just a hint of hue, some are properly coloured, because a
+ * set of twelve that were all equally saturated would not actually offer
+ * twelve different moods. Half are light siblings of well-known dark palettes
+ * above (`catppuccin` → `catppuccin-latte`, `rose-pine` → `rose-pine-dawn`,
+ * `gruvbox` → `gruvbox-light`, `solarized` → `solarized-light`, `everforest` →
+ * `everforest-light`, `nord` → `nord-snow`); the rest are original.
+ */
+export const LIGHT_APP_COLOR_PRESETS = [
+    { id: 'daybreak', label: 'Daybreak', colors: DEFAULT_LIGHT_APP_COLORS },
+    {
+        id: 'catppuccin-latte',
+        label: 'Catppuccin Latte',
+        colors: { base: '#eff1f5', raised: '#e6e9ef', control: '#dee0e4', hover: '#cacdd5', active: '#acb0be', muted: '#6c6f85' },
+    },
+    {
+        id: 'rose-pine-dawn',
+        label: 'Rosé Pine Dawn',
+        colors: { base: '#faf4ed', raised: '#fffaf3', control: '#f2eeea', hover: '#e4e1e0', active: '#cecacd', muted: '#797593' },
+    },
+    {
+        id: 'gruvbox-light',
+        label: 'Gruvbox Light',
+        colors: { base: '#fbf1c7', raised: '#ebdbb2', control: '#d9d0bf', hover: '#c4baa8', active: '#a89984', muted: '#7c6f64' },
+    },
+    {
+        id: 'solarized-light',
+        label: 'Solarized Light',
+        colors: { base: '#fdf6e3', raised: '#eee8d5', control: '#e8e4da', hover: '#dcd6c6', active: '#c8bfa0', muted: '#657b83' },
+    },
+    {
+        id: 'everforest-light',
+        label: 'Everforest Light',
+        colors: { base: '#f3ead3', raised: '#e8ddba', control: '#d2c9a7', hover: '#bfb88d', active: '#a6a26e', muted: '#638547' },
+    },
+    {
+        id: 'nord-snow',
+        label: 'Nord (Snow Storm)',
+        colors: { base: '#eceff4', raised: '#e5e9f0', control: '#e3e6ec', hover: '#d3d7e0', active: '#aeb7c9', muted: '#4c566a' },
+    },
+    {
+        id: 'meadow',
+        label: 'Meadow',
+        colors: { base: '#f9fbf2', raised: '#f0f6df', control: '#e7eedb', hover: '#d0e2ba', active: '#a3cf78', muted: '#4d6b2f' },
+    },
+    {
+        id: 'citrus',
+        label: 'Citrus',
+        colors: { base: '#fff8ec', raised: '#fdedcf', control: '#f2e4ce', hover: '#eecc9c', active: '#ef9b4e', muted: '#b5451f' },
+    },
+    {
+        id: 'blossom',
+        label: 'Blossom',
+        colors: { base: '#fdf6f8', raised: '#fbe9ee', control: '#f5e7ea', hover: '#ebccd5', active: '#d998ab', muted: '#8a4a5c' },
+    },
+    {
+        id: 'sky',
+        label: 'Sky',
+        colors: { base: '#f2f9fc', raised: '#e2f2f8', control: '#dfecf0', hover: '#bcdbe4', active: '#74bcd1', muted: '#2f6b7d' },
+    },
+    {
+        id: 'lavender',
+        label: 'Lavender',
+        colors: { base: '#f8f6fd', raised: '#eee7fa', control: '#eae5f4', hover: '#d5c8ea', active: '#a98adf', muted: '#5c3f8a' },
+    },
+];
+
+/**
+ * How much lighter each dark step is than the window behind it, in HSL
+ * lightness points. Measured off the default palette, so a ramp derived from
+ * one colour has the same spacing the app was drawn with.
+ */
+const DARK_LIGHTNESS_STEPS = [0, 4.5, 10, 15, 21, 34];
+
+/**
+ * The light equivalent: a light ramp starts near white and descends, so these
+ * are subtracted rather than added. The last step is a much bigger jump than
+ * dark's (-48 vs +13) because HSL chroma is `S × (1 − |2L−1|)` - a muted step
+ * near L 50% needs to travel a lot further from a base at L 96-98% to read as
+ * saturated at all than dark's equivalent step does travelling the other way.
+ */
+const LIGHT_LIGHTNESS_STEPS = [0, -2, -6, -12, -19, -48];
 
 const HEX_PATTERN = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i;
 
@@ -204,35 +297,87 @@ function hslToHex(hue, saturation, lightness) {
 
 /**
  * A whole ramp from one colour: the window keeps the hue and saturation it was
- * given, and every surface above it is the same colour lifted. One picker is
+ * given, and every surface above it is the same colour shifted. One picker is
  * how most people want to say "make the app green", and each step stays
  * editable afterwards.
  */
-export function derivePalette(baseHex) {
+function derivePaletteWithSteps(baseHex, steps) {
     const [hue, saturation, lightness] = rgbToHsl(hexToRgb(baseHex));
 
     return APP_COLOR_FIELDS.reduce((colors, field, index) => {
-        colors[field.key] = hslToHex(hue, saturation, lightness + LIGHTNESS_STEPS[index]);
+        colors[field.key] = hslToHex(hue, saturation, lightness + steps[index]);
         return colors;
     }, {});
 }
 
+export function deriveDarkPalette(baseHex) {
+    return derivePaletteWithSteps(baseHex, DARK_LIGHTNESS_STEPS);
+}
+
+export function deriveLightPalette(baseHex) {
+    return derivePaletteWithSteps(baseHex, LIGHT_LIGHTNESS_STEPS);
+}
+
 /** Fill the gaps and drop anything unreadable, so a half-written store still
  *  produces an app you can see. */
-export function sanitizeAppColors(colors) {
+export function sanitizeAppColors(colors, fallback = DEFAULT_APP_COLORS) {
     const source = colors || {};
     return APP_COLOR_FIELDS.reduce((result, field) => {
-        result[field.key] = normalizeHex(source[field.key], DEFAULT_APP_COLORS[field.key]);
+        result[field.key] = normalizeHex(source[field.key], fallback[field.key]);
         return result;
     }, {});
 }
 
 /** The preset these colours are, if they are still exactly one of them. */
-export function matchPreset(colors) {
+export function matchPreset(colors, presets = APP_COLOR_PRESETS) {
     const candidate = sanitizeAppColors(colors);
-    return APP_COLOR_PRESETS.find(preset =>
+    return presets.find(preset =>
         APP_COLOR_FIELDS.every(field => preset.colors[field.key] === candidate[field.key])
     )?.id || null;
+}
+
+/**
+ * The six colours that should actually be on screen right now, given what
+ * mode and which tint on each side of it are selected. The one place this
+ * gets worked out - `hooks/useTheme.js` and the pre-paint boot script in
+ * `main.jsx` both call this rather than each carrying their own copy of the
+ * same branching.
+ */
+export function resolveAppColors({ theme, darkTint, lightTint, appColors, lightAppColors, prefersDark }) {
+    const dark = theme === 'dark' || (theme === 'system' && prefersDark);
+    const tint = dark ? darkTint : lightTint;
+
+    if (tint === CUSTOM_TINT_ID) {
+        return dark
+            ? sanitizeAppColors(appColors, DEFAULT_APP_COLORS)
+            : sanitizeAppColors(lightAppColors, DEFAULT_LIGHT_APP_COLORS);
+    }
+
+    const presets = dark ? APP_COLOR_PRESETS : LIGHT_APP_COLOR_PRESETS;
+    const fallback = dark ? DEFAULT_APP_COLORS : DEFAULT_LIGHT_APP_COLORS;
+    return presets.find(preset => preset.id === tint)?.colors || fallback;
+}
+
+/**
+ * One-time cleanup for the theme this app shipped with before light mode was
+ * themeable, where "Custom" was a fourth option alongside Light/Dark/System
+ * rather than a tint under Dark. Owns its own `localStorage` read/write
+ * (idempotent) rather than being handed values, since it has to run from both
+ * `useTheme.js` (a hook) and `main.jsx`'s pre-paint boot script (not a hook).
+ */
+export function migrateLegacyTheme() {
+    if (localStorage.getItem('theme') !== 'custom') return;
+
+    let stored = null;
+    try {
+        stored = JSON.parse(localStorage.getItem('appColors') || 'null');
+    } catch {
+        stored = null;
+    }
+
+    const colors = sanitizeAppColors(stored, DEFAULT_APP_COLORS);
+    localStorage.setItem('theme', 'dark');
+    localStorage.setItem('darkTint', matchPreset(colors, APP_COLOR_PRESETS) || CUSTOM_TINT_ID);
 }
 
 /**
@@ -251,15 +396,7 @@ export function applyAppColors(colors) {
     }
 }
 
-/** Hand the app back its own colours, the ones `:root` states in input.css. */
-export function clearAppColors() {
-    const root = document.documentElement;
-    for (const field of APP_COLOR_FIELDS) {
-        root.style.removeProperty(CSS_VARIABLES[field.key]);
-    }
-}
-
-/** What one of these colours currently resolves to, custom palette or not. */
+/** What one of these colours currently resolves to, whichever tint is live. */
 export function currentAppColor(key) {
     const variable = CSS_VARIABLES[key];
     if (!variable) return DEFAULT_APP_COLORS.base;

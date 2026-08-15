@@ -69,7 +69,7 @@ const ITEM = `w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-left
     transition-colors`;
 
 /** A row you are not on: nothing at rest, the ramp's first step under the pointer. */
-const HOVER = 'hover:bg-gray-100 dark:hover:bg-surface-control';
+const HOVER = 'hover:bg-surface-control';
 
 /**
  * The row you are on.
@@ -85,8 +85,8 @@ const HOVER = 'hover:bg-gray-100 dark:hover:bg-surface-control';
  * again, or the row you are on would be the one row in the menu that does not
  * respond to the pointer.
  */
-const SELECTED = `bg-gray-200 dark:bg-surface-hover
-    hover:bg-gray-300 dark:hover:bg-surface-active`;
+const SELECTED = `bg-surface-hover
+    hover:bg-surface-active`;
 
 const REMOVE = `absolute right-1 top-1/2 -translate-y-1/2 w-6 h-6 rounded-md
     flex items-center justify-center transition-colors
@@ -112,7 +112,7 @@ function CheckBox({ checked }) {
                 transition-colors
                 ${checked
                     ? 'bg-gray-900 border-gray-900 dark:bg-white dark:border-white'
-                    : 'border-gray-300 dark:border-neutral-600'}`}
+                    : 'border-surface-hover'}`}
         >
             {checked && (
                 <Tick02Icon size={11} strokeWidth={3} className="text-white dark:text-black" />
@@ -269,8 +269,8 @@ export default function PanelMenu({
                     role="menu"
                     className={`absolute ${place} ${menuClassName} z-40 rounded-xl
                         max-h-80 flex flex-col animate-dialog-in
-                        bg-white dark:bg-surface-raised
-                        border border-gray-200 dark:border-surface-control
+                        bg-surface-raised
+                        border border-surface-control/60
                         shadow-xl shadow-black/10 dark:shadow-black/40`}
                 >
                     {/* Above the scroller rather than inside it, so a search
@@ -281,7 +281,7 @@ export default function PanelMenu({
                         {sections.map((section, index) => (
                             <div key={section.heading || `section-${index}`}>
                                 {index > 0 && (
-                                    <div className="-mx-1 my-1.5 border-t border-gray-100 dark:border-surface-control" />
+                                    <div className="-mx-1 my-1.5 border-t border-surface-control" />
                                 )}
                                 {section.heading && (
                                     <div className="px-2.5 pb-1.5 pt-1 flex items-baseline gap-2

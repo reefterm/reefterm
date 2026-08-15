@@ -62,7 +62,7 @@ function TransferRow({ transfer, onCancel, onRetry }) {
             ].filter(Boolean).join(' · ');
 
     return (
-        <div className="flex items-center gap-3 px-3 py-2 hover:bg-gray-50 dark:hover:bg-surface-control/50 transition-colors">
+        <div className="flex items-center gap-3 px-3 py-2 hover:bg-surface-control/50 transition-colors">
             <span className="shrink-0"><StateIcon transfer={transfer} /></span>
 
             <div className="min-w-0 flex-1">
@@ -78,7 +78,7 @@ function TransferRow({ transfer, onCancel, onRetry }) {
                 </div>
 
                 {isActive(transfer.state) && (
-                    <div className="mt-1 h-1 bg-gray-200 dark:bg-surface-control rounded-full overflow-hidden">
+                    <div className="mt-1 h-1 bg-surface-control rounded-full overflow-hidden">
                         <div
                             className={`h-full rounded-full transition-[width] duration-200 ${
                                 transfer.state === 'running' ? 'bg-blue-500' : 'bg-blue-500/40 sftp-indeterminate'
@@ -137,7 +137,7 @@ function TransferPanel({ transfers, summary, expanded, onToggle, onCancel, onRet
             : `${transfers.length} transfer${transfers.length > 1 ? 's' : ''} finished`;
 
     return (
-        <div className="shrink-0 border-t border-gray-200 dark:border-surface-control bg-white dark:bg-surface-raised">
+        <div className="shrink-0 border-t border-surface-control/60 bg-surface-raised">
             <div className="h-9 flex items-center gap-2 px-3">
                 <button
                     onClick={onToggle}
@@ -164,7 +164,7 @@ function TransferPanel({ transfers, summary, expanded, onToggle, onCancel, onRet
                 {summary.finished > 0 && (
                     <button
                         onClick={onClear}
-                        className="shrink-0 w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-surface-control transition-colors"
+                        className="shrink-0 w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-surface-control transition-colors"
                         title="Clear finished"
                     >
                         <Delete02Icon size={14} strokeWidth={2} />
@@ -173,7 +173,7 @@ function TransferPanel({ transfers, summary, expanded, onToggle, onCancel, onRet
             </div>
 
             {expanded && (
-                <div className="max-h-52 overflow-y-auto border-t border-gray-100 dark:border-surface-control/70">
+                <div className="max-h-52 overflow-y-auto border-t border-surface-control/70">
                     {transfers.map(transfer => (
                         <TransferRow
                             key={transfer.id}
@@ -187,7 +187,7 @@ function TransferPanel({ transfers, summary, expanded, onToggle, onCancel, onRet
 
             {/* Collapsed: one bar standing in for the whole queue. */}
             {!expanded && summary.active > 0 && (
-                <div className="h-0.5 bg-gray-200 dark:bg-surface-control">
+                <div className="h-0.5 bg-surface-control">
                     <div
                         className="h-full bg-blue-500 transition-[width] duration-200"
                         style={{ width: `${summary.percent}%` }}

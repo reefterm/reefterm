@@ -86,13 +86,13 @@ export default function PermissionsModal({ entry, onApply, onClose }) {
                 </tbody>
             </table>
 
-            <div className="flex items-center gap-3 mt-4 pt-4 border-t border-gray-100 dark:border-surface-control">
+            <div className="flex items-center gap-3 mt-4 pt-4 border-t border-surface-control">
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Octal</label>
                 <input
                     type="text"
                     value={octal}
                     onChange={(event) => handleOctal(event.target.value)}
-                    className="w-24 px-3 py-1.5 rounded-lg border border-gray-300 dark:border-surface-control bg-white dark:bg-surface-base text-gray-900 dark:text-white font-mono text-sm outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-white"
+                    className="w-24 px-3 py-1.5 rounded-lg border border-surface-control bg-surface-base text-gray-900 dark:text-white font-mono text-sm outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-white"
                     data-autofocus
                 />
                 <span className="font-mono text-sm text-gray-500 dark:text-gray-400">

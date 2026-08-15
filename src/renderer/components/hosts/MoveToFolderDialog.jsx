@@ -59,7 +59,7 @@ export default function MoveToFolderDialog({
             onClose={onCancel}
             icon={
                 <span className="w-9 h-9 rounded-xl flex items-center justify-center
-                    bg-gray-100 dark:bg-surface-control text-gray-500 dark:text-gray-300">
+                    bg-surface-control text-gray-500 dark:text-gray-300">
                     <FolderTransferIcon size={20} strokeWidth={2} />
                 </span>
             }
@@ -105,7 +105,7 @@ export default function MoveToFolderDialog({
                             onClick={() => onMove(entry.id)}
                             className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-left transition-colors
                                 text-gray-700 dark:text-gray-300
-                                enabled:hover:bg-gray-100 dark:enabled:hover:bg-surface-control
+                                enabled:hover:bg-surface-control
                                 disabled:opacity-40 disabled:cursor-not-allowed"
                         >
                             <Folder02Icon size={15} strokeWidth={2} className="shrink-0 opacity-70" />

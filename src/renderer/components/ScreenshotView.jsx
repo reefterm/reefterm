@@ -56,8 +56,8 @@ export default function ScreenshotView({ id }) {
     }, [close, handleCopy, handleSave]);
 
     return (
-        <div className="h-full flex flex-col bg-gray-100 dark:bg-surface-base text-gray-900 dark:text-gray-100 font-inter overflow-hidden">
-            <header className="h-12 shrink-0 flex items-center justify-between gap-3 px-3 app-drag border-b border-gray-200 dark:border-surface-control">
+        <div className="h-full flex flex-col bg-surface-base text-gray-900 dark:text-gray-100 font-inter overflow-hidden">
+            <header className="h-12 shrink-0 flex items-center justify-between gap-3 px-3 app-drag border-b border-surface-control/60">
                 <div className="flex items-center gap-2 min-w-0">
                     <span className="text-xs font-semibold truncate">Screenshot</span>
                     {shot?.title && (
@@ -78,7 +78,7 @@ export default function ScreenshotView({ id }) {
                         onClick={handleCopy}
                         disabled={!shot}
                         title="Copy to clipboard (Ctrl+C)"
-                        className="flex items-center gap-1.5 px-3 h-8 rounded-xl text-xs font-semibold bg-gray-200 dark:bg-surface-control text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-surface-hover disabled:opacity-40 transition-colors"
+                        className="flex items-center gap-1.5 px-3 h-8 rounded-xl text-xs font-semibold bg-surface-control text-gray-700 dark:text-gray-200 hover:bg-surface-hover disabled:opacity-40 transition-colors"
                     >
                         {copied ? <Tick01Icon size={14} strokeWidth={2.5} /> : <Copy01Icon size={14} strokeWidth={2} />}
                         {copied ? 'Copied' : 'Copy'}
@@ -120,7 +120,7 @@ export default function ScreenshotView({ id }) {
             </main>
 
             {savedPath && (
-                <footer className="shrink-0 flex items-center justify-between gap-3 px-4 py-2.5 border-t border-gray-200 dark:border-surface-control text-xs">
+                <footer className="shrink-0 flex items-center justify-between gap-3 px-4 py-2.5 border-t border-surface-control/60 text-xs">
                     <span className="text-gray-500 dark:text-gray-400 truncate">
                         Saved to <span className="font-mono">{savedPath}</span>
                     </span>

@@ -194,7 +194,7 @@ function ProxyDialog({ proxy, proxies = [], dismiss, onClose, onSave, onTest }) 
                     <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">
                         This proxy speaks
                     </span>
-                    <div className="grid grid-cols-3 gap-1 p-1 bg-gray-100 dark:bg-surface-base rounded-xl">
+                    <div className="grid grid-cols-3 gap-1 p-1 bg-surface-base rounded-xl">
                         {PROXY_TYPES.map((entry) => (
                             <button
                                 key={entry.id}
@@ -202,7 +202,7 @@ function ProxyDialog({ proxy, proxies = [], dismiss, onClose, onSave, onTest }) 
                                 title={entry.detail}
                                 className={`px-2 py-1.5 rounded-lg text-sm font-medium transition-all ${
                                     formData.type === entry.id
-                                        ? 'bg-white dark:bg-surface-active text-gray-900 dark:text-white shadow-sm'
+                                        ? 'bg-surface-active text-gray-900 dark:text-white shadow-sm'
                                         : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
                                 }`}
                                 onClick={() => handleType(entry.id)}
@@ -350,7 +350,7 @@ function ProxyDialog({ proxy, proxies = [], dismiss, onClose, onSave, onTest }) 
                     <span className="shrink-0 text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-neutral-400">
                         Optional
                     </span>
-                    <span className="h-px flex-1 bg-gray-200 dark:bg-surface-control" />
+                    <span className="h-px flex-1 bg-surface-control" />
                 </div>
 
                 <div className="flex flex-col gap-2">

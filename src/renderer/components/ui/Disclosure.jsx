@@ -26,7 +26,7 @@ export default function Disclosure({ title, summary, defaultOpen = false, childr
     const [open, setOpen] = useState(defaultOpen);
 
     return (
-        <div className="rounded-xl border border-gray-200 dark:border-surface-control">
+        <div className="rounded-xl border border-surface-control/60">
             {/* `surface-control` is one step up the elevation ramp from the
                 sheet's own `surface-raised`, so the row lifts under the pointer.
                 `surface-base` sits below it and would darken instead. */}
@@ -35,7 +35,7 @@ export default function Disclosure({ title, summary, defaultOpen = false, childr
                 onClick={() => setOpen(current => !current)}
                 aria-expanded={open}
                 className={`w-full flex items-center gap-2 px-3 py-2.5 text-left transition-colors
-                    hover:bg-gray-50 dark:hover:bg-surface-control
+                    hover:bg-surface-control
                     ${open ? 'rounded-t-xl' : 'rounded-xl'}`}
             >
                 <ArrowRight01Icon
@@ -61,7 +61,7 @@ export default function Disclosure({ title, summary, defaultOpen = false, childr
                 An open section is a panel with a title on top, and without the
                 rule the first field reads as another line of the header. */}
             {open && (
-                <div className="flex flex-col gap-4 px-3 pt-3.5 pb-3.5 border-t border-gray-200 dark:border-surface-control">
+                <div className="flex flex-col gap-4 px-3 pt-3.5 pb-3.5 border-t border-surface-control/60">
                     <SectionBoundary name={title}>{children}</SectionBoundary>
                 </div>
             )}

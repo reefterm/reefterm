@@ -127,8 +127,8 @@ export default function GeneralPage() {
                                     label: <span lang={entry.tag}>{label}</span>,
                                 };
                             })}
-                            className="w-56 h-9 px-3 rounded-xl text-sm bg-white dark:bg-neutral-800
-                                border border-gray-300 dark:border-neutral-700
+                            className="w-56 h-9 px-3 rounded-xl text-sm bg-surface-control
+                                border border-surface-active
                                 text-gray-900 dark:text-gray-100 outline-none
                                 focus-visible:ring-2 focus-visible:ring-gray-900/20 dark:focus-visible:ring-white/25"
                         />

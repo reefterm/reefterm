@@ -106,7 +106,7 @@ export default function ProviderPicker({ value, available = [], onChange }) {
                         onClick={() => !selected && onChange(provider.value)}
                         className={`${CARD} ${selected
                             ? 'border-gray-900 dark:border-white bg-gray-50 dark:bg-white/[0.06]'
-                            : 'border-gray-200 dark:border-surface-control hover:border-gray-300 '
+                            : 'border-surface-control/60 hover:border-gray-300 '
                                 + 'dark:hover:border-white/25'}
                             ${ready ? '' : 'opacity-50 cursor-not-allowed hover:border-gray-200'}`}
                     >

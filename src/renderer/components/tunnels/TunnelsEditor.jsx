@@ -50,7 +50,7 @@ export default function TunnelsEditor({ tunnels = [], onChange, labelled = true 
                 <button
                     type="button"
                     onClick={() => setEditing({})}
-                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-surface-control transition-colors"
+                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold text-gray-600 dark:text-gray-300 hover:bg-surface-control transition-colors"
                 >
                     <PlusSignIcon size={13} strokeWidth={2.5} />
                     {t('common.add')}
@@ -58,7 +58,7 @@ export default function TunnelsEditor({ tunnels = [], onChange, labelled = true 
             </div>
 
             {tunnels.length === 0 ? (
-                <p className="text-xs text-gray-500 dark:text-gray-400 rounded-lg border border-dashed border-gray-300 dark:border-neutral-700 px-3 py-3">
+                <p className="text-xs text-gray-500 dark:text-gray-400 rounded-lg border border-dashed border-surface-active px-3 py-3">
                     {t('tunnel.editorEmpty')}
                 </p>
             ) : (
@@ -66,9 +66,9 @@ export default function TunnelsEditor({ tunnels = [], onChange, labelled = true 
                     {tunnels.map((tunnel) => (
                         <div
                             key={tunnel.id}
-                            className="flex items-center gap-2.5 px-3 py-2 rounded-lg border border-gray-200 dark:border-neutral-700 bg-gray-50 dark:bg-neutral-800/50"
+                            className="flex items-center gap-2.5 px-3 py-2 rounded-lg border border-surface-active/60 bg-surface-control/50"
                         >
-                            <span className="shrink-0 px-1.5 py-0.5 rounded bg-white dark:bg-surface-control text-[10px] font-semibold font-mono text-gray-600 dark:text-gray-400">
+                            <span className="shrink-0 px-1.5 py-0.5 rounded bg-surface-control text-[10px] font-semibold font-mono text-gray-600 dark:text-gray-400">
                                 {typeInfo(tunnel.type).flag}
                             </span>
 
@@ -84,7 +84,7 @@ export default function TunnelsEditor({ tunnels = [], onChange, labelled = true 
                             </div>
 
                             {tunnel.autoStart && (
-                                <span className="shrink-0 text-[10px] px-1.5 py-0.5 rounded bg-white dark:bg-surface-control text-gray-500 dark:text-neutral-400">
+                                <span className="shrink-0 text-[10px] px-1.5 py-0.5 rounded bg-surface-control text-gray-500 dark:text-neutral-400">
                                     {t('tunnel.autoBadge')}
                                 </span>
                             )}
@@ -93,7 +93,7 @@ export default function TunnelsEditor({ tunnels = [], onChange, labelled = true 
                                 type="button"
                                 onClick={() => setEditing(tunnel)}
                                 title={t('common.edit')}
-                                className="shrink-0 w-6 h-6 flex items-center justify-center rounded text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-surface-control transition-colors"
+                                className="shrink-0 w-6 h-6 flex items-center justify-center rounded text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-surface-control transition-colors"
                             >
                                 <Edit02Icon size={12} strokeWidth={2} />
                             </button>

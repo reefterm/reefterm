@@ -82,7 +82,7 @@ const SnippetsToolbar = forwardRef(function SnippetsToolbar({
 
                 {/* A hairline between "how it is shown" and "what there is",
                     so the two primary actions do not read as a fourth filter. */}
-                <span className="w-px h-6 bg-gray-200 dark:bg-surface-control mx-0.5" aria-hidden="true" />
+                <span className="w-px h-6 bg-surface-control mx-0.5" aria-hidden="true" />
 
                 <IconButton
                     onClick={onNewPackage}

@@ -29,11 +29,11 @@ import { composeSnippet, emptyStep, isPackage, MAX_STEPS } from '../../lib/snipp
  * of a package, and a keyboard has to be able to set it.
  */
 
-const ROW = 'group/step flex items-start gap-2 rounded-lg border border-gray-200 '
-    + 'dark:border-surface-control bg-white dark:bg-surface-base px-2 py-2';
+const ROW = 'group/step flex items-start gap-2 rounded-lg border border-surface-control/60 '
+    + 'bg-surface-base px-2 py-2';
 
 const ICON_BUTTON = 'w-6 h-6 flex items-center justify-center rounded-md text-gray-400 '
-    + 'hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-surface-control '
+    + 'hover:text-gray-900 dark:hover:text-white hover:bg-surface-control '
     + 'transition-colors disabled:opacity-30 disabled:pointer-events-none';
 
 function StepRow({
@@ -201,7 +201,7 @@ export default function PackageSteps({ form, library = [], onChange }) {
             </div>
 
             {steps.length === 0 ? (
-                <p className="rounded-lg border border-dashed border-gray-300 dark:border-surface-control px-3 py-6 text-center text-[13px] text-gray-500 dark:text-gray-400">
+                <p className="rounded-lg border border-dashed border-surface-control px-3 py-6 text-center text-[13px] text-gray-500 dark:text-gray-400">
                     A package runs a series of commands in order. Add the first one below.
                 </p>
             ) : (
@@ -226,7 +226,7 @@ export default function PackageSteps({ form, library = [], onChange }) {
                     type="button"
                     onClick={addInline}
                     disabled={full}
-                    className="h-8 px-3 rounded-lg border border-gray-300 dark:border-surface-control text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-surface-control transition-colors flex items-center gap-1.5 disabled:opacity-40"
+                    className="h-8 px-3 rounded-lg border border-surface-control text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-surface-control transition-colors flex items-center gap-1.5 disabled:opacity-40"
                 >
                     <PlusSignIcon size={13} strokeWidth={2.5} />
                     Write a command
@@ -243,7 +243,7 @@ export default function PackageSteps({ form, library = [], onChange }) {
                             type="button"
                             onClick={() => setPicking(open => !open)}
                             disabled={full || referable.length === 0}
-                            className="h-8 px-3 rounded-lg border border-gray-300 dark:border-surface-control text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-surface-control transition-colors flex items-center gap-1.5 disabled:opacity-40"
+                            className="h-8 px-3 rounded-lg border border-surface-control text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-surface-control transition-colors flex items-center gap-1.5 disabled:opacity-40"
                         >
                             <Link01Icon size={13} strokeWidth={2.5} />
                             Add from library
@@ -261,8 +261,8 @@ export default function PackageSteps({ form, library = [], onChange }) {
                             <div
                                 ref={pickerRef}
                                 className="absolute left-0 bottom-full mb-1.5 z-50 w-72 max-h-64 overflow-y-auto
-                                    rounded-xl border border-gray-200 dark:border-surface-control
-                                    bg-white dark:bg-surface-raised shadow-xl p-1"
+                                    rounded-xl border border-surface-control/60
+                                    bg-surface-raised shadow-xl p-1"
                                 role="listbox"
                                 aria-label="Saved commands"
                             >
@@ -272,7 +272,7 @@ export default function PackageSteps({ form, library = [], onChange }) {
                                         type="button"
                                         role="option"
                                         onClick={() => addReference(entry.id)}
-                                        className="w-full text-left px-2 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-surface-control transition-colors"
+                                        className="w-full text-left px-2 py-1.5 rounded-lg hover:bg-surface-control transition-colors"
                                     >
                                         <span className="block text-[13px] font-medium text-gray-900 dark:text-white truncate">
                                             {entry.name}
@@ -304,8 +304,8 @@ export default function PackageSteps({ form, library = [], onChange }) {
             )}
 
             {text && (
-                <div className="rounded-lg border border-gray-200 dark:border-surface-control overflow-hidden">
-                    <div className="px-2.5 h-7 flex items-center gap-2 border-b border-gray-200 dark:border-surface-control bg-gray-50 dark:bg-surface-base/60">
+                <div className="rounded-lg border border-surface-control/60 overflow-hidden">
+                    <div className="px-2.5 h-7 flex items-center gap-2 border-b border-surface-control/60 bg-surface-base/60">
                         <span className="text-[10px] uppercase tracking-wide font-semibold text-gray-400 dark:text-neutral-500">
                             What gets sent
                         </span>

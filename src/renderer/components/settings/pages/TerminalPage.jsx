@@ -63,7 +63,7 @@ const TILE_BASE = 'terminal-theme-option group flex flex-col items-center gap-2 
 
 const tileClass = (selected) => `${TILE_BASE} ${selected
     ? 'border-gray-900 dark:border-white ring-1 ring-gray-900 dark:ring-white'
-    : 'border-gray-200 dark:border-neutral-700 hover:border-gray-300 dark:hover:border-neutral-600'}`;
+    : 'border-surface-active/60 hover:border-surface-hover'}`;
 
 const labelClass = (selected) => `text-xs text-center leading-tight ${selected
     ? 'font-bold text-gray-900 dark:text-white'
@@ -129,7 +129,7 @@ export default function TerminalPage({
                         so it wants the full width and a fixed place on the page. */}
                     <div className="flex flex-col gap-3">
                         <div
-                            className="rounded-xl px-4 py-3 overflow-x-auto border border-gray-200 dark:border-neutral-700"
+                            className="rounded-xl px-4 py-3 overflow-x-auto border border-surface-active/60"
                             style={{ backgroundColor: themeColors.background }}
                         >
                             <div
@@ -152,8 +152,8 @@ export default function TerminalPage({
                         <Select
                             id="terminal-font-family"
                             aria-label={t('settings.terminal.fontAria')}
-                            className="w-full px-3 py-2 rounded-xl text-sm bg-white dark:bg-neutral-800
-                                border border-gray-300 dark:border-neutral-700
+                            className="w-full px-3 py-2 rounded-xl text-sm bg-surface-control
+                                border border-surface-active
                                 text-gray-900 dark:text-gray-100 outline-none
                                 focus-visible:ring-2 focus-visible:ring-gray-900/20 dark:focus-visible:ring-white/25"
                             value={terminalSettings.fontFamily}
@@ -346,9 +346,9 @@ export default function TerminalPage({
                         : t('settings.terminal.resetDesc')}
                     control={
                         <button
-                            className="px-4 py-2 rounded-xl text-sm font-semibold border border-gray-300
-                                dark:border-neutral-700 text-gray-700 dark:text-gray-300 transition-all
-                                active:scale-95 hover:bg-gray-50 dark:hover:bg-neutral-800
+                            className="px-4 py-2 rounded-xl text-sm font-semibold border border-surface-active
+                                text-gray-700 dark:text-gray-300 transition-all
+                                active:scale-95 hover:bg-surface-control
                                 disabled:opacity-40 disabled:cursor-not-allowed"
                             disabled={isDefault}
                             onClick={() => {
@@ -448,9 +448,9 @@ export default function TerminalPage({
                     align="center"
                     control={
                         <button
-                            className="px-4 py-2 rounded-xl text-sm font-semibold border border-gray-300
-                                dark:border-neutral-700 text-gray-700 dark:text-gray-300 transition-all
-                                active:scale-95 hover:bg-gray-50 dark:hover:bg-neutral-800"
+                            className="px-4 py-2 rounded-xl text-sm font-semibold border border-surface-active
+                                text-gray-700 dark:text-gray-300 transition-all
+                                active:scale-95 hover:bg-surface-control"
                             onClick={() => setEditorOpen(true)}
                         >
                             {t('settings.appearance.editColors')}

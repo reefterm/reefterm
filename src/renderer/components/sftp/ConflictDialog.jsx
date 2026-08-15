@@ -8,8 +8,8 @@ function Comparison({ label, size, modifiedAt, highlight }) {
     return (
         <div className={`flex-1 rounded-xl border p-3 ${
             highlight
-                ? 'border-gray-900/20 dark:border-white/20 bg-gray-50 dark:bg-surface-control/60'
-                : 'border-gray-200 dark:border-surface-control'
+                ? 'border-gray-900/20 dark:border-white/20 bg-surface-control/60'
+                : 'border-surface-control/60'
         }`}>
             <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-neutral-500">
                 {label}

@@ -17,11 +17,15 @@ const SYNCED_KEYS = [
     'terminal.appearance',   // useTerminalSettings
     'terminalTheme',         // useTerminalTheme
     'terminalCustomTheme',   // useTerminalTheme, the user's own palette
-    'theme',                 // useTheme, light, dark, system or custom
-    'appColors',             // useTheme, the user's own app palette
+    'theme',                 // useTheme, light, dark or system
+    'darkTint',              // useTheme, which dark-mode preset is picked (or 'custom')
+    'lightTint',             // useTheme, which light-mode preset is picked (or 'custom')
+    'appColors',             // useTheme, the user's own dark app palette
+    'lightAppColors',        // useTheme, the user's own light app palette
     'titleBarLogo',          // useTheme, whether the title bar shows the mark
     'titleBarLogoImage',     // useTheme, the user's own mark, as a data URL
     'titleBarLogoSide',      // useTheme, which end of the title bar it sits at
+    'quickThemeSwitcher.enabled', // useTheme, whether the theme-switcher gutter shows
     'settings.category',     // which settings page was last open
 ];
 

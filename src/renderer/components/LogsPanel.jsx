@@ -152,7 +152,7 @@ function LogRow({ entry, currentActor }) {
     return (
         <div
             className={`group flex items-start gap-3 px-3 py-1.5 rounded-lg transition-colors ${
-                expandable ? 'cursor-pointer hover:bg-gray-100 dark:hover:bg-surface-control' : ''
+                expandable ? 'cursor-pointer hover:bg-surface-control' : ''
             }`}
             onClick={expandable ? () => setOpen(value => !value) : undefined}
         >
@@ -188,7 +188,7 @@ function LogRow({ entry, currentActor }) {
                         <span
                             title={`Recorded by ${entry.actor?.user} on ${entry.actor?.machine}`}
                             className="shrink-0 inline-flex items-center gap-1 text-[11px] px-1.5 py-px rounded
-                                       bg-gray-100 dark:bg-surface-control text-gray-600 dark:text-gray-300"
+                                       bg-surface-control text-gray-600 dark:text-gray-300"
                         >
                             <UserIcon size={10} strokeWidth={2} />
                             {entry.actor?.user || 'unknown'}
@@ -203,7 +203,7 @@ function LogRow({ entry, currentActor }) {
                 </div>
 
                 {open && (
-                    <div className="mt-1.5 mb-1 flex flex-col gap-1 border-l-2 border-gray-200 dark:border-surface-hover pl-3">
+                    <div className="mt-1.5 mb-1 flex flex-col gap-1 border-l-2 border-surface-hover/60 pl-3">
                         {entry.message && (
                             <span className="text-[11px] text-red-600 dark:text-red-400 break-words">
                                 {entry.message}
@@ -345,8 +345,8 @@ function LogsPanel({ isActive = true, reachedForPage = 0 }) {
                             className={`h-8 px-3 rounded-lg text-xs font-semibold transition-colors ${
                                 active
                                     ? 'bg-gray-900 dark:bg-white text-white dark:text-black'
-                                    : 'bg-gray-100 dark:bg-surface-control text-gray-500 dark:text-gray-400 '
-                                      + 'hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-surface-hover'
+                                    : 'bg-surface-control text-gray-500 dark:text-gray-400 '
+                                      + 'hover:text-gray-900 dark:hover:text-white hover:bg-surface-hover'
                             }`}
                         >
                             {t(filter.labelKey)}
@@ -359,15 +359,15 @@ function LogsPanel({ isActive = true, reachedForPage = 0 }) {
                     );
                 })}
 
-                <span className="w-px h-5 bg-gray-200 dark:bg-surface-control mx-1" />
+                <span className="w-px h-5 bg-surface-control mx-1" />
 
                 <button
                     onClick={() => setFailuresOnly(value => !value)}
                     className={`h-8 px-3 rounded-lg text-xs font-semibold inline-flex items-center gap-1.5 transition-colors ${
                         failuresOnly
                             ? 'bg-red-600 text-white'
-                            : 'bg-gray-100 dark:bg-surface-control text-gray-500 dark:text-gray-400 '
-                              + 'hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-surface-hover'
+                            : 'bg-surface-control text-gray-500 dark:text-gray-400 '
+                              + 'hover:text-gray-900 dark:hover:text-white hover:bg-surface-hover'
                     }`}
                 >
                     <AlertCircleIcon size={13} strokeWidth={2} />
@@ -410,7 +410,7 @@ function LogsPanel({ isActive = true, reachedForPage = 0 }) {
                                 <span className={`text-[11px] ${FAINT}`}>
                                     {fullDate(group.entries[0].at)}
                                 </span>
-                                <span className="flex-1 h-px bg-gray-200 dark:bg-surface-control" />
+                                <span className="flex-1 h-px bg-surface-control" />
                                 <span className={`text-[11px] tabular-nums ${FAINT}`}>
                                     {group.entries.length === 1 ? '1 entry' : `${group.entries.length} entries`}
                                 </span>

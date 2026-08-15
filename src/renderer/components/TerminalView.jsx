@@ -320,7 +320,7 @@ function TerminalView({
             short: connection.retryIn ? `Retrying in ${connection.retryIn}s` : 'Reconnecting…',
         },
         failed: { dot: 'bg-red-500', label: 'Disconnected, could not reconnect', short: 'Could not reconnect' },
-        closed: { dot: 'bg-gray-400 dark:bg-neutral-600', label: 'Disconnected' },
+        closed: { dot: 'bg-surface-hover', label: 'Disconnected' },
     };
 
     const statusUi = STATUS_UI[connection.status] || STATUS_UI.connecting;
@@ -700,7 +700,7 @@ function TerminalView({
             style={{ backgroundColor: themeConfig.background }}
         >
             {/* Header: identity on the left, every control grouped on the right */}
-            <div className={`h-11 bg-white dark:bg-surface-raised border-b border-gray-200 dark:border-surface-control flex justify-between items-center gap-3 px-3 shrink-0 overflow-hidden transition-opacity duration-200 ${
+            <div className={`h-11 bg-surface-raised border-b border-surface-control/60 flex justify-between items-center gap-3 px-3 shrink-0 overflow-hidden transition-opacity duration-200 ${
                 isSplit && !isFocused ? 'opacity-60' : 'opacity-100'
             }`}>
                 <div className="flex items-center gap-2.5 min-w-0 overflow-hidden">
@@ -807,7 +807,7 @@ function TerminalView({
                             switcher is hidden has nothing to divide from. */}
                         {((isRdp && viewMode === 'desktop' && !desktopOnly)
                             || (viewMode === 'bmc' && !bmcOnly)) && (
-                            <div className="h-5 w-px bg-gray-200 dark:bg-surface-control" />
+                            <div className="h-5 w-px bg-surface-control" />
                         )}
 
                         {/* A switcher offering one view is not a choice. A
@@ -909,7 +909,7 @@ function TerminalView({
                         {/* The SSH session's own divider and Reconnect. Neither
                             belongs to a pane that has no session. */}
                         {!sessionless && (
-                            <div className="h-5 w-px bg-gray-200 dark:bg-surface-control" />
+                            <div className="h-5 w-px bg-surface-control" />
                         )}
 
                         {canReconnect && (
@@ -954,7 +954,7 @@ function TerminalView({
                                             ? 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400'
                                             : action.danger
                                                 ? 'text-gray-500 dark:text-gray-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400'
-                                                : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-surface-control dark:hover:text-white'
+                                                : 'text-gray-500 dark:text-gray-400 hover:bg-surface-control hover:text-gray-900 dark:hover:text-white'
                                     }`}
                                     onClick={action.onPress || action.onSelect}
                                     disabled={action.disabled}
@@ -1027,7 +1027,7 @@ function TerminalView({
                 Absent from the DOM, not just empty, when nothing is contributed. */}
             {viewMode === 'ssh' && statusTiles.length > 0 && (
                 <div className="h-8 shrink-0 flex items-center gap-4 px-3 overflow-x-auto
-                    border-t border-gray-200 dark:border-surface-control bg-white dark:bg-surface-raised">
+                    border-t border-surface-control/60 bg-surface-raised">
                     {statusTiles.map(contribution => (
                         <StatusTile
                             key={`${contribution.pluginId}:${contribution.id}`}

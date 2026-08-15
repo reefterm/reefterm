@@ -94,8 +94,8 @@ function SelectionBar({ hostCount, folderCount, onMove, onGroup, onTag, onDelete
     return (
         <div className="org-selection-bar absolute bottom-4 left-1/2 -translate-x-1/2 z-20
             flex flex-nowrap items-center gap-1.5 pl-4 pr-2 py-2 rounded-2xl
-            bg-white dark:bg-surface-raised
-            border border-gray-200 dark:border-surface-control shadow-2xl">
+            bg-surface-raised
+            border border-surface-active/50 shadow-2xl">
 
             {/* One line, one baseline. The breakdown earns its place only when
                 the selection is of two kinds; "3 selected · 3 hosts" is the

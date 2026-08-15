@@ -58,14 +58,14 @@ export default function ContextMenu({ x, y, items, onClose }) {
     return createPortal(
         <div
             ref={ref}
-            className="fixed z-[300] min-w-[190px] p-1 rounded-xl bg-white dark:bg-surface-raised border border-gray-200 dark:border-surface-control shadow-2xl context-menu"
+            className="fixed z-[300] min-w-[190px] p-1 rounded-xl bg-surface-raised border border-surface-control/60 shadow-2xl context-menu"
             style={{ left: position.left, top: position.top, visibility: position.ready ? 'visible' : 'hidden' }}
             onMouseDown={(event) => event.stopPropagation()}
             onContextMenu={(event) => event.preventDefault()}
             role="menu"
         >
             {visible.map((item, index) => item.type === 'separator' ? (
-                <div key={`sep-${index}`} className="-mx-1 my-1 border-t border-gray-100 dark:border-surface-control" />
+                <div key={`sep-${index}`} className="-mx-1 my-1 border-t border-surface-control" />
             ) : item.type === 'heading' ? (
                 <div
                     key={`head-${index}`}
@@ -92,7 +92,7 @@ export default function ContextMenu({ x, y, items, onClose }) {
                     className={`w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-xs text-left transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
                         item.danger
                             ? 'text-red-600 dark:text-red-400 enabled:hover:bg-red-50 dark:enabled:hover:bg-red-900/20'
-                            : 'text-gray-700 dark:text-gray-300 enabled:hover:bg-gray-100 dark:enabled:hover:bg-surface-control'
+                            : 'text-gray-700 dark:text-gray-300 enabled:hover:bg-surface-control'
                     }`}
                 >
                     <span className="shrink-0 w-4 flex items-center justify-center">{item.icon}</span>

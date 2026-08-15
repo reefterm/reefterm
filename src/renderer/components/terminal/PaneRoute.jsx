@@ -76,7 +76,7 @@ function PaneRoute({ route = [] }) {
                     <span className="relative flex w-2.5 shrink-0 items-center justify-center self-stretch">
                         {index > 0 && (
                             <span className="absolute bottom-full left-1/2 -translate-x-1/2 h-2 w-px
-                                bg-gray-200 dark:bg-neutral-600" />
+                                bg-surface-hover" />
                         )}
                         {/* `block` and `shrink-0` are not decoration: a span is
                             inline by default, and width and height do nothing to

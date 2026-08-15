@@ -115,8 +115,8 @@ export default function TagInput({
             <div
                 onClick={() => inputRef.current?.focus()}
                 className="flex flex-wrap items-center gap-1.5 w-full min-h-[38px] px-2 py-1.5 rounded-xl
-                    border border-gray-300 dark:border-surface-control bg-white dark:bg-surface-base
-                    transition-colors focus-within:border-gray-400 dark:focus-within:border-neutral-600
+                    border border-surface-control bg-surface-base
+                    transition-colors focus-within:border-surface-hover
                     cursor-text"
             >
                 {tags.map(tag => (
@@ -154,8 +154,8 @@ export default function TagInput({
                 chip in it would be a chip that refuses to be clicked. */}
             {!full && suggestions.length > 0 && (
                 <div className="flex flex-col gap-2 p-2 rounded-xl
-                    bg-gray-50 dark:bg-surface-base/60
-                    border border-gray-200/70 dark:border-surface-control">
+                    bg-surface-base/60
+                    border border-surface-control/60">
                     <div className="flex items-baseline justify-between gap-2">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-neutral-500">
                             {typed ? `Matching “${typed}”` : 'Tags already in use'}

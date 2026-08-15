@@ -56,7 +56,7 @@ export default function PluginConsentDialog({ plugin, onApprove, onDeny, onClose
                     {requested.map(capability => (
                         <li
                             key={capability.name}
-                            className="rounded-lg border border-gray-200 dark:border-neutral-700 px-3 py-2"
+                            className="rounded-lg border border-surface-active/60 px-3 py-2"
                         >
                             <p className="text-sm font-medium text-gray-900 dark:text-white">
                                 {capability.name}
@@ -77,8 +77,8 @@ export default function PluginConsentDialog({ plugin, onApprove, onDeny, onClose
                             {requestedExtensions.map(extension => (
                                 <li
                                     key={extension.point}
-                                    className="flex items-center gap-3 rounded-lg border border-gray-200
-                                        dark:border-neutral-700 bg-gray-50 dark:bg-neutral-800/60 px-3 py-2"
+                                    className="flex items-center gap-3 rounded-lg border border-surface-active/60
+                                        bg-surface-control/60 px-3 py-2"
                                 >
                                     {extension.sample && (
                                         <div className="shrink-0"><NodePreview node={extension.sample} /></div>

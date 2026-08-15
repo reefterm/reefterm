@@ -38,10 +38,10 @@ export default function Checkbox({
 
     const wrapper = variant === 'card'
         ? 'flex items-start gap-3 rounded-xl border p-3 transition-colors '
-          + 'border-gray-200 dark:border-surface-control '
-          + 'hover:border-gray-300 dark:hover:border-neutral-600 '
+          + 'border-surface-control/60 '
+          + 'hover:border-surface-hover '
           + 'has-[:checked]:border-gray-900/25 dark:has-[:checked]:border-white/25 '
-          + 'has-[:checked]:bg-gray-50 dark:has-[:checked]:bg-surface-control/40 '
+          + 'has-[:checked]:bg-surface-control/40 '
           + 'has-[:disabled]:opacity-50 has-[:disabled]:pointer-events-none'
         : `inline-flex items-start gap-2.5 ${label || description ? '' : 'align-middle'}`;
 
@@ -65,7 +65,7 @@ export default function Checkbox({
                     'cb-box relative shrink-0 flex items-center justify-center border-[1.5px]',
                     box,
                     label || description ? 'mt-[1px]' : '',
-                    'border-gray-300 dark:border-neutral-600 bg-white dark:bg-surface-base',
+                    'border-surface-hover bg-surface-base',
                     'transition-[background-color,border-color,transform] duration-150',
                     'peer-checked:bg-gray-900 peer-checked:border-gray-900',
                     'dark:peer-checked:bg-white dark:peer-checked:border-white',
@@ -79,7 +79,7 @@ export default function Checkbox({
                     // never match.
                     disabled
                         ? 'opacity-40'
-                        : 'group-hover:border-gray-400 dark:group-hover:border-neutral-500 group-active:scale-90',
+                        : 'group-hover:border-surface-muted group-active:scale-90',
                 ].join(' ')}
             >
                 {/* The tick draws itself in rather than popping. */}

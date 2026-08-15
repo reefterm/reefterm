@@ -63,7 +63,7 @@ export default function Dialog({ title, subtitle, icon, onClose, children, foote
 
             <div
                 ref={cardRef}
-                className="relative w-full bg-white dark:bg-surface-raised border border-gray-200 dark:border-surface-control rounded-2xl shadow-2xl flex flex-col max-h-full animate-dialog-in"
+                className="relative w-full bg-surface-raised border border-surface-control/60 rounded-2xl shadow-2xl flex flex-col max-h-full animate-dialog-in"
                 style={{ maxWidth: width }}
             >
                 <div className="flex items-start gap-3 p-5 pb-4">
@@ -81,7 +81,7 @@ export default function Dialog({ title, subtitle, icon, onClose, children, foote
                 {children && <div className="px-5 pb-2 overflow-y-auto">{children}</div>}
 
                 {footer && (
-                    <div className="flex items-center justify-end gap-2 p-5 pt-4 border-t border-gray-100 dark:border-surface-control mt-2">
+                    <div className="flex items-center justify-end gap-2 p-5 pt-4 border-t border-surface-control mt-2">
                         {footer}
                     </div>
                 )}
@@ -95,7 +95,7 @@ export function DialogButton({ variant = 'ghost', children, ...props }) {
     const styles = {
         primary: 'bg-gray-900 dark:bg-white text-white dark:text-black hover:opacity-90',
         danger: 'bg-red-600 text-white hover:bg-red-500',
-        ghost: 'border border-gray-300 dark:border-surface-control text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-surface-control',
+        ghost: 'border border-surface-control text-gray-700 dark:text-gray-300 hover:bg-surface-control',
     };
 
     return (

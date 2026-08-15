@@ -5,26 +5,29 @@ import SettingCard from '../ui/SettingCard';
 import SettingRow, { DIVIDED } from '../ui/SettingRow';
 import Toggle from '../ui/Toggle';
 import SegmentedControl from '../../ui/SegmentedControl';
+import PaletteSwatch from '../../ui/PaletteSwatch';
 import AppColorsDialog from '../AppColorsDialog';
 import logoUrl from '../../../logoterminal.svg';
-import { CUSTOM_THEME } from '../../../hooks/useTheme';
 import {
     APP_COLOR_PRESETS,
+    CUSTOM_TINT_ID,
     DEFAULT_APP_COLORS,
-    matchPreset,
+    DEFAULT_LIGHT_APP_COLORS,
+    LIGHT_APP_COLOR_PRESETS,
+    deriveDarkPalette,
+    deriveLightPalette,
     sanitizeAppColors,
 } from '../../../lib/app-colors';
 import { toastOptions } from '../../../lib/toast';
 import { useT } from '../../../i18n';
 
-const THEME_OPTIONS = [
+const MODE_OPTIONS = [
+    { id: 'system', icon: 'monitor' },
     { id: 'light', icon: 'sun' },
     { id: 'dark', icon: 'moon' },
-    { id: 'system', icon: 'monitor' },
-    { id: CUSTOM_THEME, icon: 'palette' },
 ];
 
-function ThemeIcon({ type, colors }) {
+function ThemeIcon({ type }) {
     switch (type) {
         case 'sun':
             return (
@@ -54,48 +57,16 @@ function ThemeIcon({ type, colors }) {
                     <line x1="12" y1="17" x2="12" y2="21" />
                 </svg>
             );
-        // Not a glyph but the palette itself, so the tile says which colours
-        // choosing it would actually bring.
-        case 'palette':
-            return (
-                <div className="w-6 h-6 rounded-lg overflow-hidden grid grid-cols-2 ring-1 ring-black/10 dark:ring-white/15">
-                    {['base', 'raised', 'control', 'muted'].map(key => (
-                        <div key={key} style={{ backgroundColor: colors[key] }} />
-                    ))}
-                </div>
-            );
         default:
             return null;
     }
 }
 
-/** A palette as a small window: title bar, sidebar, card. */
-function PaletteSwatch({ colors }) {
-    return (
-        <div
-            className="w-full h-14 rounded-lg overflow-hidden p-1.5 flex flex-col gap-1"
-            style={{ backgroundColor: colors.base }}
-        >
-            <div className="flex items-center gap-1">
-                <div className="h-2.5 w-8 rounded" style={{ backgroundColor: colors.control }} />
-                <div className="h-2.5 w-5 rounded" style={{ backgroundColor: colors.raised }} />
-            </div>
-            <div className="flex gap-1 flex-1">
-                <div className="w-3 rounded" style={{ backgroundColor: colors.raised }} />
-                <div className="flex-1 rounded p-1 flex flex-col gap-1" style={{ backgroundColor: colors.raised }}>
-                    <div className="h-1 w-8 rounded-full" style={{ backgroundColor: colors.muted }} />
-                    <div className="h-1.5 w-5 rounded" style={{ backgroundColor: colors.active }} />
-                </div>
-            </div>
-        </div>
-    );
-}
-
 const TILE_BASE = 'group flex flex-col items-center gap-2 p-2 rounded-xl border transition-all cursor-pointer';
 
 const tileClass = (selected) => `${TILE_BASE} ${selected
-    ? 'border-gray-900 dark:border-white ring-1 ring-gray-900 dark:ring-white'
-    : 'border-gray-200 dark:border-neutral-700 hover:border-gray-300 dark:hover:border-neutral-600'}`;
+    ? 'border-surface-active ring-1 ring-surface-active bg-surface-active/10'
+    : 'border-surface-active/60 hover:border-surface-hover'}`;
 
 const labelClass = (selected) => `text-xs text-center leading-tight ${selected
     ? 'font-bold text-gray-900 dark:text-white'
@@ -103,23 +74,37 @@ const labelClass = (selected) => `text-xs text-center leading-tight ${selected
 
 export default function AppearancePage({
     theme,
+    darkTint,
+    lightTint,
     appColors,
+    lightAppColors,
+    resolvedDark,
     showLogo = true,
     logoImage = null,
     logoSide = 'left',
+    quickThemeSwitcherEnabled = true,
     onThemeChange,
+    onDarkTintChange,
+    onLightTintChange,
     onAppColorsChange,
+    onLightAppColorsChange,
     onShowLogoChange,
     onLogoImageChange,
     onLogoSideChange,
+    onQuickThemeSwitcherEnabledChange,
 }) {
     const t = useT();
     const [editorOpen, setEditorOpen] = useState(false);
     const [picking, setPicking] = useState(false);
 
-    const colors = sanitizeAppColors(appColors || DEFAULT_APP_COLORS);
-    const customSelected = theme === CUSTOM_THEME;
-    const activePreset = matchPreset(colors);
+    // Read off `resolvedDark` rather than `theme`, so on System this follows
+    // the OS live instead of guessing from the mode's name.
+    const tint = resolvedDark ? darkTint : lightTint;
+    const presets = resolvedDark ? APP_COLOR_PRESETS : LIGHT_APP_COLOR_PRESETS;
+    const defaultColors = resolvedDark ? DEFAULT_APP_COLORS : DEFAULT_LIGHT_APP_COLORS;
+    const derive = resolvedDark ? deriveDarkPalette : deriveLightPalette;
+    const colors = sanitizeAppColors(resolvedDark ? appColors : lightAppColors, defaultColors);
+    const customSelected = tint === CUSTOM_TINT_ID;
 
     /**
      * Main owns the picker: the renderer has no filesystem, and the type and
@@ -149,11 +134,19 @@ export default function AppearancePage({
         }
     };
 
-    const applyColors = (next, message) => {
-        onAppColorsChange?.(next);
-        // Setting colours is also how you choose them: leaving the app on Dark
-        // after editing a palette would look like nothing had happened.
-        if (!customSelected) onThemeChange?.(CUSTOM_THEME);
+    const applyTint = (tintId, message) => {
+        (resolvedDark ? onDarkTintChange : onLightTintChange)?.(tintId);
+        toast.success(message, toastOptions());
+    };
+
+    const applyCustomColors = (next, message) => {
+        if (resolvedDark) {
+            onAppColorsChange?.(next);
+            onDarkTintChange?.(CUSTOM_TINT_ID);
+        } else {
+            onLightAppColorsChange?.(next);
+            onLightTintChange?.(CUSTOM_TINT_ID);
+        }
         toast.success(message, toastOptions());
     };
 
@@ -165,23 +158,21 @@ export default function AppearancePage({
             <SettingCard>
                 <SettingRow
                     title={t('settings.appearance.theme')}
-                    description={customSelected
-                        ? t('settings.appearance.themeCustomDesc')
-                        : t('settings.appearance.themeDesc')}
+                    description={t('settings.appearance.themeDesc')}
                 >
                     {/* Reflows on the column's own width rather than a fixed
-                        count: at the narrow end of the window four fixed
+                        count: at the narrow end of the window three fixed
                         columns put the labels into each other. */}
                     <div
                         className="grid gap-4 grid-cols-[repeat(auto-fit,minmax(112px,1fr))]"
                         id="theme-selector"
                     >
-                        {THEME_OPTIONS.map((option) => (
+                        {MODE_OPTIONS.map((option) => (
                             <button
                                 key={option.id}
                                 className={`theme-option flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${theme === option.id
-                                    ? 'border-gray-900 dark:border-white bg-gray-50 dark:bg-neutral-800'
-                                    : 'border-gray-200 dark:border-neutral-700 hover:border-gray-300 dark:hover:border-neutral-600'
+                                    ? 'border-surface-active bg-surface-active/20'
+                                    : 'border-surface-active/60 hover:border-surface-hover'
                                     }`}
                                 data-theme={option.id}
                                 onClick={() => {
@@ -194,7 +185,7 @@ export default function AppearancePage({
                                     );
                                 }}
                             >
-                                <ThemeIcon type={option.icon} colors={colors} />
+                                <ThemeIcon type={option.icon} />
                                 <span className="text-sm font-medium">
                                     {t(`settings.appearance.theme.${option.id}`)}
                                 </span>
@@ -203,70 +194,64 @@ export default function AppearancePage({
                     </div>
                 </SettingRow>
 
-                {/* Only under Custom: these colours are what that theme *is*, and
-                    a palette picker that changed nothing on Light or Dark would
-                    be a control that lies. */}
-                {customSelected && (
-                    <SettingRow
-                        className={DIVIDED}
-                        title={t('settings.appearance.appColors')}
-                        description={t('settings.appearance.appColorsDesc')}
+                <SettingRow
+                    className={DIVIDED}
+                    title={t('settings.appearance.tint')}
+                    description={customSelected
+                        ? t('settings.appearance.tintCustomDesc')
+                        : t('settings.appearance.tintDesc')}
+                >
+                    <div
+                        className="grid gap-3 grid-cols-[repeat(auto-fill,minmax(104px,1fr))]
+                            max-h-[22rem] overflow-y-auto pr-1 -mr-1"
+                        id="app-palette-selector"
                     >
-                        <div
-                            className="grid gap-3 grid-cols-[repeat(auto-fill,minmax(104px,1fr))]
-                                max-h-[22rem] overflow-y-auto pr-1 -mr-1"
-                            id="app-palette-selector"
-                        >
-                            {APP_COLOR_PRESETS.map((option) => (
-                                <button
-                                    key={option.id}
-                                    className={tileClass(activePreset === option.id)}
-                                    data-app-palette={option.id}
-                                    onClick={() => applyColors(
-                                        option.colors,
-                                        t('settings.appearance.appColorsChanged', { palette: option.label }),
-                                    )}
-                                >
-                                    <PaletteSwatch colors={option.colors} />
-                                    <span className={labelClass(activePreset === option.id)}>
-                                        {option.label}
-                                    </span>
-                                </button>
-                            ))}
-
-                            {/* Where a hand-picked palette shows up, so colours
-                                that match no preset are still shown as the one
-                                in use. Nothing to click: it is already on. */}
-                            {!activePreset && (
-                                <div className={`${tileClass(true)} cursor-default`} data-app-palette="custom">
-                                    <PaletteSwatch colors={colors} />
-                                    <span className={labelClass(true)}>
-                                        {t('settings.appearance.yours')}
-                                    </span>
-                                </div>
-                            )}
-                        </div>
-                    </SettingRow>
-                )}
-
-                {customSelected && (
-                    <SettingRow
-                        className={DIVIDED}
-                        align="center"
-                        title={t('settings.appearance.customColors')}
-                        description={t('settings.appearance.customColorsDesc')}
-                        control={
+                        {presets.map((option) => (
                             <button
-                                className="px-4 py-2 rounded-xl text-sm font-semibold border border-gray-300
-                                    dark:border-neutral-700 text-gray-700 dark:text-gray-300 transition-all
-                                    active:scale-95 hover:bg-gray-50 dark:hover:bg-neutral-800"
-                                onClick={() => setEditorOpen(true)}
+                                key={option.id}
+                                className={tileClass(tint === option.id)}
+                                data-app-palette={option.id}
+                                onClick={() => applyTint(
+                                    option.id,
+                                    t('settings.appearance.appColorsChanged', { palette: option.label }),
+                                )}
                             >
-                                {t('settings.appearance.editColors')}
+                                <PaletteSwatch colors={option.colors} />
+                                <span className={labelClass(tint === option.id)}>
+                                    {option.label}
+                                </span>
                             </button>
-                        }
-                    />
-                )}
+                        ))}
+
+                        {/* Where a hand-picked palette shows up. Nothing to
+                            click: it is already on. */}
+                        {customSelected && (
+                            <div className={`${tileClass(true)} cursor-default`} data-app-palette="custom">
+                                <PaletteSwatch colors={colors} />
+                                <span className={labelClass(true)}>
+                                    {t('settings.appearance.yours')}
+                                </span>
+                            </div>
+                        )}
+                    </div>
+                </SettingRow>
+
+                <SettingRow
+                    className={DIVIDED}
+                    align="center"
+                    title={t('settings.appearance.customColors')}
+                    description={t('settings.appearance.customColorsDesc')}
+                    control={
+                        <button
+                            className="px-4 py-2 rounded-xl text-sm font-semibold border border-surface-active
+                                text-gray-700 dark:text-gray-300 transition-all
+                                active:scale-95 hover:bg-surface-control"
+                            onClick={() => setEditorOpen(true)}
+                        >
+                            {t('settings.appearance.editColors')}
+                        </button>
+                    }
+                />
             </SettingCard>
 
             <SettingCard>
@@ -305,7 +290,7 @@ export default function AppearancePage({
                                 title bar will not be. */}
                             <div
                                 className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0
-                                    border border-gray-200 dark:border-surface-control"
+                                    border border-surface-control/60"
                                 style={{
                                     backgroundImage:
                                         'linear-gradient(45deg, rgb(127 127 127 / 0.18) 25%, transparent 25%),'
@@ -324,9 +309,9 @@ export default function AppearancePage({
                             </div>
 
                             <button
-                                className="px-4 py-2 rounded-xl text-sm font-semibold border border-gray-300
-                                    dark:border-neutral-700 text-gray-700 dark:text-gray-300 transition-all
-                                    active:scale-95 hover:bg-gray-50 dark:hover:bg-neutral-800
+                                className="px-4 py-2 rounded-xl text-sm font-semibold border border-surface-active
+                                    text-gray-700 dark:text-gray-300 transition-all
+                                    active:scale-95 hover:bg-surface-control
                                     disabled:opacity-40 disabled:cursor-not-allowed"
                                 disabled={picking}
                                 onClick={chooseLogo}
@@ -338,9 +323,9 @@ export default function AppearancePage({
 
                             {logoImage && (
                                 <button
-                                    className="px-4 py-2 rounded-xl text-sm font-semibold border border-gray-300
-                                        dark:border-neutral-700 text-gray-700 dark:text-gray-300 transition-all
-                                        active:scale-95 hover:bg-gray-50 dark:hover:bg-neutral-800"
+                                    className="px-4 py-2 rounded-xl text-sm font-semibold border border-surface-active
+                                        text-gray-700 dark:text-gray-300 transition-all
+                                        active:scale-95 hover:bg-surface-control"
                                     onClick={() => {
                                         onLogoImageChange?.(null);
                                         toast.success(t('settings.appearance.logoCleared'), toastOptions());
@@ -380,12 +365,38 @@ export default function AppearancePage({
                 />
             </SettingCard>
 
+            <SettingCard>
+                <SettingRow
+                    align="center"
+                    title={t('settings.appearance.quickSwitcher')}
+                    description={t('settings.appearance.quickSwitcherDesc')}
+                    control={
+                        <Toggle
+                            checked={quickThemeSwitcherEnabled}
+                            onChange={(next) => {
+                                onQuickThemeSwitcherEnabledChange?.(next);
+                                toast.success(
+                                    next
+                                        ? t('settings.appearance.quickSwitcherShown')
+                                        : t('settings.appearance.quickSwitcherHidden'),
+                                    toastOptions(),
+                                );
+                            }}
+                            ariaLabel={t('settings.appearance.quickSwitcherAria')}
+                        />
+                    }
+                />
+            </SettingCard>
+
             {editorOpen && (
                 <AppColorsDialog
                     colors={colors}
+                    presets={presets}
+                    defaultColors={defaultColors}
+                    derive={derive}
                     onSave={(next) => {
                         setEditorOpen(false);
-                        applyColors(next, t('settings.appearance.colorsApplied'));
+                        applyCustomColors(next, t('settings.appearance.colorsApplied'));
                     }}
                     onClose={() => setEditorOpen(false)}
                 />

@@ -1,21 +1,32 @@
 import { useState, useLayoutEffect, useCallback } from 'react';
 import {
     DEFAULT_APP_COLORS,
+    DEFAULT_LIGHT_APP_COLORS,
     applyAppColors,
-    clearAppColors,
+    migrateLegacyTheme,
+    resolveAppColors,
     sanitizeAppColors,
 } from '../lib/app-colors';
 
-/** The theme that is the user's own colours rather than one of ours. */
-export const CUSTOM_THEME = 'custom';
+// This module is a singleton for the life of the app, so this runs exactly
+// once, before any of the lazy initializers below read the keys it might
+// rewrite. See migrateLegacyTheme's own header for what it is cleaning up.
+migrateLegacyTheme();
 
-const THEMES = new Set(['light', 'dark', 'system', CUSTOM_THEME]);
+const THEMES = new Set(['light', 'dark', 'system']);
 
 const THEME_KEY = 'theme';
+const DARK_TINT_KEY = 'darkTint';
+const LIGHT_TINT_KEY = 'lightTint';
 const COLORS_KEY = 'appColors';
+const LIGHT_COLORS_KEY = 'lightAppColors';
 const LOGO_KEY = 'titleBarLogo';
 const LOGO_IMAGE_KEY = 'titleBarLogoImage';
 const LOGO_SIDE_KEY = 'titleBarLogoSide';
+const QUICK_SWITCHER_KEY = 'quickThemeSwitcher.enabled';
+
+const DEFAULT_DARK_TINT = 'tokyo-night';
+const DEFAULT_LIGHT_TINT = 'daybreak';
 
 /** Which end of the title bar the mark sits at. */
 export const LOGO_SIDES = ['left', 'right'];
@@ -40,18 +51,28 @@ const readTheme = () => {
     return THEMES.has(saved) ? saved : 'system';
 };
 
-const readColors = () => {
+const readDarkTint = () => localStorage.getItem(DARK_TINT_KEY) || DEFAULT_DARK_TINT;
+const readLightTint = () => localStorage.getItem(LIGHT_TINT_KEY) || DEFAULT_LIGHT_TINT;
+
+const readColors = (key, fallback) => {
     try {
-        const saved = localStorage.getItem(COLORS_KEY);
-        return sanitizeAppColors(saved ? JSON.parse(saved) : null);
+        const saved = localStorage.getItem(key);
+        return sanitizeAppColors(saved ? JSON.parse(saved) : null, fallback);
     } catch {
-        return { ...DEFAULT_APP_COLORS };
+        return { ...fallback };
     }
 };
 
+const prefersDarkQuery = () => window.matchMedia('(prefers-color-scheme: dark)');
+
 export function useTheme() {
     const [theme, setThemeState] = useState(readTheme);
-    const [appColors, setAppColorsState] = useState(readColors);
+    const [darkTint, setDarkTintState] = useState(readDarkTint);
+    const [lightTint, setLightTintState] = useState(readLightTint);
+    const [appColors, setAppColorsState] = useState(() => readColors(COLORS_KEY, DEFAULT_APP_COLORS));
+    const [lightAppColors, setLightAppColorsState] = useState(
+        () => readColors(LIGHT_COLORS_KEY, DEFAULT_LIGHT_APP_COLORS),
+    );
 
     // The mark in the title bar: whether it is drawn, whose it is, and which
     // end it sits at. Owned here rather than by the settings page, because the
@@ -63,20 +84,27 @@ export function useTheme() {
         return LOGO_SIDES.includes(saved) ? saved : 'left';
     });
 
-    const applyTheme = useCallback((themeName, colors) => {
-        const root = document.documentElement;
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    // The quick-switch gutter on the shell's edge. On by default, same as the
+    // logo: a feature you have to discover is one most people never will.
+    const [quickThemeSwitcherEnabled, setQuickThemeSwitcherEnabledState] = useState(
+        () => localStorage.getItem(QUICK_SWITCHER_KEY) !== 'false',
+    );
 
-        // A custom palette is a retint of the dark ramp, so choosing one is also
-        // choosing dark: the light surfaces are Tailwind's greys and would not
-        // hear about it.
-        root.classList.toggle(
-            'dark',
-            themeName === 'dark' || themeName === CUSTOM_THEME || (themeName === 'system' && prefersDark)
-        );
+    // Whether the resolved mode is dark right now. Its own state, not computed
+    // inline, because System mode tracks the OS live and a reader (the tint
+    // grid) needs to re-render on that, not just have the CSS variables update
+    // underneath it.
+    const [resolvedDark, setResolvedDark] = useState(
+        () => theme === 'dark' || (theme === 'system' && prefersDarkQuery().matches),
+    );
 
-        if (themeName === CUSTOM_THEME) applyAppColors(colors);
-        else clearAppColors();
+    const applyTheme = useCallback((themeName, tints) => {
+        const prefersDark = prefersDarkQuery().matches;
+        const dark = themeName === 'dark' || (themeName === 'system' && prefersDark);
+
+        document.documentElement.classList.toggle('dark', dark);
+        applyAppColors(resolveAppColors({ theme: themeName, ...tints, prefersDark }));
+        setResolvedDark(dark);
     }, []);
 
     const setTheme = useCallback((newTheme) => {
@@ -84,10 +112,27 @@ export function useTheme() {
         localStorage.setItem(THEME_KEY, newTheme);
     }, []);
 
+    const setDarkTint = useCallback((tint) => {
+        setDarkTintState(tint);
+        localStorage.setItem(DARK_TINT_KEY, tint);
+    }, []);
+
+    const setLightTint = useCallback((tint) => {
+        setLightTintState(tint);
+        localStorage.setItem(LIGHT_TINT_KEY, tint);
+    }, []);
+
     const setAppColors = useCallback((colors) => {
-        const next = sanitizeAppColors(colors);
+        const next = sanitizeAppColors(colors, DEFAULT_APP_COLORS);
         setAppColorsState(next);
         localStorage.setItem(COLORS_KEY, JSON.stringify(next));
+        return next;
+    }, []);
+
+    const setLightAppColors = useCallback((colors) => {
+        const next = sanitizeAppColors(colors, DEFAULT_LIGHT_APP_COLORS);
+        setLightAppColorsState(next);
+        localStorage.setItem(LIGHT_COLORS_KEY, JSON.stringify(next));
         return next;
     }, []);
 
@@ -114,26 +159,39 @@ export function useTheme() {
         localStorage.setItem(LOGO_SIDE_KEY, side);
     }, []);
 
+    const setQuickThemeSwitcherEnabled = useCallback((next) => {
+        setQuickThemeSwitcherEnabledState(next);
+        localStorage.setItem(QUICK_SWITCHER_KEY, String(next));
+    }, []);
+
     // Before the paint rather than after it: this is what decides whether the
     // window is black or white, and a frame of the wrong one is a flash.
     useLayoutEffect(() => {
-        applyTheme(theme, appColors);
+        const tints = { darkTint, lightTint, appColors, lightAppColors };
+        applyTheme(theme, tints);
 
-        // Listen for system theme changes
-        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        // Listen for system theme changes. On System mode this has to
+        // re-resolve which tint's colours apply, not just flip `.dark` - the
+        // ramp itself is different on either side of the OS switch.
+        const mediaQuery = prefersDarkQuery();
         const handleChange = () => {
-            if (theme === 'system') applyTheme('system', appColors);
+            if (theme === 'system') applyTheme('system', tints);
         };
 
         mediaQuery.addEventListener('change', handleChange);
         return () => mediaQuery.removeEventListener('change', handleChange);
-    }, [theme, appColors, applyTheme]);
+    }, [theme, darkTint, lightTint, appColors, lightAppColors, applyTheme]);
 
     return {
         theme, setTheme,
+        darkTint, setDarkTint,
+        lightTint, setLightTint,
         appColors, setAppColors,
+        lightAppColors, setLightAppColors,
+        resolvedDark,
         showLogo, setShowLogo,
         logoImage, setLogoImage,
         logoSide, setLogoSide,
+        quickThemeSwitcherEnabled, setQuickThemeSwitcherEnabled,
     };
 }

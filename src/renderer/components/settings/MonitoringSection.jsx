@@ -310,7 +310,7 @@ export default function MonitoringSection() {
                     }
                 >
                     <div className="flex flex-col gap-3">
-                        <div className="rounded-xl border border-gray-200 dark:border-neutral-700
+                        <div className="rounded-xl border border-surface-active/60
                             divide-y divide-gray-100 dark:divide-neutral-800 overflow-hidden">
                             {rows.length > 0 ? (
                                 rows.map(status => (

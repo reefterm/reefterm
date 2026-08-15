@@ -122,7 +122,7 @@ const SPREAD = 2;
  * squares half on top of each other read as one wide rounded box.
  */
 const TILE = `relative w-5 h-5 rounded-md shrink-0 flex items-center justify-center
-    bg-white dark:bg-surface-control
+    bg-surface-control
     ring-1 ring-black/10 dark:ring-white/[0.12]
     transition-all duration-200 ease-out`;
 

@@ -409,7 +409,7 @@ function HostModal({ host, dismiss, onClose, onSave, keys = [], hosts = [], allT
                         be handed a computed one: adding a kind to HOST_KINDS
                         means changing this number, and forgetting to wraps the
                         new one onto a line of its own. */}
-                    <div className="grid grid-cols-5 gap-1 p-1 bg-gray-100 dark:bg-surface-base rounded-xl">
+                    <div className="grid grid-cols-5 gap-1 p-1 bg-surface-base rounded-xl">
                         {HOST_KINDS.map((entry) => (
                             <button
                                 key={entry.id}
@@ -417,7 +417,7 @@ function HostModal({ host, dismiss, onClose, onSave, keys = [], hosts = [], allT
                                 title={entry.detail}
                                 className={`px-2 py-1.5 rounded-lg text-sm font-medium transition-all ${
                                     kind === entry.id
-                                        ? 'bg-white dark:bg-surface-active text-gray-900 dark:text-white shadow-sm'
+                                        ? 'bg-surface-active text-gray-900 dark:text-white shadow-sm'
                                         : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
                                 }`}
                                 onClick={() => handleKind(entry.id)}
@@ -523,7 +523,7 @@ function HostModal({ host, dismiss, onClose, onSave, keys = [], hosts = [], allT
                     <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">
                         Authentication method
                     </span>
-                    <div className="grid grid-cols-4 gap-1 p-1 bg-gray-100 dark:bg-surface-base rounded-xl">
+                    <div className="grid grid-cols-4 gap-1 p-1 bg-surface-base rounded-xl">
                         {AUTH_METHODS.map((method) => (
                             <button
                                 key={method.id}
@@ -531,7 +531,7 @@ function HostModal({ host, dismiss, onClose, onSave, keys = [], hosts = [], allT
                                 title={method.hint}
                                 className={`px-2 py-1.5 rounded-lg text-sm font-medium transition-all ${
                                     formData.authMethod === method.id
-                                        ? 'bg-white dark:bg-surface-active text-gray-900 dark:text-white shadow-sm'
+                                        ? 'bg-surface-active text-gray-900 dark:text-white shadow-sm'
                                         : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
                                 }`}
                                 onClick={() => handleChange('authMethod', method.id)}
@@ -546,7 +546,7 @@ function HostModal({ host, dismiss, onClose, onSave, keys = [], hosts = [], allT
                 {sshHost && formData.authMethod === 'keychain' && (
                     <Field label="SSH key">
                         {keys.length === 0 ? (
-                            <div className="px-3 py-2.5 rounded-xl border border-gray-300 dark:border-surface-control bg-gray-50 dark:bg-surface-base text-gray-500 dark:text-gray-400 text-sm flex items-center gap-2">
+                            <div className="px-3 py-2.5 rounded-xl border border-surface-control bg-surface-base text-gray-500 dark:text-gray-400 text-sm flex items-center gap-2">
                                 <AlertSquareIcon className="w-4 h-4 shrink-0" size={16} />
                                 No SSH keys found. Add keys in the Keychain page first.
                             </div>
@@ -647,7 +647,7 @@ function HostModal({ host, dismiss, onClose, onSave, keys = [], hosts = [], allT
                     tells the editor not to ask again, and for this one kind
                     these settings are the essentials. */}
                 {isDesktop && (
-                    <div className="pt-1 border-t border-gray-100 dark:border-surface-control">
+                    <div className="pt-1 border-t border-surface-control">
                         <DesktopEditor
                             managed
                             desktop={formData.desktop}
@@ -666,7 +666,7 @@ function HostModal({ host, dismiss, onClose, onSave, keys = [], hosts = [], allT
                     tells the editor not to ask again, and these settings are the
                     whole of what it needs. */}
                 {isIpmi && (
-                    <div className="pt-1 border-t border-gray-100 dark:border-surface-control">
+                    <div className="pt-1 border-t border-surface-control">
                         <BmcEditor
                             managed
                             bmc={formData.bmc}
@@ -688,7 +688,7 @@ function HostModal({ host, dismiss, onClose, onSave, keys = [], hosts = [], allT
                     <span className="shrink-0 text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-neutral-400">
                         Optional
                     </span>
-                    <span className="h-px flex-1 bg-gray-200 dark:bg-surface-control" />
+                    <span className="h-px flex-1 bg-surface-control" />
                 </div>
 
                 {/* Tighter than the form's own spacing: these are bordered rows
@@ -809,7 +809,7 @@ function HostModal({ host, dismiss, onClose, onSave, keys = [], hosts = [], allT
                                 : 'For a network only reachable through a SOCKS or HTTP proxy. Saved proxies are managed on the Proxies page.'}
                         >
                             {proxies.length === 0 ? (
-                                <div className="px-3 py-2.5 rounded-xl border border-gray-300 dark:border-surface-control bg-gray-50 dark:bg-surface-base text-gray-500 dark:text-gray-400 text-sm flex items-center gap-2">
+                                <div className="px-3 py-2.5 rounded-xl border border-surface-control bg-surface-base text-gray-500 dark:text-gray-400 text-sm flex items-center gap-2">
                                     <AlertSquareIcon className="w-4 h-4 shrink-0" size={16} />
                                     No proxies saved. Add one on the Proxies page first.
                                 </div>
@@ -944,8 +944,8 @@ function HostModal({ host, dismiss, onClose, onSave, keys = [], hosts = [], allT
                                             is just one more switch, and it is
                                             offered rather than pointed at. */}
                                         {monitorSettings && !monitorSettings.enabled && (
-                                            <div className="px-3 py-2.5 rounded-xl border border-gray-300
-                                                dark:border-surface-control bg-gray-50 dark:bg-surface-base
+                                            <div className="px-3 py-2.5 rounded-xl border border-surface-control
+                                                bg-surface-base
                                                 text-gray-500 dark:text-gray-400 text-sm flex items-center gap-3">
                                                 <span className="flex-1 min-w-0">
                                                     Monitoring is off for the app, so this host will be set up

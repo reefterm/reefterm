@@ -63,7 +63,7 @@ function Sidebar({ activeNav, onNavChange, isTerminalView }) {
     return (
         <nav
             id="sidebar"
-            className="bg-gray-100 dark:bg-surface-base flex flex-col shrink-0 transition-all duration-300 ease-in-out overflow-hidden"
+            className="bg-surface-base flex flex-col shrink-0 transition-all duration-300 ease-in-out overflow-hidden"
             style={sidebarStyle}
         >
             <div className="flex flex-col gap-1 flex-1 min-h-0">
@@ -72,8 +72,8 @@ function Sidebar({ activeNav, onNavChange, isTerminalView }) {
                         key={item.id}
                         className={`nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-colors ${
                             activeNav === item.id
-                                ? 'bg-gray-900/[0.08] dark:bg-surface-control text-gray-900 dark:text-white'
-                                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-900/[0.04] dark:hover:bg-surface-raised'
+                                ? 'bg-surface-control text-gray-900 dark:text-white'
+                                : 'text-gray-600 dark:text-gray-400 hover:bg-surface-raised'
                         }`}
                         onClick={() => onNavChange(item.id)}
                     >

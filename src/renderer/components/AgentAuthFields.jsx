@@ -57,7 +57,7 @@ function UnusableKeys({ identities }) {
     const securityKeys = identities.filter(identity => identity.type?.startsWith('sk-')).length;
 
     return (
-        <div className="pt-1 border-t border-gray-100 dark:border-neutral-800 flex flex-col gap-1">
+        <div className="pt-1 border-t border-surface-control flex flex-col gap-1">
             <span className="flex items-start gap-2 text-xs text-amber-600 dark:text-amber-500">
                 <Alert02Icon size={12} strokeWidth={2} className="shrink-0 mt-0.5" />
                 <span className="min-w-0">
@@ -116,21 +116,21 @@ function AgentAuthFields({ agentPath, agentForward, onChange }) {
 
     return (
         <div className="flex flex-col gap-3">
-            <div className="rounded-lg border border-gray-200 dark:border-neutral-800 p-3 flex flex-col gap-2">
+            <div className="rounded-lg border border-surface-control/60 p-3 flex flex-col gap-2">
                 <div className="flex items-start justify-between gap-3">
                     <StatusLine status={status} />
                     <button
                         type="button"
                         onClick={() => refresh(agentPath)}
                         title="Check again"
-                        className="shrink-0 w-6 h-6 flex items-center justify-center rounded-md text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-neutral-800 transition-colors"
+                        className="shrink-0 w-6 h-6 flex items-center justify-center rounded-md text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-surface-control transition-colors"
                     >
                         <Refresh01Icon size={13} strokeWidth={2} />
                     </button>
                 </div>
 
                 {status?.available && status.identities?.length > 0 && (
-                    <ul className="flex flex-col gap-1 pt-1 border-t border-gray-100 dark:border-neutral-800">
+                    <ul className="flex flex-col gap-1 pt-1 border-t border-surface-control">
                         {status.identities.map((identity, index) => (
                             <li
                                 key={identity.fingerprint || index}
@@ -183,7 +183,7 @@ function AgentAuthFields({ agentPath, agentForward, onChange }) {
                         onChange={(event) => onChange('agentPath', event.target.value)}
                         placeholder={status?.path || 'Leave blank to detect automatically'}
                         spellCheck={false}
-                        className="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-gray-900 dark:focus:ring-white focus:border-transparent outline-none transition-all placeholder:text-gray-400 font-mono text-xs"
+                        className="w-full px-4 py-2.5 rounded-xl border border-surface-active bg-surface-control text-gray-900 dark:text-white focus:ring-2 focus:ring-gray-900 dark:focus:ring-white focus:border-transparent outline-none transition-all placeholder:text-gray-400 font-mono text-xs"
                     />
                     <p className="text-xs text-gray-500 dark:text-gray-400">
                         {IS_WINDOWS ? (

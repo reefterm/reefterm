@@ -48,7 +48,7 @@ export default function LockScreen({ onUnlocked }) {
         // The gutter is draggable so the frameless window can still be moved
         // while locked; there is no title bar on this screen to grab.
         <div
-            className="h-full flex items-center justify-center bg-gray-100 dark:bg-surface-base app-drag"
+            className="h-full flex items-center justify-center bg-surface-base app-drag"
             style={{ padding: APP_GUTTER }}
         >
             <form onSubmit={submit} className="app-no-drag animate-fade-in w-full max-w-[16rem] flex flex-col items-center">
@@ -72,14 +72,14 @@ export default function LockScreen({ onUnlocked }) {
                         aria-invalid={Boolean(error)}
                         // Padded equally on both sides so the text stays centred
                         // under the icon despite the reveal button on the right.
-                        className={`w-full h-11 px-11 text-center rounded-xl border bg-white dark:bg-surface-raised
+                        className={`w-full h-11 px-11 text-center rounded-xl border bg-surface-raised
                             text-gray-900 dark:text-white text-sm tracking-wide outline-none
                             transition-colors duration-150
                             placeholder:tracking-normal placeholder:text-gray-400 dark:placeholder:text-neutral-500
                             disabled:opacity-60
                             ${error
                                 ? 'border-red-400/80 dark:border-red-500/60'
-                                : 'border-gray-200 dark:border-surface-control'
+                                : 'border-surface-control/60'
                             }`}
                     />
                     <button

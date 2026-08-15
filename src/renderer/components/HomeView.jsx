@@ -21,7 +21,11 @@ function HomeView({
     currentFolderId,
     connectedHostIds,
     theme,
+    darkTint,
+    lightTint,
     appColors,
+    lightAppColors,
+    resolvedDark,
     showLogo,
     logoImage,
     logoSide,
@@ -30,10 +34,15 @@ function HomeView({
     terminalSettings,
     terminalFonts,
     onThemeChange,
+    onDarkTintChange,
+    onLightTintChange,
     onAppColorsChange,
+    onLightAppColorsChange,
     onShowLogoChange,
     onLogoImageChange,
     onLogoSideChange,
+    quickThemeSwitcherEnabled,
+    onQuickThemeSwitcherEnabledChange,
     onTerminalThemeChange,
     onCustomTerminalThemeChange,
     onTerminalSettingsChange,
@@ -122,7 +131,11 @@ function HomeView({
             {activeNav === 'settings' && (
                 <SettingsPanel
                     theme={theme}
+                    darkTint={darkTint}
+                    lightTint={lightTint}
                     appColors={appColors}
+                    lightAppColors={lightAppColors}
+                    resolvedDark={resolvedDark}
                     showLogo={showLogo}
                     logoImage={logoImage}
                     logoSide={logoSide}
@@ -131,10 +144,15 @@ function HomeView({
                     terminalSettings={terminalSettings}
                     terminalFonts={terminalFonts}
                     onThemeChange={onThemeChange}
+                    onDarkTintChange={onDarkTintChange}
+                    onLightTintChange={onLightTintChange}
                     onAppColorsChange={onAppColorsChange}
+                    onLightAppColorsChange={onLightAppColorsChange}
                     onShowLogoChange={onShowLogoChange}
                     onLogoImageChange={onLogoImageChange}
                     onLogoSideChange={onLogoSideChange}
+                    quickThemeSwitcherEnabled={quickThemeSwitcherEnabled}
+                    onQuickThemeSwitcherEnabledChange={onQuickThemeSwitcherEnabledChange}
                     onTerminalThemeChange={onTerminalThemeChange}
                     onCustomTerminalThemeChange={onCustomTerminalThemeChange}
                     onTerminalSettingsChange={onTerminalSettingsChange}

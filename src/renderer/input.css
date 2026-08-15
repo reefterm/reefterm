@@ -138,23 +138,25 @@ input[type="color"]::-webkit-color-swatch {
 }
 
 ::-webkit-scrollbar-thumb {
-    @apply bg-gray-300 dark:bg-neutral-700 rounded-full;
+    @apply bg-surface-hover/60 rounded-full;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    @apply bg-gray-400 dark:bg-neutral-600;
+    @apply bg-surface-active/60;
 }
 
-/* Ripple Animation */
+/* Ripple Animation. Starts already covering the button (useRippleEffect in
+   TitleBar.jsx sizes it before it scales up), so low alpha matters more here
+   than for a ripple that starts as a pinprick. */
 .ripple {
     @apply absolute rounded-full pointer-events-none z-10;
-    background: rgba(0, 0, 0, 0.1);
+    background: rgba(0, 0, 0, 0.05);
     transform: scale(0);
     animation: ripple-animation 0.6s linear;
 }
 
 .dark .ripple {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
 }
 
 @keyframes ripple-animation {
@@ -204,14 +206,12 @@ input[type="color"]::-webkit-color-swatch {
     animation: fade-in 0.2s ease-out;
 }
 
-/* Auth tab active state */
+/* Auth tab active state. Unconditional now light has its own ramp too - same
+   reason .glass-card and .org-card below stopped branching on `.dark`. */
 .auth-tab-active {
-    @apply bg-white text-gray-900 shadow-sm;
-}
-
-.dark .auth-tab-active {
-    background-color: rgb(var(--app-active)) !important;
-    color: white !important;
+    @apply shadow-sm;
+    background-color: rgb(var(--app-active));
+    color: #fff;
 }
 
 /* Connecting state: a halo breathing out from the host badge, plus a slim
@@ -1231,9 +1231,10 @@ body.pane-resizing-y .xterm {
     pointer-events: none;
 }
 
-/* Glassmorphic Cards */
+/* Glassmorphic Cards. Solid ramp colour, not a translucent overlay - a black
+   or white wash washes the tint out on anything but a plain grey window. */
 .glass-card {
-    background: rgba(0, 0, 0, 0.03);
+    background: rgb(var(--app-control));
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border: none;
@@ -1241,26 +1242,13 @@ body.pane-resizing-y .xterm {
 }
 
 .glass-card:hover {
-    background: rgba(0, 0, 0, 0.06);
-}
-
-/* Solid, not a white overlay: compositing white over the blue-tinted base
-   washes the tint out, so cards drifted grey next to palette-coloured buttons
-   at the same elevation. */
-.dark .glass-card {
-    background: rgb(var(--app-control));
-    border: none;
-}
-
-.dark .glass-card:hover {
     background: rgb(var(--app-hover));
 }
 
-/* Hosts page cards.
-   Built on the same surface as .glass-card, with the states a card needs once
-   it can be picked up and dropped on. */
+/* Hosts page cards: same surface as .glass-card, plus drag/drop states. The
+   focus ring stays split by `.dark` - its colour depends on contrast, not palette. */
 .org-card {
-    background: rgba(0, 0, 0, 0.03);
+    background: rgb(var(--app-control));
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border: none;
@@ -1269,22 +1257,11 @@ body.pane-resizing-y .xterm {
 }
 
 .org-card:hover {
-    background: rgba(0, 0, 0, 0.06);
+    background: rgb(var(--app-hover));
 }
 
 .org-card:focus-visible {
     box-shadow: 0 0 0 2px rgba(17, 24, 39, 0.25);
-}
-
-/* Solid rather than a white overlay, for the same reason .glass-card is:
-   compositing white over the blue-tinted base washes the tint out and the card
-   drifts grey next to controls at the same elevation. */
-.dark .org-card {
-    background: rgb(var(--app-control));
-}
-
-.dark .org-card:hover {
-    background: rgb(var(--app-hover));
 }
 
 .dark .org-card:focus-visible {
@@ -1299,23 +1276,19 @@ body.pane-resizing-y .xterm {
 }
 
 .org-card-dragging:hover {
-    background: rgba(0, 0, 0, 0.03);
-}
-
-.dark .org-card-dragging:hover {
     background: rgb(var(--app-control));
 }
 
 /* A folder that would receive the drop. The ring is drawn inside the card so a
-   grid of them does not shift as the highlight moves between neighbours. */
+   grid of them does not shift as the highlight moves between neighbours; like
+   the focus ring above, its colour stays split by `.dark` on purpose. */
 .org-card-into {
-    background: rgba(17, 24, 39, 0.07);
+    background: rgb(var(--app-hover));
     box-shadow: inset 0 0 0 2px rgba(17, 24, 39, 0.35);
     transform: scale(1.02);
 }
 
 .dark .org-card-into {
-    background: rgb(var(--app-hover));
     box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.4);
 }
 
@@ -1710,13 +1683,11 @@ body.tab-dragging .session-tab {
 }
 
 /* Inset content card. Spacing comes from the app shell's gutter, so the panel
-   itself carries no margin, see src/renderer/lib/layout.js */
+   itself carries no margin, see src/renderer/lib/layout.js. Translucent over
+   the ramp's own `raised` step rather than a fixed white wash, so this tints
+   along with everything else instead of staying paper-white under a coloured
+   light tint. */
 #main-content {
-    background: rgba(255, 255, 255, 0.6);
-    border-radius: 16px;
-}
-
-.dark #main-content {
-    background: rgb(var(--app-raised));
+    background: rgb(var(--app-raised) / 0.6);
     border-radius: 16px;
 }

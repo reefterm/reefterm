@@ -83,7 +83,7 @@ function SerialFields({ serial, onChange }) {
                         type="button"
                         onClick={refresh}
                         title={t('serial.rescan')}
-                        className="shrink-0 w-10 flex items-center justify-center rounded-xl border border-gray-300 dark:border-surface-control text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-surface-base transition-colors"
+                        className="shrink-0 w-10 flex items-center justify-center rounded-xl border border-surface-control text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-surface-base transition-colors"
                     >
                         {scan === null
                             ? <Loading03Icon size={14} className="animate-spin" />
@@ -190,7 +190,7 @@ function SerialFields({ serial, onChange }) {
                 label={t('serial.enterSends')}
                 hint={t('serial.enterSendsHint')}
             >
-                <div className="grid grid-cols-3 gap-1 p-1 bg-gray-100 dark:bg-surface-base rounded-xl">
+                <div className="grid grid-cols-3 gap-1 p-1 bg-surface-base rounded-xl">
                     {NEWLINES.map(entry => (
                         <button
                             key={entry.id}
@@ -199,7 +199,7 @@ function SerialFields({ serial, onChange }) {
                             onClick={() => set('newline', entry.id)}
                             className={`px-2 py-1.5 rounded-lg text-sm font-medium transition-all ${
                                 config.newline === entry.id
-                                    ? 'bg-white dark:bg-surface-active text-gray-900 dark:text-white shadow-sm'
+                                    ? 'bg-surface-active text-gray-900 dark:text-white shadow-sm'
                                     : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
                             }`}
                         >

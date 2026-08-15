@@ -49,9 +49,9 @@ function HostsBreadcrumb({ path, dropTargetId, onNavigate }) {
                                 focus-visible:ring-2 focus-visible:ring-gray-900/20 dark:focus-visible:ring-white/25
                                 ${isCurrent
                                     ? 'text-gray-900 dark:text-white'
-                                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-surface-control'}
+                                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-surface-control'}
                                 ${isDropTarget
-                                    ? 'bg-gray-900/[0.07] dark:bg-surface-hover text-gray-900 dark:text-white ring-2 ring-gray-900/20 dark:ring-white/25'
+                                    ? 'bg-surface-hover text-gray-900 dark:text-white ring-2 ring-gray-900/20 dark:ring-white/25'
                                     : ''}`}
                         >
                             <span className="flex items-center gap-1 min-w-0">

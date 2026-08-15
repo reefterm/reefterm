@@ -846,7 +846,7 @@ function SftpView({ tabId, isActive = true }) {
 
     if (initError) {
         return (
-            <div className="h-full flex flex-col items-center justify-center gap-3 bg-white dark:bg-surface-base text-center px-6">
+            <div className="h-full flex flex-col items-center justify-center gap-3 bg-surface-base text-center px-6">
                 <Alert02Icon size={40} strokeWidth={1.5} className="text-red-500" />
                 <div>
                     <h3 className="text-base font-semibold text-gray-900 dark:text-white">
@@ -907,7 +907,7 @@ function SftpView({ tabId, isActive = true }) {
 
     return (
         <div
-            className="h-full flex flex-col bg-white dark:bg-surface-base overflow-hidden relative"
+            className="h-full flex flex-col bg-surface-base overflow-hidden relative"
             onDragEnter={handleDragEnter}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
@@ -981,7 +981,7 @@ function SftpView({ tabId, isActive = true }) {
             />
 
             {/* Status bar */}
-            <div className="shrink-0 h-7 flex items-center gap-3 px-3 border-t border-gray-200 dark:border-surface-control text-[11px] text-gray-500 dark:text-gray-400">
+            <div className="shrink-0 h-7 flex items-center gap-3 px-3 border-t border-surface-control/60 text-[11px] text-gray-500 dark:text-gray-400">
                 <span className="tabular-nums">
                     {visibleEntries.length} item{visibleEntries.length === 1 ? '' : 's'}
                     {entries.length !== visibleEntries.length && ` of ${entries.length}`}

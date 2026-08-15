@@ -52,7 +52,7 @@ const SearchField = forwardRef(function SearchField({
                     onClick={() => onChange('')}
                     className="absolute right-2 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center
                         rounded-md text-gray-400 hover:text-gray-900 dark:hover:text-white
-                        hover:bg-gray-100 dark:hover:bg-surface-control transition-colors"
+                        hover:bg-surface-control transition-colors"
                 >
                     <Cancel01Icon size={12} strokeWidth={2.5} />
                 </button>

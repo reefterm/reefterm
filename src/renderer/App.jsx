@@ -40,10 +40,15 @@ function App() {
     // Theme management
     const {
         theme, setTheme,
+        darkTint, setDarkTint,
+        lightTint, setLightTint,
         appColors, setAppColors,
+        lightAppColors, setLightAppColors,
+        resolvedDark,
         showLogo, setShowLogo,
         logoImage, setLogoImage,
         logoSide, setLogoSide,
+        quickThemeSwitcherEnabled, setQuickThemeSwitcherEnabled,
     } = useTheme();
     const { terminalTheme, setTerminalTheme, customTerminalTheme, setCustomTerminalTheme } = useTerminalTheme();
     const {
@@ -654,7 +659,7 @@ function App() {
         // `app-drag` turns the gutter around the shell into a window frame you
         // can drag; `#app-layout` below opts back out for the content.
         <div
-            className="h-full flex flex-col bg-gray-100 dark:bg-surface-base text-gray-900 dark:text-gray-100 font-inter overflow-hidden app-drag selection:bg-yellow-500/30 selection:text-yellow-600 dark:selection:text-yellow-400"
+            className="h-full flex flex-col bg-surface-base text-gray-900 dark:text-gray-100 font-inter overflow-hidden app-drag selection:bg-yellow-500/30 selection:text-yellow-600 dark:selection:text-yellow-400"
             style={{
                 // A single gutter around the shell, and the same value between
                 // the title bar and the content below it. Fullscreen drops it
@@ -728,7 +733,11 @@ function App() {
                             currentFolderId={currentFolderId}
                             connectedHostIds={connectedHostIds}
                             theme={theme}
+                            darkTint={darkTint}
+                            lightTint={lightTint}
                             appColors={appColors}
+                            lightAppColors={lightAppColors}
+                            resolvedDark={resolvedDark}
                             showLogo={showLogo}
                             logoImage={logoImage}
                             logoSide={logoSide}
@@ -737,10 +746,15 @@ function App() {
                             terminalSettings={terminalSettings}
                             terminalFonts={terminalFonts}
                             onThemeChange={setTheme}
+                            onDarkTintChange={setDarkTint}
+                            onLightTintChange={setLightTint}
                             onAppColorsChange={setAppColors}
+                            onLightAppColorsChange={setLightAppColors}
                             onShowLogoChange={setShowLogo}
                             onLogoImageChange={setLogoImage}
                             onLogoSideChange={setLogoSide}
+                            quickThemeSwitcherEnabled={quickThemeSwitcherEnabled}
+                            onQuickThemeSwitcherEnabledChange={setQuickThemeSwitcherEnabled}
                             onTerminalThemeChange={setTerminalTheme}
                             onCustomTerminalThemeChange={setCustomTerminalTheme}
                             onTerminalSettingsChange={setTerminalSettings}
@@ -937,7 +951,7 @@ function App() {
                 no pane: the same screen, over the window, so a question can
                 never end up with nowhere to be asked. */}
             {(strayHostKeyPrompt || strayAuthPrompt) && (
-                <div className="fixed inset-0 z-[200] bg-white dark:bg-surface-base text-gray-900 dark:text-white">
+                <div className="fixed inset-0 z-[200] bg-surface-base text-gray-900 dark:text-white">
                     <SessionScreen
                         state={strayHostKeyPrompt ? 'hostkey' : 'auth'}
                         address={

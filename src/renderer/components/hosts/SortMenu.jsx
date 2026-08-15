@@ -125,7 +125,7 @@ function TagSection({ tags, selected, mode, onToggle, onModeChange, onClear }) {
 
     return (
         <>
-            <div className="-mx-1 my-1.5 border-t border-gray-100 dark:border-surface-control" />
+            <div className="-mx-1 my-1.5 border-t border-surface-control" />
 
             <SectionLabel
                 aside={selected.length > 0 && (
@@ -135,7 +135,7 @@ function TagSection({ tags, selected, mode, onToggle, onModeChange, onClear }) {
                             would be asking a question with one answer. */}
                         {selected.length > 1 && (
                             <div className="flex items-center rounded-md overflow-hidden
-                                border border-gray-200 dark:border-surface-control">
+                                border border-surface-control/60">
                                 {['all', 'any'].map(entry => (
                                     <button
                                         key={entry}
@@ -188,11 +188,11 @@ function TagSection({ tags, selected, mode, onToggle, onModeChange, onClear }) {
                         spellCheck={false}
                         aria-label={t('hosts.searchTags')}
                         className="w-full h-7 pl-7 pr-2 rounded-lg text-[11px]
-                            bg-gray-100 dark:bg-surface-base
+                            bg-surface-base
                             text-gray-900 dark:text-white
                             placeholder:text-gray-400 dark:placeholder:text-neutral-500
                             border border-transparent outline-none transition-colors
-                            focus:border-gray-300 dark:focus:border-neutral-600"
+                            focus:border-surface-hover"
                     />
                 </div>
             )}
@@ -259,9 +259,9 @@ function Row({ checked, onClick, title, role = 'menuitemcheckbox', children }) {
             title={title}
             onClick={onClick}
             className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-left
-                transition-colors hover:bg-gray-100 dark:hover:bg-surface-control ${
+                transition-colors hover:bg-surface-control ${
                 checked
-                    ? 'bg-gray-100 dark:bg-surface-control text-gray-900 dark:text-white'
+                    ? 'bg-surface-control text-gray-900 dark:text-white'
                     : 'text-gray-700 dark:text-gray-300'
             }`}
         >

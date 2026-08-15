@@ -158,7 +158,7 @@ export default function BmcEditor({
                         <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">
                             Scheme
                         </span>
-                        <div className="grid grid-cols-3 gap-1 p-1 bg-gray-100 dark:bg-surface-base rounded-xl">
+                        <div className="grid grid-cols-3 gap-1 p-1 bg-surface-base rounded-xl">
                             {SCHEMES.map(option => (
                                 <button
                                     key={option.id}
@@ -167,7 +167,7 @@ export default function BmcEditor({
                                     onClick={() => setScheme(option.id)}
                                     className={`px-2 py-1.5 rounded-lg text-sm font-medium transition-all ${
                                         scheme === option.id
-                                            ? 'bg-white dark:bg-surface-active text-gray-900 dark:text-white shadow-sm'
+                                            ? 'bg-surface-active text-gray-900 dark:text-white shadow-sm'
                                             : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
                                     }`}
                                 >
@@ -291,7 +291,7 @@ export default function BmcEditor({
                         was reflashed presents a new certificate, and the prompt
                         that then appears reads better if this was here. */}
                     {value.trustedCert && (
-                        <div className="flex items-start gap-3 rounded-xl border border-gray-200 dark:border-surface-control p-3">
+                        <div className="flex items-start gap-3 rounded-xl border border-surface-control/60 p-3">
                             <div className="flex-1 min-w-0">
                                 <p className="text-xs font-semibold text-gray-700 dark:text-gray-300">
                                     Certificate accepted

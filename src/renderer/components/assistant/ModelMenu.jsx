@@ -56,7 +56,7 @@ function ModelNote({ loading, onRefresh }) {
             onClick={onRefresh}
             className="w-full h-9 px-2.5 flex items-center gap-2 rounded-lg text-left text-[11px]
                 transition-colors text-gray-500 dark:text-neutral-400
-                hover:bg-gray-100 dark:hover:bg-surface-control
+                hover:bg-surface-control
                 hover:text-gray-900 dark:hover:text-white"
         >
             <Refresh01Icon size={13} strokeWidth={2} className="shrink-0" />

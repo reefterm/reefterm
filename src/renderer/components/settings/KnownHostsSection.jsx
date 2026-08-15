@@ -18,7 +18,7 @@ function KeyRow({ entry, onForget }) {
     const t = useT();
 
     return (
-        <div className="flex items-center gap-3 py-2 pl-8 pr-3 border-t border-gray-100 dark:border-surface-control/60">
+        <div className="flex items-center gap-3 py-2 pl-8 pr-3 border-t border-surface-control/60">
             <span className="shrink-0 w-36 font-mono text-[11px] truncate text-gray-500 dark:text-gray-400">
                 {entry.keyType || t('settings.knownHosts.unknownType')}
             </span>
@@ -39,7 +39,7 @@ function KeyRow({ entry, onForget }) {
                     toast.success(t('settings.knownHosts.copied'), toastOptions({ duration: 1500 }));
                 }}
                 title={t('settings.knownHosts.copy')}
-                className="shrink-0 w-6 h-6 flex items-center justify-center rounded-md text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-surface-control transition-colors"
+                className="shrink-0 w-6 h-6 flex items-center justify-center rounded-md text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-surface-control transition-colors"
             >
                 <Copy01Icon size={12} strokeWidth={2} />
             </button>
@@ -59,7 +59,7 @@ function HostRow({ record, expanded, onToggle, onForgetHost, onForgetKey }) {
     const t = useT();
 
     return (
-        <div className="border border-gray-200 dark:border-surface-control rounded-xl overflow-hidden">
+        <div className="border border-surface-control/60 rounded-xl overflow-hidden">
             {/* The row itself is the control, so the whole strip highlights and
                 presses rather than just the text under the pointer. "Forget" is
                 a sibling, since a button cannot be nested inside one. */}
@@ -69,8 +69,8 @@ function HostRow({ record, expanded, onToggle, onForgetHost, onForgetKey }) {
                     aria-expanded={expanded}
                     className="flex items-center gap-2 min-w-0 flex-1 h-11 pl-3 pr-2 text-left outline-none
                         transition-colors duration-150
-                        hover:bg-gray-50 dark:hover:bg-surface-control/40
-                        active:bg-gray-100 dark:active:bg-surface-control/70
+                        hover:bg-surface-control/40
+                        active:bg-surface-control/70
                         focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-gray-900/20
                         dark:focus-visible:ring-white/25"
                 >
@@ -209,7 +209,7 @@ export default function KnownHostsSection() {
                                 onChange={(event) => setFilter(event.target.value)}
                                 placeholder={t('common.filter')}
                                 spellCheck={false}
-                                className="w-40 h-8 pl-8 pr-7 rounded-lg border border-gray-200 dark:border-surface-control bg-gray-50 dark:bg-surface-base text-gray-900 dark:text-white text-xs outline-none focus:border-gray-300 dark:focus:border-neutral-700 placeholder:text-gray-400"
+                                className="w-40 h-8 pl-8 pr-7 rounded-lg border border-surface-control/60 bg-surface-base text-gray-900 dark:text-white text-xs outline-none focus:border-surface-active placeholder:text-gray-400"
                             />
                             {filter && (
                                 <button

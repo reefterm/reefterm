@@ -128,8 +128,8 @@ function TooltipBubble({ label, hint, placement, trigger }) {
             // it reads as a smudge rather than a lift.
             className="tooltip-bubble fixed z-[10000] pointer-events-none
                 flex items-center gap-2 px-2.5 py-1.5 rounded-lg
-                bg-white dark:bg-surface-raised
-                border border-gray-200 dark:border-surface-control
+                bg-surface-raised
+                border border-surface-control/60
                 shadow-[0_2px_8px_rgba(0,0,0,0.07)] dark:shadow-[0_2px_10px_rgba(0,0,0,0.22)]
                 text-[11px] font-medium leading-none whitespace-nowrap
                 text-gray-700 dark:text-gray-200"
@@ -145,8 +145,8 @@ function TooltipBubble({ label, hint, placement, trigger }) {
             <span
                 aria-hidden="true"
                 className={`absolute w-2 h-2 rotate-45
-                    bg-white dark:bg-surface-raised
-                    border-gray-200 dark:border-surface-control
+                    bg-surface-raised
+                    border-surface-control/60
                     ${ARROW_EDGES[side]}`}
                 style={arrowStyle(side, position?.arrow ?? ARROW_INSET)}
             />

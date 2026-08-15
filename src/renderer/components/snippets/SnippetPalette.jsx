@@ -29,9 +29,9 @@ import Tooltip from '../ui/Tooltip';
  * taken back is always seen first.
  */
 
-const FIELD_CLASS = 'w-full px-2.5 py-1.5 rounded-lg border border-gray-200 dark:border-surface-control '
-    + 'bg-gray-50 dark:bg-surface-base text-gray-900 dark:text-white text-sm font-mono outline-none '
-    + 'transition-colors focus:border-gray-400 dark:focus:border-neutral-600';
+const FIELD_CLASS = 'w-full px-2.5 py-1.5 rounded-lg border border-surface-control/60 '
+    + 'bg-surface-base text-gray-900 dark:text-white text-sm font-mono outline-none '
+    + 'transition-colors focus:border-surface-hover';
 
 /** One line, so a here-doc does not stretch a row to the height of the list. */
 const preview = (command) => {
@@ -53,7 +53,7 @@ function SnippetRow({ snippet, body, steps, broken, active, onPick, onHover }) {
             onClick={onPick}
             onMouseMove={onHover}
             className={`w-full text-left px-2.5 py-2 rounded-lg transition-colors ${
-                active ? 'bg-gray-100 dark:bg-surface-control' : ''
+                active ? 'bg-surface-control' : ''
             }`}
         >
             <div className="flex items-center gap-2 min-w-0">
@@ -67,7 +67,7 @@ function SnippetRow({ snippet, body, steps, broken, active, onPick, onHover }) {
                         : `${steps} step${steps === 1 ? '' : 's'}, ${snippet.chain ? 'stopping at the first failure' : 'one after another'}`}>
                         <span className={`shrink-0 text-[9px] uppercase tracking-wide px-1 py-px rounded border ${broken
                             ? 'text-red-600 dark:text-red-400 border-red-300/60 dark:border-red-500/40'
-                            : 'text-gray-500 dark:text-neutral-400 border-gray-300/70 dark:border-surface-control'}`}>
+                            : 'text-gray-500 dark:text-neutral-400 border-surface-control/60'}`}>
                             {broken ? 'broken' : `${steps} steps`}
                         </span>
                     </Tooltip>
@@ -232,8 +232,8 @@ export default function SnippetPalette({ hostId, hostName, onInsert, onClose }) 
             ref={panelRef}
             style={{ top: PANE_OVERLAY_TOP, maxHeight: `calc(100% - ${PANE_OVERLAY_TOP + 16}px)` }}
             className="absolute right-3 z-30 w-[26rem] max-w-[calc(100%-1.5rem)] flex flex-col
-                rounded-xl bg-white/97 dark:bg-surface-raised/97 backdrop-blur
-                border border-gray-200 dark:border-surface-control shadow-xl
+                rounded-xl bg-surface-raised/97 backdrop-blur
+                border border-surface-control/60 shadow-xl
                 overflow-hidden animate-fade-in"
             role="dialog"
             aria-label="Snippets"
@@ -241,12 +241,12 @@ export default function SnippetPalette({ hostId, hostName, onInsert, onClose }) 
         >
             {filling ? (
                 <>
-                    <div className="flex items-center gap-2 px-2 h-10 border-b border-gray-100 dark:border-surface-control">
+                    <div className="flex items-center gap-2 px-2 h-10 border-b border-surface-control">
                         <Tooltip label="Back to the list" hint="Esc">
                             <button
                                 type="button"
                                 onClick={() => setFilling(null)}
-                                className="shrink-0 w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-surface-control transition-colors"
+                                className="shrink-0 w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-surface-control transition-colors"
                             >
                                 <ArrowLeft01Icon size={15} strokeWidth={2.5} />
                             </button>
@@ -276,7 +276,7 @@ export default function SnippetPalette({ hostId, hostName, onInsert, onClose }) 
                         ))}
                     </div>
 
-                    <div className="px-3 py-2.5 border-t border-gray-100 dark:border-surface-control bg-gray-50/80 dark:bg-surface-base/60">
+                    <div className="px-3 py-2.5 border-t border-surface-control bg-surface-base/60">
                         <pre className="text-[11px] font-mono text-gray-600 dark:text-gray-300 whitespace-pre-wrap break-all max-h-20 overflow-y-auto">
                             {filled}
                         </pre>
@@ -305,7 +305,7 @@ export default function SnippetPalette({ hostId, hostName, onInsert, onClose }) 
                 </>
             ) : (
                 <>
-                    <div className="flex items-center gap-2 px-3 h-10 border-b border-gray-100 dark:border-surface-control">
+                    <div className="flex items-center gap-2 px-3 h-10 border-b border-surface-control">
                         <Search01Icon size={14} strokeWidth={2} className="shrink-0 text-gray-400" />
                         <input
                             ref={inputRef}
@@ -356,14 +356,14 @@ export default function SnippetPalette({ hostId, hostName, onInsert, onClose }) 
                     </div>
 
                     {problem && (
-                        <p className="px-3 py-2 border-t border-gray-100 dark:border-surface-control flex items-start gap-1.5 text-[11px] text-red-500">
+                        <p className="px-3 py-2 border-t border-surface-control flex items-start gap-1.5 text-[11px] text-red-500">
                             <Alert02Icon size={13} strokeWidth={2} className="shrink-0 mt-px" />
                             {problem}
                         </p>
                     )}
 
                     {matches.length > 0 && (
-                        <div className="px-3 py-1.5 border-t border-gray-100 dark:border-surface-control flex items-center justify-between text-[10px] text-gray-400 dark:text-neutral-500">
+                        <div className="px-3 py-1.5 border-t border-surface-control flex items-center justify-between text-[10px] text-gray-400 dark:text-neutral-500">
                             <span>↑↓ move · ⏎ insert</span>
                             <span>{matches.length} of {snippets.length}</span>
                         </div>

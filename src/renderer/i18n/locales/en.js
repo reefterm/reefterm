@@ -368,6 +368,10 @@ export default {
     'settings.appearance.themeToast.system': 'System',
     'settings.appearance.themeToast.custom': 'Custom',
     'settings.appearance.themeChanged': 'Theme changed to {theme}',
+    'settings.appearance.tint': 'App tint',
+    'settings.appearance.tintDesc': 'A palette for whichever mode is active above.',
+    'settings.appearance.tintCustomDesc': 'The app is using your own palette. Pick one below to start '
+        + 'from it instead, or set every color yourself.',
     'settings.appearance.appColors': 'App Colors',
     'settings.appearance.appColorsDesc': 'A palette to start from. Every surface in the app is '
         + 'drawn from it.',
@@ -398,6 +402,12 @@ export default {
     'settings.appearance.positionAria': 'Logo position',
     'settings.appearance.logoMovedLeft': 'Logo moved left',
     'settings.appearance.logoMovedRight': 'Logo moved right',
+    'settings.appearance.quickSwitcher': 'Quick theme switcher',
+    'settings.appearance.quickSwitcherDesc': 'A gutter on the edge of the window for switching '
+        + 'terminal and app themes without opening Settings.',
+    'settings.appearance.quickSwitcherAria': 'Show the quick theme switcher',
+    'settings.appearance.quickSwitcherShown': 'Quick theme switcher shown',
+    'settings.appearance.quickSwitcherHidden': 'Quick theme switcher hidden',
 
     /* ---------------------------------------------------------------- *
      * Settings: Terminal

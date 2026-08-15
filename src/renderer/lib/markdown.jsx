@@ -74,9 +74,9 @@ function inline(text, keyPrefix) {
 function CodeBlock({ code, language }) {
     return (
         <div className="group relative [&:not(:first-child)]:mt-2 rounded-lg overflow-hidden
-            border border-gray-200 dark:border-surface-control">
+            border border-surface-control/60">
             {language && (
-                <div className="px-3 py-1 text-[10px] uppercase tracking-wide text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-surface-base border-b border-gray-200 dark:border-surface-control">
+                <div className="px-3 py-1 text-[10px] uppercase tracking-wide text-gray-500 dark:text-gray-400 bg-surface-base border-b border-surface-control/60">
                     {language}
                 </div>
             )}
@@ -94,7 +94,7 @@ function CodeBlock({ code, language }) {
 
             {/* The block scrolls on its own rather than widening the panel: a
                 long command line must not push the whole conversation sideways. */}
-            <pre className="px-3 py-2 overflow-x-auto bg-gray-50 dark:bg-surface-base">
+            <pre className="px-3 py-2 overflow-x-auto bg-surface-base">
                 <code className="font-jetbrains text-xs leading-relaxed whitespace-pre">{code}</code>
             </pre>
         </div>
@@ -162,10 +162,10 @@ function fitRow(cells, width) {
 function Table({ header, rows, align }) {
     return (
         <div className="[&:not(:first-child)]:mt-2 overflow-x-auto rounded-lg
-            border border-gray-200 dark:border-surface-control">
+            border border-surface-control/60">
             <table className="w-full border-collapse text-[12px] leading-snug">
                 <thead>
-                    <tr className="bg-gray-50 dark:bg-surface-base">
+                    <tr className="bg-surface-base">
                         {header.map((cell, column) => (
                             <th
                                 key={`th${column}`}
@@ -182,7 +182,7 @@ function Table({ header, rows, align }) {
                     {rows.map((row, index) => (
                         <tr
                             key={`tr${index}`}
-                            className="border-t border-gray-200 dark:border-surface-control"
+                            className="border-t border-surface-control/60"
                         >
                             {row.map((cell, column) => (
                                 <td

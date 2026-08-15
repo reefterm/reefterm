@@ -4,7 +4,7 @@ import { formatSize, formatDateTime, formatMode, formatOctal } from '../../lib/f
 
 function Row({ label, children, mono }) {
     return (
-        <div className="flex gap-4 py-2 border-b border-gray-100 dark:border-surface-control/70 last:border-0">
+        <div className="flex gap-4 py-2 border-b border-surface-control/70 last:border-0">
             <span className="w-32 shrink-0 text-sm text-gray-500 dark:text-gray-400">{label}</span>
             <span className={`text-sm text-gray-900 dark:text-white min-w-0 break-all ${mono ? 'font-mono' : ''}`}>
                 {children}
@@ -27,7 +27,7 @@ export default function PropertiesModal({ entry, path, onClose }) {
             subtitle={kindOf(entry)}
             onClose={onClose}
             icon={
-                <span className="w-9 h-9 rounded-xl flex items-center justify-center bg-gray-100 dark:bg-surface-control text-gray-500 dark:text-gray-400">
+                <span className="w-9 h-9 rounded-xl flex items-center justify-center bg-surface-control text-gray-500 dark:text-gray-400">
                     <InformationCircleIcon size={20} strokeWidth={2} />
                 </span>
             }

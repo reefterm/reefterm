@@ -2,13 +2,7 @@ import { useMemo, useState } from 'react';
 import Dialog, { DialogButton } from '../ui/Dialog';
 import ColorField from '../ui/ColorField';
 import Select from '../ui/Select';
-import {
-    APP_COLOR_FIELDS,
-    APP_COLOR_PRESETS,
-    DEFAULT_APP_COLORS,
-    derivePalette,
-    sanitizeAppColors,
-} from '../../lib/app-colors';
+import { APP_COLOR_FIELDS, sanitizeAppColors } from '../../lib/app-colors';
 import { useT } from '../../i18n';
 
 /**
@@ -21,7 +15,7 @@ import { useT } from '../../i18n';
 function AppPreview({ colors }) {
     return (
         <div
-            className="rounded-xl overflow-hidden border border-gray-200 dark:border-surface-control"
+            className="rounded-xl overflow-hidden border border-surface-control/60"
             style={{ backgroundColor: colors.base }}
         >
             {/* Title bar: the tab in front, then two behind it. */}
@@ -79,10 +73,13 @@ function AppPreview({ colors }) {
 /**
  * The app colour editor. Edits are a draft until saved, so trying a palette on
  * costs nothing, and saving is what applies it.
+ *
+ * `presets`, `defaultColors` and `derive` are handed in rather than imported,
+ * so the same dialog edits either side of the ramp without knowing which.
  */
-export default function AppColorsDialog({ colors, onSave, onClose }) {
+export default function AppColorsDialog({ colors, presets, defaultColors, derive, onSave, onClose }) {
     const t = useT();
-    const [draft, setDraft] = useState(() => sanitizeAppColors(colors));
+    const [draft, setDraft] = useState(() => sanitizeAppColors(colors, defaultColors));
     const [preset, setPreset] = useState('');
 
     const dirty = useMemo(
@@ -94,7 +91,7 @@ export default function AppColorsDialog({ colors, onSave, onClose }) {
 
     const startFrom = (presetId) => {
         setPreset(presetId);
-        const chosen = APP_COLOR_PRESETS.find(option => option.id === presetId);
+        const chosen = presets.find(option => option.id === presetId);
         if (chosen) setDraft({ ...chosen.colors });
     };
 
@@ -106,7 +103,7 @@ export default function AppColorsDialog({ colors, onSave, onClose }) {
             onClose={onClose}
             footer={
                 <>
-                    <DialogButton onClick={() => { setPreset(''); setDraft({ ...DEFAULT_APP_COLORS }); }}>
+                    <DialogButton onClick={() => { setPreset(''); setDraft({ ...defaultColors }); }}>
                         {t('common.reset')}
                     </DialogButton>
                     <DialogButton onClick={onClose}>{t('common.cancel')}</DialogButton>
@@ -127,12 +124,12 @@ export default function AppColorsDialog({ colors, onSave, onClose }) {
                         value={preset}
                         onChange={startFrom}
                         containerClassName="flex-1"
-                        className="w-full px-3 py-2 rounded-xl text-sm border border-gray-300
-                            dark:border-surface-control bg-white dark:bg-neutral-800 text-gray-900 dark:text-white
+                        className="w-full px-3 py-2 rounded-xl text-sm border border-surface-control
+                            bg-surface-control text-gray-900 dark:text-white
                             outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-white"
                         options={[
                             { value: '', label: t('common.keepCurrentColors') },
-                            ...APP_COLOR_PRESETS.map(option => ({
+                            ...presets.map(option => ({
                                 value: option.id,
                                 label: option.label,
                             })),
@@ -143,12 +140,12 @@ export default function AppColorsDialog({ colors, onSave, onClose }) {
                 {/* One colour, and the ramp is rebuilt around it: the shortcut
                     for "make the app green" without setting five near-identical
                     darks by hand. Every step below stays editable afterwards. */}
-                <div className="rounded-xl p-3 bg-gray-50 dark:bg-surface-base/60 border border-gray-200 dark:border-surface-control">
+                <div className="rounded-xl p-3 bg-surface-base/60 border border-surface-control/60">
                     <ColorField
                         label={t('appColors.derive')}
                         hint={t('appColors.deriveHint')}
                         value={draft.base}
-                        onChange={(value) => { setPreset(''); setDraft(derivePalette(value)); }}
+                        onChange={(value) => { setPreset(''); setDraft(derive(value)); }}
                     />
                 </div>
 

@@ -29,8 +29,8 @@ const VARIANTS = {
     // The one action a screen is really offering.
     primary: 'bg-gray-900 dark:bg-white text-white dark:text-black hover:opacity-90 shadow-md',
     // Sits beside a primary without competing with it.
-    secondary: 'border border-gray-300 dark:border-surface-control text-gray-700 dark:text-gray-300 '
-        + 'hover:bg-gray-50 dark:hover:bg-surface-control',
+    secondary: 'border border-surface-control text-gray-700 dark:text-gray-300 '
+        + 'hover:bg-surface-control',
     // `secondary`, retuned for a button that sits on a raised card rather than
     // on a panel. Its border and its hover are both the control step of the
     // dark ramp, which is fine over `surface-raised` and useless over anything
@@ -42,10 +42,10 @@ const VARIANTS = {
         + 'hover:bg-gray-100 hover:border-gray-400 '
         + 'dark:hover:bg-white/[0.12] dark:hover:border-white/[0.28]',
     // Filled but quiet, for the icon buttons that flank a primary.
-    subtle: 'bg-gray-100 dark:bg-surface-control text-gray-500 dark:text-gray-400 '
-        + 'hover:bg-gray-200 dark:hover:bg-surface-hover hover:text-gray-900 dark:hover:text-white shadow-sm',
+    subtle: 'bg-surface-control text-gray-500 dark:text-gray-400 '
+        + 'hover:bg-surface-hover hover:text-gray-900 dark:hover:text-white shadow-sm',
     // No chrome until you touch it.
-    ghost: 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-surface-control '
+    ghost: 'text-gray-500 dark:text-gray-400 hover:bg-surface-control '
         + 'hover:text-gray-900 dark:hover:text-white',
     danger: 'bg-red-600 text-white hover:bg-red-500 shadow-md',
     // The one action a warning banner is offering - same weight as primary,
@@ -56,7 +56,7 @@ const VARIANTS = {
     // A destructive action among quiet ones: the same no-chrome-until-you-touch-it
     // as `ghost`, coloured, which is how the menus mark their delete rows too. An
     // outline here would be a third border in a row that is meant to have none.
-    dangerGhost: 'text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20',
+    dangerGhost: 'text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/20',
 };
 
 const BASE = 'inline-flex items-center justify-center font-semibold whitespace-nowrap '

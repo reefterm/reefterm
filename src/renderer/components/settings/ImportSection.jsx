@@ -30,7 +30,7 @@ export function GroupHeader({ icon, title, count, selected, onToggleAll, childre
     const t = useT();
 
     return (
-        <div className="flex items-center gap-3 px-3 h-10 border-b border-gray-200 dark:border-surface-control bg-gray-50 dark:bg-surface-base/60">
+        <div className="flex items-center gap-3 px-3 h-10 border-b border-surface-control/60 bg-surface-base/60">
             <Checkbox
                 size="sm"
                 checked={count > 0 && selected === count}
@@ -223,7 +223,7 @@ export default function ImportSection({ onImported }) {
                 <div className="flex items-center gap-2 shrink-0">
                     <button
                         onClick={chooseFile}
-                        className="px-3 h-9 rounded-xl border border-gray-300 dark:border-surface-control text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-surface-control transition-colors"
+                        className="px-3 h-9 rounded-xl border border-surface-control text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-surface-control transition-colors"
                     >
                         {t('settings.backup.chooseFile')}
                     </button>
@@ -262,7 +262,7 @@ export default function ImportSection({ onImported }) {
 
                     {/* Hosts */}
                     {hosts.length > 0 && (
-                        <div className="border border-gray-200 dark:border-surface-control rounded-xl overflow-hidden">
+                        <div className="border border-surface-control/60 rounded-xl overflow-hidden">
                             <GroupHeader
                                 icon={<ServerStack01Icon size={15} strokeWidth={2} />}
                                 title={t('nav.hosts')}
@@ -274,9 +274,9 @@ export default function ImportSection({ onImported }) {
                                 {hosts.map(host => (
                                     <div
                                         key={host.key}
-                                        className="border-b border-gray-100 dark:border-surface-control/60 last:border-b-0"
+                                        className="border-b border-surface-control/60 last:border-b-0"
                                     >
-                                        <label className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-surface-control/30">
+                                        <label className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-surface-control/30">
                                             <Checkbox
                                                 size="sm"
                                                 checked={selectedHosts.has(host.key)}
@@ -300,7 +300,7 @@ export default function ImportSection({ onImported }) {
 
                     {/* Known hosts */}
                     {entries.length > 0 && (
-                        <div className="border border-gray-200 dark:border-surface-control rounded-xl overflow-hidden">
+                        <div className="border border-surface-control/60 rounded-xl overflow-hidden">
                             <GroupHeader
                                 icon={<ShieldKeyIcon size={15} strokeWidth={2} />}
                                 title={t('import.trustedKeys')}
@@ -312,7 +312,7 @@ export default function ImportSection({ onImported }) {
                                 {entries.map(entry => (
                                     <label
                                         key={entry.key}
-                                        className="flex items-center gap-3 px-3 py-2 cursor-pointer border-b border-gray-100 dark:border-surface-control/60 last:border-b-0 hover:bg-gray-50 dark:hover:bg-surface-control/30"
+                                        className="flex items-center gap-3 px-3 py-2 cursor-pointer border-b border-surface-control/60 last:border-b-0 hover:bg-surface-control/30"
                                     >
                                         <Checkbox
                                             size="sm"
@@ -322,7 +322,7 @@ export default function ImportSection({ onImported }) {
                                         <span className="text-sm font-mono text-gray-900 dark:text-white truncate max-w-[12rem]">
                                             {entry.host}{entry.port !== 22 ? `:${entry.port}` : ''}
                                         </span>
-                                        <span className="shrink-0 px-1.5 py-0.5 rounded bg-gray-100 dark:bg-surface-control text-[10px] font-mono text-gray-500 dark:text-gray-400">
+                                        <span className="shrink-0 px-1.5 py-0.5 rounded bg-surface-control text-[10px] font-mono text-gray-500 dark:text-gray-400">
                                             {entry.keyType}
                                         </span>
                                         <span className="flex-1 min-w-0 text-[11px] font-mono text-gray-400 dark:text-neutral-500 truncate">

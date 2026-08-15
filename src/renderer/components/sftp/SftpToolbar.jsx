@@ -28,10 +28,10 @@ function IconButton({ icon, title, onClick, disabled, active, danger }) {
             aria-label={title}
             className={`w-8 h-8 shrink-0 flex items-center justify-center rounded-lg transition-colors disabled:opacity-35 disabled:cursor-not-allowed ${
                 active
-                    ? 'bg-gray-900/[0.08] dark:bg-surface-control text-gray-900 dark:text-white'
+                    ? 'bg-surface-control text-gray-900 dark:text-white'
                     : danger
                         ? 'text-gray-500 dark:text-gray-400 enabled:hover:bg-red-50 dark:enabled:hover:bg-red-900/20 enabled:hover:text-red-600 dark:enabled:hover:text-red-400'
-                        : 'text-gray-500 dark:text-gray-400 enabled:hover:bg-gray-100 dark:enabled:hover:bg-surface-control enabled:hover:text-gray-900 dark:enabled:hover:text-white'
+                        : 'text-gray-500 dark:text-gray-400 enabled:hover:bg-surface-control enabled:hover:text-gray-900 dark:enabled:hover:text-white'
             }`}
         >
             {icon}
@@ -39,7 +39,7 @@ function IconButton({ icon, title, onClick, disabled, active, danger }) {
     );
 }
 
-const Divider = () => <div className="w-px h-5 shrink-0 bg-gray-200 dark:bg-surface-control mx-0.5" />;
+const Divider = () => <div className="w-px h-5 shrink-0 bg-surface-control mx-0.5" />;
 
 /**
  * Breadcrumbs that turn into a text field on click, so a path can be typed or
@@ -88,7 +88,7 @@ function PathBar({ path, onNavigate, onSubmitPath }) {
                 }}
                 onBlur={() => { setEditing(false); setValue(path); }}
                 spellCheck={false}
-                className="flex-1 min-w-0 h-8 px-3 rounded-lg border border-blue-500 bg-white dark:bg-surface-base text-gray-900 dark:text-white font-mono text-xs outline-none"
+                className="flex-1 min-w-0 h-8 px-3 rounded-lg border border-blue-500 bg-surface-base text-gray-900 dark:text-white font-mono text-xs outline-none"
             />
         );
     }
@@ -101,11 +101,11 @@ function PathBar({ path, onNavigate, onSubmitPath }) {
             onClick={(event) => { if (event.target === event.currentTarget) setEditing(true); }}
             onDoubleClick={() => setEditing(true)}
             title="Click to type a path"
-            className="flex-1 min-w-0 h-8 flex items-center gap-0.5 px-2 rounded-lg border border-transparent hover:border-gray-200 dark:hover:border-surface-control overflow-x-auto sftp-pathbar cursor-text"
+            className="flex-1 min-w-0 h-8 flex items-center gap-0.5 px-2 rounded-lg border border-transparent hover:border-surface-control/60 overflow-x-auto sftp-pathbar cursor-text"
         >
             <button
                 onClick={() => onNavigate('/')}
-                className="shrink-0 px-1.5 py-0.5 rounded text-xs font-mono text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-surface-control hover:text-gray-900 dark:hover:text-white transition-colors"
+                className="shrink-0 px-1.5 py-0.5 rounded text-xs font-mono text-gray-500 dark:text-gray-400 hover:bg-surface-control hover:text-gray-900 dark:hover:text-white transition-colors"
             >
                 /
             </button>
@@ -114,7 +114,7 @@ function PathBar({ path, onNavigate, onSubmitPath }) {
                     {index > 0 && <span className="text-gray-300 dark:text-neutral-600 text-xs">/</span>}
                     <button
                         onClick={() => onNavigate(segment.path)}
-                        className={`px-1.5 py-0.5 rounded text-xs font-mono transition-colors hover:bg-gray-100 dark:hover:bg-surface-control ${
+                        className={`px-1.5 py-0.5 rounded text-xs font-mono transition-colors hover:bg-surface-control ${
                             index === segments.length - 1
                                 ? 'text-gray-900 dark:text-white font-medium'
                                 : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
@@ -154,7 +154,7 @@ function SftpToolbar({
     onFilterChange,
 }) {
     return (
-        <div className="shrink-0 h-12 flex items-center gap-1 px-2 border-b border-gray-200 dark:border-surface-control bg-white dark:bg-surface-raised">
+        <div className="shrink-0 h-12 flex items-center gap-1 px-2 border-b border-surface-control/60 bg-surface-raised">
             <IconButton
                 icon={<ArrowLeft01Icon size={17} strokeWidth={2} />}
                 title="Back"
@@ -209,7 +209,7 @@ function SftpToolbar({
                     }}
                     placeholder="Filter"
                     spellCheck={false}
-                    className="w-36 h-8 pl-8 pr-7 rounded-lg border border-gray-200 dark:border-surface-control bg-gray-50 dark:bg-surface-base text-gray-900 dark:text-white text-xs outline-none focus:border-gray-300 dark:focus:border-neutral-700 placeholder:text-gray-400"
+                    className="w-36 h-8 pl-8 pr-7 rounded-lg border border-surface-control/60 bg-surface-base text-gray-900 dark:text-white text-xs outline-none focus:border-surface-active placeholder:text-gray-400"
                 />
                 {filter && (
                     <button

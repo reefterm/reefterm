@@ -93,10 +93,10 @@ function PanePicker({ hosts, isActive, onPick, onQuickConnect, onCancel }) {
 
     return (
         <div
-            className="absolute inset-0 flex flex-col bg-white dark:bg-surface-raised"
+            className="absolute inset-0 flex flex-col bg-surface-raised"
             onKeyDown={handleKeyDown}
         >
-            <div className="h-11 shrink-0 flex items-center gap-2 px-3 border-b border-gray-200 dark:border-surface-control">
+            <div className="h-11 shrink-0 flex items-center gap-2 px-3 border-b border-surface-control/60">
                 <span className="text-xs font-semibold text-gray-900 dark:text-white truncate">
                     Split with…
                 </span>
@@ -125,7 +125,7 @@ function PanePicker({ hosts, isActive, onPick, onQuickConnect, onCancel }) {
                         onChange={(event) => { setQuery(event.target.value); setSelected(0); }}
                         placeholder="Search hosts, or type an address…"
                         spellCheck={false}
-                        className="w-full h-9 pl-9 pr-3 rounded-xl border border-gray-200 dark:border-surface-control bg-gray-50 dark:bg-surface-base text-gray-900 dark:text-white text-sm outline-none transition-colors focus:border-gray-300 dark:focus:border-neutral-700 placeholder:text-gray-400 dark:placeholder:text-neutral-500"
+                        className="w-full h-9 pl-9 pr-3 rounded-xl border border-surface-control/60 bg-surface-base text-gray-900 dark:text-white text-sm outline-none transition-colors focus:border-surface-active placeholder:text-gray-400 dark:placeholder:text-neutral-500"
                     />
                 </div>
             </div>
@@ -158,8 +158,8 @@ function PanePicker({ hosts, isActive, onPick, onQuickConnect, onCancel }) {
                                     onClick={() => choose(index)}
                                     className={`w-full flex items-center gap-2.5 px-2 py-2 rounded-xl text-left transition-colors ${
                                         index === selected
-                                            ? 'bg-gray-900/[0.06] dark:bg-surface-hover'
-                                            : 'hover:bg-gray-900/[0.04] dark:hover:bg-surface-control'
+                                            ? 'bg-surface-hover'
+                                            : 'hover:bg-surface-control'
                                     }`}
                                 >
                                     <OsIcon os={hostOs(host)} distro={host.distro} className="w-5 h-5 shrink-0" />
@@ -184,8 +184,8 @@ function PanePicker({ hosts, isActive, onPick, onQuickConnect, onCancel }) {
                                 onClick={() => choose(addressIndex)}
                                 className={`w-full flex items-center gap-2.5 px-2 py-2 rounded-xl text-left transition-colors ${
                                     addressIndex === selected
-                                        ? 'bg-gray-900/[0.06] dark:bg-surface-hover'
-                                        : 'hover:bg-gray-900/[0.04] dark:hover:bg-surface-control'
+                                        ? 'bg-surface-hover'
+                                        : 'hover:bg-surface-control'
                                 }`}
                             >
                                 <span className="w-5 h-5 shrink-0 flex items-center justify-center text-gray-400 dark:text-neutral-500">

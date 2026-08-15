@@ -199,8 +199,8 @@ function IconButton({ icon, title, onClick, disabled, active }) {
                 disabled={disabled}
                 className={`w-8 h-8 shrink-0 flex items-center justify-center rounded-xl transition-colors disabled:opacity-35 disabled:cursor-not-allowed ${
                     active
-                        ? 'bg-gray-900/[0.08] dark:bg-surface-control text-gray-900 dark:text-white'
-                        : 'text-gray-500 dark:text-gray-400 enabled:hover:bg-gray-100 dark:enabled:hover:bg-surface-control enabled:hover:text-gray-900 dark:enabled:hover:text-white'
+                        ? 'bg-surface-control text-gray-900 dark:text-white'
+                        : 'text-gray-500 dark:text-gray-400 enabled:hover:bg-surface-control enabled:hover:text-gray-900 dark:enabled:hover:text-white'
                 }`}
             >
                 {icon}
@@ -749,7 +749,7 @@ function RdpView({ paneId, host, isActive, isFocused, isLive, toolbarHost = null
 
             {/* No extra margin: the row's own gap spaces this, exactly as it
                 does the pane header's other dividers. */}
-            <div className="h-5 w-px bg-gray-200 dark:bg-surface-control" />
+            <div className="h-5 w-px bg-surface-control" />
 
             {/* The other direction needs no button: what is copied on the
                 desktop reaches this machine's clipboard on its own. */}
@@ -778,12 +778,12 @@ function RdpView({ paneId, host, isActive, isFocused, isLive, toolbarHost = null
     );
 
     return (
-        <div className="absolute inset-0 flex flex-col bg-gray-50 dark:bg-surface-base">
+        <div className="absolute inset-0 flex flex-col bg-surface-base">
             {/* Only when there is nowhere better to put them. With a host the
                 controls go into the pane header instead, and this view is just
                 the desktop. */}
             {!toolbarHost && (
-                <div className="h-11 shrink-0 flex items-center justify-end gap-1 px-3 border-b border-gray-200 dark:border-surface-control">
+                <div className="h-11 shrink-0 flex items-center justify-end gap-1 px-3 border-b border-surface-control/60">
                     {controls}
                 </div>
             )}
@@ -859,13 +859,13 @@ function RdpView({ paneId, host, isActive, isFocused, isLive, toolbarHost = null
                         note={status === 'connecting' ? '' : statusUi.label}
                         os={hostOs(host)}
                         distro={host?.distro}
-                        className="z-20 bg-gray-50 dark:bg-surface-base text-gray-900 dark:text-white"
+                        className="z-20 bg-surface-base text-gray-900 dark:text-white"
                     />
                 )}
 
                 {/* Not coming up and not up: failed, or over. */}
                 {!busy && status !== 'connected' && (
-                    <div className="absolute inset-0 flex items-center justify-center p-6 bg-gray-50 dark:bg-surface-base">
+                    <div className="absolute inset-0 flex items-center justify-center p-6 bg-surface-base">
                         <div className="text-center max-w-sm">
                             {status === 'error' ? (
                                 <AlertCircleIcon

@@ -85,8 +85,8 @@ function SettingsNav({ active, onChange, aiEnabled = true }) {
                             text-sm transition-colors
                             focus-visible:ring-2 focus-visible:ring-gray-900/20 dark:focus-visible:ring-white/25
                             ${isActive
-                                ? 'bg-gray-900/[0.08] dark:bg-surface-control text-gray-900 dark:text-white font-semibold'
-                                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-900/[0.04] dark:hover:bg-surface-raised'
+                                ? 'bg-surface-control text-gray-900 dark:text-white font-semibold'
+                                : 'text-gray-600 dark:text-gray-400 hover:bg-surface-raised'
                             }`}
                     >
                         <Icon size={17} strokeWidth={isActive ? 2 : 1.5} className="shrink-0" />

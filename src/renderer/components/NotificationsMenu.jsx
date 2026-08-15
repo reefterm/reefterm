@@ -30,7 +30,7 @@ const NOTICE = 'w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-left'
 
 function NotificationItem({ item }) {
     return (
-        <button className="w-full flex items-start gap-2 px-2 py-1.5 rounded-lg text-left transition-colors hover:bg-gray-100 dark:hover:bg-neutral-800">
+        <button className="w-full flex items-start gap-2 px-2 py-1.5 rounded-lg text-left transition-colors hover:bg-surface-control">
             <span
                 aria-hidden="true"
                 className={`mt-[7px] w-1.5 h-1.5 rounded-full shrink-0 ${
@@ -206,8 +206,8 @@ export default function NotificationsMenu({ items = [], onMarkAllRead }) {
                     ref={panelRef}
                     role="dialog"
                     aria-label="Notifications"
-                    className="fixed p-1 rounded-xl bg-white dark:bg-neutral-900 border border-gray-200
-                        dark:border-neutral-700 shadow-xl z-[9999] animate-fade-in app-no-drag"
+                    className="fixed p-1 rounded-xl bg-surface-raised border border-surface-active/60
+                        shadow-xl z-[9999] animate-fade-in app-no-drag"
                     style={{
                         top: pos?.top ?? -9999,
                         right: pos?.right ?? EDGE,
@@ -236,7 +236,7 @@ export default function NotificationsMenu({ items = [], onMarkAllRead }) {
                         <>
                             {act ? (
                                 <button
-                                    className={`${NOTICE} transition-colors hover:bg-gray-100 dark:hover:bg-neutral-800`}
+                                    className={`${NOTICE} transition-colors hover:bg-surface-control`}
                                     onClick={() => { close(); act(); }}
                                 >
                                     {notice}
@@ -247,7 +247,7 @@ export default function NotificationsMenu({ items = [], onMarkAllRead }) {
                                 <div className={NOTICE}>{notice}</div>
                             )}
                             {items.length > 0 && (
-                                <div className="-mx-1 my-1 border-t border-gray-100 dark:border-neutral-800" />
+                                <div className="-mx-1 my-1 border-t border-surface-control" />
                             )}
                         </>
                     )}

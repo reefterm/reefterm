@@ -14,7 +14,7 @@ const RECENT_LIMIT = 5;
 // height from whatever line-height it happens to inherit.
 function Kbd({ children }) {
     return (
-        <kbd className="inline-flex items-center justify-center h-5 min-w-5 px-1 leading-none rounded-lg border border-gray-200 dark:border-neutral-700 bg-gray-50 dark:bg-neutral-800 text-[10px] font-sans font-medium text-gray-500 dark:text-neutral-400">
+        <kbd className="inline-flex items-center justify-center h-5 min-w-5 px-1 leading-none rounded-lg border border-surface-active/60 bg-surface-control text-[10px] font-sans font-medium text-gray-500 dark:text-neutral-400">
             {children}
         </kbd>
     );
@@ -35,8 +35,8 @@ function HostRow({ host, folderName, selected, onSelect, onConnect }) {
             onClick={onConnect}
             className={`host-row w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-colors ${
                 selected
-                    ? 'bg-gray-900/[0.06] dark:bg-surface-hover'
-                    : 'hover:bg-gray-900/[0.04] dark:hover:bg-surface-control'
+                    ? 'bg-surface-hover'
+                    : 'hover:bg-surface-control'
             }`}
             data-selected={selected ? 'true' : 'false'}
         >
@@ -54,7 +54,7 @@ function HostRow({ host, folderName, selected, onSelect, onConnect }) {
             </span>
 
             {folderName && (
-                <span className="shrink-0 px-2 py-0.5 rounded-lg bg-gray-100 dark:bg-neutral-800 text-[11px] text-gray-500 dark:text-neutral-400 max-w-[120px] truncate">
+                <span className="shrink-0 px-2 py-0.5 rounded-lg bg-surface-control text-[11px] text-gray-500 dark:text-neutral-400 max-w-[120px] truncate">
                     {folderName}
                 </span>
             )}
@@ -91,8 +91,8 @@ function AddressRow({ address, selected, onSelect, onConnect }) {
             onClick={onConnect}
             className={`host-row w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-colors ${
                 selected
-                    ? 'bg-gray-900/[0.06] dark:bg-surface-hover'
-                    : 'hover:bg-gray-900/[0.04] dark:hover:bg-surface-control'
+                    ? 'bg-surface-hover'
+                    : 'hover:bg-surface-control'
             }`}
             data-selected={selected ? 'true' : 'false'}
         >
@@ -255,7 +255,7 @@ function NewTabView({ hosts, folders, isActive, onConnect, onQuickConnect, onNew
                         onChange={(e) => { setQuery(e.target.value); setSelected(0); }}
                         placeholder={t('newTab.searchPlaceholder')}
                         spellCheck={false}
-                        className="w-full h-12 pl-12 pr-24 rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900/70 text-gray-900 dark:text-white text-[15px] outline-none transition-colors focus:border-gray-300 dark:focus:border-neutral-700 placeholder:text-gray-400 dark:placeholder:text-neutral-500"
+                        className="w-full h-12 pl-12 pr-24 rounded-xl border border-surface-control/60 bg-surface-raised/70 text-gray-900 dark:text-white text-[15px] outline-none transition-colors focus:border-surface-active placeholder:text-gray-400 dark:placeholder:text-neutral-500"
                     />
                     <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-gray-400 dark:text-neutral-500 pointer-events-none tabular-nums">
                         {t('hosts.count', { count: flat.length })}
@@ -321,7 +321,7 @@ function NewTabView({ hosts, folders, isActive, onConnect, onQuickConnect, onNew
                 </div>
 
                 {/* Keyboard hints */}
-                <div className="shrink-0 flex items-center gap-4 pt-3 mt-1 border-t border-gray-100 dark:border-neutral-800/80 text-[11px] text-gray-400 dark:text-neutral-500">
+                <div className="shrink-0 flex items-center gap-4 pt-3 mt-1 border-t border-surface-control/80 text-[11px] text-gray-400 dark:text-neutral-500">
                     <span className="flex items-center gap-1.5">
                         <Kbd>↑</Kbd><Kbd>↓</Kbd> {t('newTab.hintNavigate')}
                     </span>

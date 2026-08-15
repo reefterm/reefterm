@@ -69,8 +69,8 @@ function IconButton({ icon, title, onClick, disabled, active }) {
             disabled={disabled}
             className={`w-8 h-8 shrink-0 flex items-center justify-center rounded-xl transition-colors disabled:opacity-35 disabled:cursor-not-allowed ${
                 active
-                    ? 'bg-gray-900/[0.08] dark:bg-surface-control text-gray-900 dark:text-white'
-                    : 'text-gray-500 dark:text-gray-400 enabled:hover:bg-gray-100 dark:enabled:hover:bg-surface-control enabled:hover:text-gray-900 dark:enabled:hover:text-white'
+                    ? 'bg-surface-control text-gray-900 dark:text-white'
+                    : 'text-gray-500 dark:text-gray-400 enabled:hover:bg-surface-control enabled:hover:text-gray-900 dark:enabled:hover:text-white'
             }`}
         >
             {icon}
@@ -100,7 +100,7 @@ function CertPrompt({ request, onRespond }) {
     const validity = [when(request.validFrom), when(request.validTo)].filter(Boolean).join(' to ');
 
     return (
-        <div className="absolute inset-0 flex items-center justify-center p-6 bg-gray-50 dark:bg-surface-base">
+        <div className="absolute inset-0 flex items-center justify-center p-6 bg-surface-base">
             <div className="max-w-md w-full text-center">
                 <SecurityLockIcon
                     size={32}
@@ -120,7 +120,7 @@ function CertPrompt({ request, onRespond }) {
                         : 'Service processors ship self-signed certificates, so this is expected. It is remembered once you accept it.'}
                 </p>
 
-                <dl className="mt-4 text-left rounded-xl border border-gray-200 dark:border-surface-control p-3 space-y-1.5">
+                <dl className="mt-4 text-left rounded-xl border border-surface-control/60 p-3 space-y-1.5">
                     {[
                         ['Address', request.hostname],
                         ['Fingerprint', request.fingerprint],
@@ -143,7 +143,7 @@ function CertPrompt({ request, onRespond }) {
                     <button
                         type="button"
                         onClick={() => onRespond(false)}
-                        className="px-4 h-9 rounded-xl border border-gray-200 dark:border-surface-control text-gray-700 dark:text-gray-300 font-semibold text-sm hover:bg-gray-100 dark:hover:bg-surface-control active:scale-95 transition-all"
+                        className="px-4 h-9 rounded-xl border border-surface-control/60 text-gray-700 dark:text-gray-300 font-semibold text-sm hover:bg-surface-control active:scale-95 transition-all"
                     >
                         Do not open
                     </button>
@@ -382,7 +382,7 @@ function BmcView({ paneId, host, isActive, toolbarHost = null }) {
 
             {/* No extra margin: the row's own gap spaces this, exactly as it
                 does the pane header's other dividers. */}
-            <div className="h-5 w-px bg-gray-200 dark:bg-surface-control" />
+            <div className="h-5 w-px bg-surface-control" />
 
             {/* Only offered where there is a form to fill. A board on HTTP Basic
                 auth was answered at the challenge, and one set to `manual` was
@@ -403,11 +403,11 @@ function BmcView({ paneId, host, isActive, toolbarHost = null }) {
     );
 
     return (
-        <div className="absolute inset-0 flex flex-col bg-gray-50 dark:bg-surface-base">
+        <div className="absolute inset-0 flex flex-col bg-surface-base">
             {/* Only when there is nowhere better to put them. With a pane header
                 the controls go there instead, and this view is just the board. */}
             {!toolbarHost && (
-                <div className="h-11 shrink-0 flex items-center justify-end gap-1 px-3 border-b border-gray-200 dark:border-surface-control">
+                <div className="h-11 shrink-0 flex items-center justify-end gap-1 px-3 border-b border-surface-control/60">
                     <span className={`w-1.5 h-1.5 rounded-full shrink-0 mr-auto ${statusUi.dot}`} title={statusUi.label} />
                     {controls}
                 </div>
@@ -433,7 +433,7 @@ function BmcView({ paneId, host, isActive, toolbarHost = null }) {
                 {certRequest && <CertPrompt request={certRequest} onRespond={respondCert} />}
 
                 {!certRequest && (!target || failed) && (
-                    <div className="absolute inset-0 flex items-center justify-center p-6 bg-gray-50 dark:bg-surface-base">
+                    <div className="absolute inset-0 flex items-center justify-center p-6 bg-surface-base">
                         <div className="text-center max-w-sm">
                             {failed ? (
                                 <AlertCircleIcon

@@ -83,7 +83,7 @@ export default function TunnelDialog({ tunnel, onSave, onClose }) {
         >
             <div className="flex flex-col gap-4">
                 {/* Type */}
-                <div className="grid grid-cols-3 gap-1 p-1 bg-gray-100 dark:bg-surface-base rounded-xl">
+                <div className="grid grid-cols-3 gap-1 p-1 bg-surface-base rounded-xl">
                     {TUNNEL_TYPES.map(option => (
                         <button
                             key={option.id}
@@ -92,7 +92,7 @@ export default function TunnelDialog({ tunnel, onSave, onClose }) {
                             onClick={() => set('type', option.id)}
                             className={`px-2 py-2 rounded-lg text-sm font-medium transition-all ${
                                 form.type === option.id
-                                    ? 'bg-white dark:bg-surface-active text-gray-900 dark:text-white shadow-sm'
+                                    ? 'bg-surface-active text-gray-900 dark:text-white shadow-sm'
                                     : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
                             }`}
                         >

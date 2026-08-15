@@ -125,7 +125,7 @@ function AppMenu() {
         <div className="shrink-0 app-no-drag">
             <button
                 ref={btnRef}
-                className={`w-8 h-8 flex items-center justify-center rounded-xl transition-colors ${open ? 'bg-gray-200 dark:bg-neutral-700' : 'hover:bg-gray-200 dark:hover:bg-neutral-800'}`}
+                className={`w-8 h-8 flex items-center justify-center rounded-xl transition-colors ${open ? 'bg-surface-active' : 'hover:bg-surface-control'}`}
                 onClick={() => setOpen(p => !p)}
             >
                 <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" viewBox="0 0 16 16" fill="currentColor">
@@ -138,19 +138,19 @@ function AppMenu() {
             {open && createPortal(
                 <div
                     ref={menuRef}
-                    className="fixed w-52 p-1 rounded-xl bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-700 shadow-xl z-[9999] animate-fade-in"
+                    className="fixed w-52 p-1 rounded-xl bg-surface-raised border border-surface-active/60 shadow-xl z-[9999] animate-fade-in"
                     style={{ top: pos.top, left: pos.left }}
                 >
                     {menuItems.map((item, i) =>
                         item.type === 'separator' ? (
-                            <div key={i} className="-mx-1 my-1 border-t border-gray-100 dark:border-neutral-800" />
+                            <div key={i} className="-mx-1 my-1 border-t border-surface-control" />
                         ) : (
                             <button
                                 key={i}
                                 className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition-colors ${
                                     item.danger
                                         ? 'text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20'
-                                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-800'
+                                        : 'text-gray-700 dark:text-gray-300 hover:bg-surface-control'
                                 }`}
                                 onClick={item.action}
                             >
@@ -210,7 +210,7 @@ function SessionTab({
         return (
             <div
                 className="tab-item session-tab flex items-center gap-2 px-3 py-2 rounded-xl text-xs
-                    font-medium relative z-10 app-no-drag bg-gray-900/[0.08] dark:bg-surface-control
+                    font-medium relative z-10 app-no-drag bg-surface-control
                     ring-1 ring-gray-900/20 dark:ring-white/25"
                 data-tab={tab.id}
             >
@@ -251,8 +251,8 @@ function SessionTab({
         <button
             className={`tab-item session-tab flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium cursor-pointer group relative z-10 overflow-hidden app-no-drag ${
                 active
-                    ? 'bg-gray-900/[0.08] dark:bg-surface-control text-gray-900 dark:text-white'
-                    : 'bg-gray-900/[0.04] dark:bg-surface-raised text-gray-500 dark:text-gray-400 hover:bg-gray-900/[0.06] dark:hover:bg-surface-control'
+                    ? 'bg-surface-control text-gray-900 dark:text-white'
+                    : 'bg-surface-raised text-gray-500 dark:text-gray-400 hover:bg-surface-control'
             }`}
             data-tab={tab.id}
             data-active={active ? 'true' : 'false'}
@@ -913,8 +913,8 @@ function TitleBar({
                         <button
                             className={`tab-item flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium transition-colors cursor-pointer group relative z-10 ${
                                 activeTabId === homeTab.id
-                                    ? 'bg-gray-900/[0.08] dark:bg-surface-control text-gray-900 dark:text-white'
-                                    : 'bg-gray-900/[0.04] dark:bg-surface-raised text-gray-500 dark:text-gray-400 hover:bg-gray-900/[0.06] dark:hover:bg-surface-control'
+                                    ? 'bg-surface-control text-gray-900 dark:text-white'
+                                    : 'bg-surface-raised text-gray-500 dark:text-gray-400 hover:bg-surface-control'
                             }`}
                             data-tab={homeTab.id}
                             onClick={() => onTabClick(homeTab.id)}
@@ -963,7 +963,7 @@ function TitleBar({
 
                     {/* New Session Plus Button */}
                     <button
-                        className="tab-add flex items-center justify-center w-8 h-8 rounded-xl text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-900/[0.06] dark:hover:bg-surface-control transition-colors app-no-drag shrink-0"
+                        className="tab-add flex items-center justify-center w-8 h-8 rounded-xl text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-surface-control transition-colors app-no-drag shrink-0"
                         onClick={onNewSession}
                         title={t('newTab.title')}
                     >

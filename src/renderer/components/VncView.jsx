@@ -61,8 +61,8 @@ function IconButton({ icon, title, onClick, disabled, active }) {
             disabled={disabled}
             className={`w-8 h-8 shrink-0 flex items-center justify-center rounded-xl transition-colors disabled:opacity-35 disabled:cursor-not-allowed ${
                 active
-                    ? 'bg-gray-900/[0.08] dark:bg-surface-control text-gray-900 dark:text-white'
-                    : 'text-gray-500 dark:text-gray-400 enabled:hover:bg-gray-100 dark:enabled:hover:bg-surface-control enabled:hover:text-gray-900 dark:enabled:hover:text-white'
+                    ? 'bg-surface-control text-gray-900 dark:text-white'
+                    : 'text-gray-500 dark:text-gray-400 enabled:hover:bg-surface-control enabled:hover:text-gray-900 dark:enabled:hover:text-white'
             }`}
         >
             {icon}
@@ -253,11 +253,11 @@ function VncView({ paneId, host, isActive, isFocused, isLive }) {
     const busy = status === 'opening' || status === 'connecting';
 
     return (
-        <div className="absolute inset-0 flex flex-col bg-gray-50 dark:bg-surface-base">
+        <div className="absolute inset-0 flex flex-col bg-surface-base">
             {/* Controls that have no keyboard equivalent once noVNC has the
                 keyboard: the whole point of Ctrl+Alt+Del here is that it cannot
                 be typed. */}
-            <div className="h-11 shrink-0 flex items-center gap-2 px-3 border-b border-gray-200 dark:border-surface-control">
+            <div className="h-11 shrink-0 flex items-center gap-2 px-3 border-b border-surface-control/60">
                 <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${statusUi.dot}`} title={statusUi.label} />
 
                 <span className="text-xs font-semibold text-gray-900 dark:text-white truncate">
@@ -305,7 +305,7 @@ function VncView({ paneId, host, isActive, isFocused, isLive }) {
                         onClick={() => setScaling('resize')}
                     />
 
-                    <div className="w-px h-5 bg-gray-200 dark:bg-surface-control mx-0.5" />
+                    <div className="w-px h-5 bg-surface-control mx-0.5" />
 
                     <IconButton
                         icon={viewOnly
@@ -347,7 +347,7 @@ function VncView({ paneId, host, isActive, isFocused, isLive }) {
                 />
 
                 {status !== 'connected' && (
-                    <div className="absolute inset-0 flex items-center justify-center p-6 bg-gray-50 dark:bg-surface-base">
+                    <div className="absolute inset-0 flex items-center justify-center p-6 bg-surface-base">
                         <div className="text-center max-w-sm">
                             {status === 'error' ? (
                                 <AlertCircleIcon

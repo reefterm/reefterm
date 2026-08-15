@@ -34,11 +34,11 @@ function TunnelCard({ tunnel, isLive, onStart, onStop, onEdit, onDelete }) {
     const hint = usageHint(tunnel);
 
     return (
-        <div className="border border-gray-200 dark:border-surface-control rounded-xl overflow-hidden">
+        <div className="border border-surface-control/60 rounded-xl overflow-hidden">
             <div className="flex items-center gap-3 px-3 py-2.5">
                 <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${state.dot}`} title={t(state.labelKey)} />
 
-                <span className="shrink-0 px-2 py-0.5 rounded-md bg-gray-100 dark:bg-surface-control text-[10px] font-semibold font-mono text-gray-600 dark:text-gray-400">
+                <span className="shrink-0 px-2 py-0.5 rounded-md bg-surface-control text-[10px] font-semibold font-mono text-gray-600 dark:text-gray-400">
                     {info.flag}
                 </span>
 
@@ -48,7 +48,7 @@ function TunnelCard({ tunnel, isLive, onStart, onStop, onEdit, onDelete }) {
                             {tunnel.name || describeTunnel(tunnel)}
                         </span>
                         {tunnel.autoStart && (
-                            <span className="shrink-0 text-[10px] px-1.5 py-0.5 rounded bg-gray-100 dark:bg-surface-control text-gray-500 dark:text-neutral-400">
+                            <span className="shrink-0 text-[10px] px-1.5 py-0.5 rounded bg-surface-control text-gray-500 dark:text-neutral-400">
                                 auto
                             </span>
                         )}
@@ -85,7 +85,7 @@ function TunnelCard({ tunnel, isLive, onStart, onStop, onEdit, onDelete }) {
                     <button
                         onClick={onEdit}
                         title={t('common.edit')}
-                        className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-surface-control transition-colors"
+                        className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-surface-control transition-colors"
                     >
                         <Edit02Icon size={13} strokeWidth={2} />
                     </button>
@@ -103,7 +103,7 @@ function TunnelCard({ tunnel, isLive, onStart, onStop, onEdit, onDelete }) {
             {/* Whatever the row cannot say on its own line: how to use it, or why
                 it is not running. */}
             {(hint || tunnel.state === 'error' || tunnel.lastError) && (
-                <div className="px-3 py-2 border-t border-gray-100 dark:border-surface-control/60 flex items-center gap-2">
+                <div className="px-3 py-2 border-t border-surface-control/60 flex items-center gap-2">
                     {tunnel.state === 'error' ? (
                         <span className="text-[11px] text-red-600 dark:text-red-400">{tunnel.message}</span>
                     ) : (
@@ -119,7 +119,7 @@ function TunnelCard({ tunnel, isLive, onStart, onStop, onEdit, onDelete }) {
                                         toast.success(t('tunnel.addressCopied'), toastOptions({ duration: 1500 }));
                                     }}
                                     title={t('tunnel.copyAddress')}
-                                    className="shrink-0 w-6 h-6 flex items-center justify-center rounded text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-surface-control transition-colors"
+                                    className="shrink-0 w-6 h-6 flex items-center justify-center rounded text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-surface-control transition-colors"
                                 >
                                     <Copy01Icon size={11} strokeWidth={2} />
                                 </button>
@@ -194,7 +194,7 @@ function TunnelsView({ tabId, host, isLive, onUpdateHost }) {
     const anyRunning = tunnels.some(tunnel => tunnel.state === 'active' || tunnel.state === 'starting');
 
     return (
-        <div className="absolute inset-0 overflow-y-auto bg-gray-50 dark:bg-surface-base">
+        <div className="absolute inset-0 overflow-y-auto bg-surface-base">
             <div className="max-w-3xl mx-auto p-6 flex flex-col gap-5">
                 <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0">
@@ -209,7 +209,7 @@ function TunnelsView({ tabId, host, isLive, onUpdateHost }) {
                             <button
                                 onClick={anyRunning ? stopAll : startAll}
                                 disabled={!isLive && !anyRunning}
-                                className="px-3 h-9 rounded-xl border border-gray-300 dark:border-surface-control text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-surface-control transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                                className="px-3 h-9 rounded-xl border border-surface-control text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-surface-control transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                             >
                                 {anyRunning ? t('tunnel.stopAll') : t('tunnel.startAll')}
                             </button>

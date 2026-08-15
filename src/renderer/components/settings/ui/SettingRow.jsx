@@ -36,4 +36,4 @@ export default function SettingRow({
  * Separator for a second setting inside the same card. The rule is what stops
  * two unrelated controls reading as one group.
  */
-export const DIVIDED = 'mt-8 pt-8 border-t border-gray-200 dark:border-neutral-700';
+export const DIVIDED = 'mt-8 pt-8 border-t border-surface-active/60';

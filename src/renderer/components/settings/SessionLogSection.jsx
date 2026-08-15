@@ -212,7 +212,7 @@ export default function SessionLogSection() {
                     <div className="flex items-center gap-2">
                         <code
                             className="flex-1 min-w-0 truncate px-3 py-2 rounded-xl text-xs font-mono
-                                bg-gray-50 dark:bg-neutral-800/60 border border-gray-200 dark:border-neutral-700
+                                bg-surface-control/60 border border-surface-active/60
                                 text-gray-700 dark:text-gray-300"
                             title={config.directory}
                         >
@@ -220,18 +220,18 @@ export default function SessionLogSection() {
                         </code>
 
                         <button
-                            className="px-3 py-2 rounded-xl text-xs font-semibold border border-gray-300
-                                dark:border-neutral-700 text-gray-700 dark:text-gray-300 transition-all
-                                active:scale-95 hover:bg-gray-50 dark:hover:bg-neutral-800 shrink-0"
+                            className="px-3 py-2 rounded-xl text-xs font-semibold border border-surface-active
+                                text-gray-700 dark:text-gray-300 transition-all
+                                active:scale-95 hover:bg-surface-control shrink-0"
                             onClick={chooseFolder}
                         >
                             {t('common.changeEllipsis')}
                         </button>
 
                         <button
-                            className="w-9 h-9 flex items-center justify-center rounded-xl border border-gray-300
-                                dark:border-neutral-700 text-gray-600 dark:text-gray-400 transition-all
-                                active:scale-95 hover:bg-gray-50 dark:hover:bg-neutral-800 shrink-0"
+                            className="w-9 h-9 flex items-center justify-center rounded-xl border border-surface-active
+                                text-gray-600 dark:text-gray-400 transition-all
+                                active:scale-95 hover:bg-surface-control shrink-0"
                             onClick={openFolder}
                             title={t('settings.logging.openFolder')}
                         >
@@ -240,9 +240,9 @@ export default function SessionLogSection() {
 
                         {!config.usingDefaultDirectory && (
                             <button
-                                className="w-9 h-9 flex items-center justify-center rounded-xl border border-gray-300
-                                    dark:border-neutral-700 text-gray-600 dark:text-gray-400 transition-all
-                                    active:scale-95 hover:bg-gray-50 dark:hover:bg-neutral-800 shrink-0"
+                                className="w-9 h-9 flex items-center justify-center rounded-xl border border-surface-active
+                                    text-gray-600 dark:text-gray-400 transition-all
+                                    active:scale-95 hover:bg-surface-control shrink-0"
                                 onClick={resetFolder}
                                 title={t('settings.logging.defaultFolder')}
                             >
@@ -252,13 +252,13 @@ export default function SessionLogSection() {
                     </div>
 
                     {logs.files.length > 0 && (
-                        <div className="rounded-xl border border-gray-200 dark:border-neutral-700 divide-y
+                        <div className="rounded-xl border border-surface-active/60 divide-y
                             divide-gray-100 dark:divide-neutral-800 overflow-hidden">
                             {logs.files.map(file => (
                                 <button
                                     key={file.path}
                                     className="w-full flex items-center gap-3 px-3 py-2 text-left transition-colors
-                                        hover:bg-gray-50 dark:hover:bg-neutral-800/60"
+                                        hover:bg-surface-control/60"
                                     onClick={() => reveal(file.path)}
                                     title={t('settings.logging.showInFolder')}
                                 >

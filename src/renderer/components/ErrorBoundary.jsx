@@ -48,7 +48,7 @@ class ErrorBoundary extends Component {
             .filter(Boolean)[0] || '';
 
         return (
-            <div className="fixed inset-0 overflow-auto bg-white dark:bg-surface-base p-8">
+            <div className="fixed inset-0 overflow-auto bg-surface-base p-8">
                 <div className="max-w-2xl mx-auto flex flex-col gap-4">
                     <div>
                         <h1 className="text-lg font-bold text-gray-900 dark:text-white">
@@ -84,14 +84,14 @@ class ErrorBoundary extends Component {
                             onClick={() => window.api?.clipboard?.writeText?.(
                                 `${error.stack || error.message || error}\n\nComponent stack:${info?.componentStack || ''}`
                             )}
-                            className="px-4 h-9 rounded-xl border border-gray-300 dark:border-surface-control text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-surface-control transition-colors"
+                            className="px-4 h-9 rounded-xl border border-surface-control text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-surface-control transition-colors"
                         >
                             Copy details
                         </button>
                     </div>
 
                     {(error.stack || info?.componentStack) && (
-                        <details className="rounded-xl border border-gray-200 dark:border-surface-control p-3">
+                        <details className="rounded-xl border border-surface-control/60 p-3">
                             <summary className="text-xs font-semibold text-gray-700 dark:text-gray-300 cursor-pointer">
                                 Stack
                             </summary>

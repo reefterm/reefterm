@@ -83,7 +83,7 @@ function TooltipRowBar({ row }) {
                     {row.value}
                 </span>
             </div>
-            <div className="h-1 rounded-full bg-gray-100 dark:bg-neutral-800 overflow-hidden">
+            <div className="h-1 rounded-full bg-surface-control overflow-hidden">
                 <div
                     className={`h-full rounded-full ${TONE_BAR[row.tone] || TONE_BAR.default}`}
                     style={{ width: `${Math.max(0, Math.min(100, row.percent))}%` }}
@@ -150,8 +150,8 @@ function TileTooltipBubble({ tooltip, pluginId, invoke, trigger, closing, onEnte
             onMouseLeave={onLeave}
             className={`tooltip-bubble ${closing ? 'tooltip-bubble-closing' : ''}
                 fixed z-[10000] w-64 max-w-[80vw] rounded-lg px-3 py-2.5 text-xs
-                bg-white dark:bg-surface-raised
-                border border-gray-200 dark:border-surface-control
+                bg-surface-raised
+                border border-surface-control/60
                 shadow-[0_8px_24px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_28px_rgba(0,0,0,0.4)]`}
             style={{
                 top: position?.top ?? -9999,
@@ -162,14 +162,14 @@ function TileTooltipBubble({ tooltip, pluginId, invoke, trigger, closing, onEnte
         >
             <span
                 aria-hidden="true"
-                className={`absolute w-2 h-2 rotate-45 bg-white dark:bg-surface-raised
-                    border-gray-200 dark:border-surface-control ${ARROW_EDGES[side]}`}
+                className={`absolute w-2 h-2 rotate-45 bg-surface-raised
+                    border-surface-control/60 ${ARROW_EDGES[side]}`}
                 style={arrowStyle(side, position?.arrow ?? 12)}
             />
             <div className="relative flex flex-col gap-2">
                 {tooltip.title && (
                     <div className="flex items-center gap-1.5 pb-1.5 font-semibold text-gray-900 dark:text-white
-                        border-b border-gray-100 dark:border-neutral-800">
+                        border-b border-surface-control">
                         <PluginIcon name={tooltip.icon} size={13} />
                         {tooltip.title}
                     </div>
@@ -313,7 +313,7 @@ export function NodePreview({ node }) {
     return (
         <span
             className="inline-flex items-center gap-1.5 h-7 px-2.5 rounded-lg border text-xs font-medium shadow-sm
-                border-gray-200 dark:border-neutral-700 text-gray-700 dark:text-gray-200 bg-white dark:bg-neutral-900"
+                border-surface-active/60 text-gray-700 dark:text-gray-200 bg-surface-raised"
         >
             <PluginIcon name={node.icon} size={13} />
             {label}

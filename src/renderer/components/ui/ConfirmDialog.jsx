@@ -35,7 +35,7 @@ export default function ConfirmDialog({
             }
         >
             {details?.length > 0 && (
-                <ul className="max-h-40 overflow-y-auto rounded-xl border border-gray-200 dark:border-surface-control bg-gray-50 dark:bg-surface-base/60 p-3 flex flex-col gap-1">
+                <ul className="max-h-40 overflow-y-auto rounded-xl border border-surface-control/60 bg-surface-base/60 p-3 flex flex-col gap-1">
                     {details.slice(0, 50).map((item) => (
                         <li key={item} className="text-xs font-mono text-gray-600 dark:text-gray-400 truncate">
                             {item}

@@ -16,7 +16,7 @@ export default function Toggle({ checked, onChange, disabled = false, ariaLabel,
             className={`relative w-11 h-6 shrink-0 rounded-full outline-none transition-colors
                 focus-visible:ring-[3px] focus-visible:ring-gray-900/20 dark:focus-visible:ring-white/25
                 disabled:opacity-40 disabled:cursor-not-allowed
-                ${checked ? 'bg-gray-900 dark:bg-white' : 'bg-gray-200 dark:bg-neutral-700'}
+                ${checked ? 'bg-gray-900 dark:bg-white' : 'bg-surface-active'}
                 ${className}`}
         >
             <span

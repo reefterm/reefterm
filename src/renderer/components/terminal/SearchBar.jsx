@@ -179,8 +179,8 @@ function SearchBar({ addon, background, onClose }) {
             // would put it over the view switcher.
             style={{ top: PANE_OVERLAY_TOP }}
             className="absolute right-3 z-30 flex items-center gap-1 pl-2.5 pr-1.5 py-1.5
-                rounded-xl bg-white/95 dark:bg-surface-raised/95 backdrop-blur
-                border border-gray-200 dark:border-surface-control shadow-lg animate-fade-in"
+                rounded-xl bg-surface-raised/95 backdrop-blur
+                border border-surface-control/60 shadow-lg animate-fade-in"
             role="search"
         >
             <Search01Icon size={14} strokeWidth={2} className="shrink-0 text-gray-400" />
@@ -207,7 +207,7 @@ function SearchBar({ addon, background, onClose }) {
                 {counter}
             </span>
 
-            <div className="flex items-center gap-0.5 pl-1 ml-0.5 border-l border-gray-200 dark:border-surface-control">
+            <div className="flex items-center gap-0.5 pl-1 ml-0.5 border-l border-surface-control/60">
                 {TOGGLES.map(({ id, label, title }) => (
                     <Tooltip key={id} label={title}>
                         <button
@@ -217,7 +217,7 @@ function SearchBar({ addon, background, onClose }) {
                             className={`w-6 h-6 flex items-center justify-center rounded-md text-[11px] font-mono font-semibold transition-colors ${
                                 options[id]
                                     ? 'bg-gray-900 dark:bg-white text-white dark:text-black'
-                                    : 'text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-surface-control'
+                                    : 'text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-surface-control'
                             }`}
                         >
                             {label}
@@ -226,13 +226,13 @@ function SearchBar({ addon, background, onClose }) {
                 ))}
             </div>
 
-            <div className="flex items-center gap-0.5 pl-1 ml-0.5 border-l border-gray-200 dark:border-surface-control">
+            <div className="flex items-center gap-0.5 pl-1 ml-0.5 border-l border-surface-control/60">
                 <Tooltip label="Previous match" hint="Shift+Enter">
                     <button
                         type="button"
                         onClick={() => step('previous')}
                         disabled={!query}
-                        className="w-6 h-6 flex items-center justify-center rounded-md text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-surface-control transition-colors disabled:opacity-30"
+                        className="w-6 h-6 flex items-center justify-center rounded-md text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-surface-control transition-colors disabled:opacity-30"
                     >
                         <ArrowUp01Icon size={14} strokeWidth={2.5} />
                     </button>
@@ -242,7 +242,7 @@ function SearchBar({ addon, background, onClose }) {
                         type="button"
                         onClick={() => step('next')}
                         disabled={!query}
-                        className="w-6 h-6 flex items-center justify-center rounded-md text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-surface-control transition-colors disabled:opacity-30"
+                        className="w-6 h-6 flex items-center justify-center rounded-md text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-surface-control transition-colors disabled:opacity-30"
                     >
                         <ArrowDown01Icon size={14} strokeWidth={2.5} />
                     </button>

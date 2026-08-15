@@ -8,8 +8,8 @@ import SettingRow, { DIVIDED } from '../ui/SettingRow';
 import Toggle from '../ui/Toggle';
 import { useT } from '../../../i18n';
 
-const INPUT = `w-full px-3 h-9 rounded-xl text-sm bg-gray-50 dark:bg-neutral-900
-    border border-gray-200 dark:border-neutral-700 text-gray-900 dark:text-white
+const INPUT = `w-full px-3 h-9 rounded-xl text-sm bg-surface-raised
+    border border-surface-active/60 text-gray-900 dark:text-white
     placeholder:text-gray-400 dark:placeholder:text-gray-500
     focus:outline-none focus:ring-2 focus:ring-gray-900/20 dark:focus:ring-white/25`;
 
@@ -18,8 +18,8 @@ const PRIMARY_BTN = `flex items-center justify-center gap-1.5 px-4 h-9 rounded-x
     hover:opacity-90 disabled:opacity-50 transition-opacity`;
 
 const GHOST_BTN = `flex items-center justify-center gap-2 px-4 h-9 rounded-xl text-sm font-medium
-    text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-neutral-700
-    hover:bg-gray-50 dark:hover:bg-neutral-800 disabled:opacity-50 transition-colors`;
+    text-gray-700 dark:text-gray-200 border border-surface-active/60
+    hover:bg-surface-control disabled:opacity-50 transition-colors`;
 
 const DANGER_BTN = `flex items-center gap-2 px-4 h-9 rounded-xl text-sm font-medium
     text-red-600 dark:text-red-400 border border-red-200 dark:border-red-500/30
@@ -46,7 +46,7 @@ const DOTS = {
     busy: 'bg-blue-500',
     warn: 'bg-amber-500',
     error: 'bg-red-500',
-    off: 'bg-gray-300 dark:bg-neutral-600',
+    off: 'bg-surface-hover',
 };
 
 /** What a background job is doing: one dot, one line. */
@@ -387,7 +387,7 @@ export default function SyncPage() {
 
                     {!showForgotFlow ? (
                         <>
-                            <div className="flex gap-1 mt-4 p-1 rounded-xl bg-gray-100 dark:bg-neutral-900 w-fit">
+                            <div className="flex gap-1 mt-4 p-1 rounded-xl bg-surface-raised w-fit">
                                 {['login', 'register'].map((option) => (
                                     <button
                                         key={option}
@@ -395,7 +395,7 @@ export default function SyncPage() {
                                         onClick={() => setMode(option)}
                                         className={`px-4 h-8 rounded-lg text-sm font-medium transition-colors
                                             ${mode === option
-                                                ? 'bg-white dark:bg-neutral-700 text-gray-900 dark:text-white shadow-sm'
+                                                ? 'bg-surface-active text-gray-900 dark:text-white shadow-sm'
                                                 : 'text-gray-500 dark:text-gray-400'}`}
                                     >
                                         {t(`settings.sync.${option === 'login' ? 'loginTab' : 'registerTab'}`)}

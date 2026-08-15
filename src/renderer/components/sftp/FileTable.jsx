@@ -70,7 +70,7 @@ function Row({
             role="row"
             aria-selected={selected}
             className={`sftp-row absolute left-0 right-0 flex items-center gap-3 px-3 text-sm cursor-default select-none ${
-                selected ? 'sftp-row-selected' : 'hover:bg-gray-100 dark:hover:bg-surface-control/60'
+                selected ? 'sftp-row-selected' : 'hover:bg-surface-control/60'
             } ${focused ? 'sftp-row-focused' : ''} ${dropTarget ? 'sftp-row-drop' : ''}`}
             style={{ top: index * ROW_HEIGHT, height: ROW_HEIGHT }}
             onClick={onClick}
@@ -105,7 +105,7 @@ function Row({
                         onBlur={onEditCommit}
                         onClick={(event) => event.stopPropagation()}
                         onDoubleClick={(event) => event.stopPropagation()}
-                        className="flex-1 min-w-0 bg-white dark:bg-surface-base border border-blue-500 rounded px-1.5 py-0.5 text-sm outline-none text-gray-900 dark:text-white"
+                        className="flex-1 min-w-0 bg-surface-base border border-blue-500 rounded px-1.5 py-0.5 text-sm outline-none text-gray-900 dark:text-white"
                         spellCheck={false}
                     />
                 ) : (
@@ -235,7 +235,7 @@ function FileTable({
     return (
         <div className="flex-1 min-h-0 flex flex-col">
             {/* Header */}
-            <div className="shrink-0 flex items-center gap-3 px-3 h-8 border-b border-gray-200 dark:border-surface-control bg-gray-50 dark:bg-surface-raised text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+            <div className="shrink-0 flex items-center gap-3 px-3 h-8 border-b border-surface-control/60 bg-surface-raised text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                 {COLUMNS.map(column => (
                     <button
                         key={column.key}

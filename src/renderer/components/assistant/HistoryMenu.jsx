@@ -73,9 +73,9 @@ export default function HistoryMenu({ conversations, currentId, onOpen, onRemove
                         outline-none focus-visible:ring-2
                         focus-visible:ring-gray-900/20 dark:focus-visible:ring-white/25
                         ${open
-                            ? 'bg-gray-100 dark:bg-surface-control text-gray-900 dark:text-white'
-                            : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 hover:text-gray-900 '
-                                + 'dark:hover:bg-surface-control dark:hover:text-white'}`}
+                            ? 'bg-surface-control text-gray-900 dark:text-white'
+                            : 'text-gray-500 dark:text-gray-400 hover:bg-surface-control hover:text-gray-900 '
+                                + 'dark:hover:text-white'}`}
                 >
                     <Clock01Icon size={16} strokeWidth={1.5} />
                 </button>

@@ -139,7 +139,7 @@ export default function SnippetDialog({ snippet, hosts = [], library = [], dismi
                         {placeholders.map(name => (
                             <span
                                 key={name}
-                                className="text-[10px] font-mono px-1.5 py-0.5 rounded border border-gray-200 dark:border-surface-control text-gray-600 dark:text-gray-400"
+                                className="text-[10px] font-mono px-1.5 py-0.5 rounded border border-surface-control/60 text-gray-600 dark:text-gray-400"
                             >
                                 {name}
                             </span>
@@ -172,13 +172,13 @@ export default function SnippetDialog({ snippet, hosts = [], library = [], dismi
                         Available on
                     </span>
 
-                    <div className="grid grid-cols-2 gap-1 p-1 bg-gray-100 dark:bg-surface-base rounded-xl">
+                    <div className="grid grid-cols-2 gap-1 p-1 bg-surface-base rounded-xl">
                         <button
                             type="button"
                             onClick={() => set('hostIds', [])}
                             className={`px-2 py-1.5 rounded-lg text-sm font-medium transition-all ${
                                 !scoped
-                                    ? 'bg-white dark:bg-surface-active text-gray-900 dark:text-white shadow-sm'
+                                    ? 'bg-surface-active text-gray-900 dark:text-white shadow-sm'
                                     : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
                             }`}
                         >
@@ -192,7 +192,7 @@ export default function SnippetDialog({ snippet, hosts = [], library = [], dismi
                             disabled={hosts.length === 0}
                             className={`px-2 py-1.5 rounded-lg text-sm font-medium transition-all disabled:opacity-40 ${
                                 scoped
-                                    ? 'bg-white dark:bg-surface-active text-gray-900 dark:text-white shadow-sm'
+                                    ? 'bg-surface-active text-gray-900 dark:text-white shadow-sm'
                                     : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
                             }`}
                         >
@@ -201,7 +201,7 @@ export default function SnippetDialog({ snippet, hosts = [], library = [], dismi
                     </div>
 
                     {scoped && (
-                        <div className="max-h-56 overflow-y-auto rounded-xl border border-gray-200 dark:border-surface-control divide-y divide-gray-100 dark:divide-surface-control">
+                        <div className="max-h-56 overflow-y-auto rounded-xl border border-surface-control/60 divide-y divide-gray-100 dark:divide-surface-control">
                             {hosts.map(host => (
                                 <Checkbox
                                     key={host.id}
@@ -210,7 +210,7 @@ export default function SnippetDialog({ snippet, hosts = [], library = [], dismi
                                     onChange={() => toggleHost(host.id)}
                                     label={host.name}
                                     description={`${host.username}@${host.host}`}
-                                    className="w-full px-3 py-2 hover:bg-gray-50 dark:hover:bg-surface-base transition-colors"
+                                    className="w-full px-3 py-2 hover:bg-surface-base transition-colors"
                                 />
                             ))}
                         </div>

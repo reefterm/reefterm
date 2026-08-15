@@ -5,7 +5,7 @@ import App from './App';
 import ErrorBoundary from './components/ErrorBoundary';
 import LockScreen from './components/LockScreen';
 import ScreenshotView from './components/ScreenshotView';
-import { applyAppColors } from './lib/app-colors';
+import { applyAppColors, migrateLegacyTheme, resolveAppColors } from './lib/app-colors';
 import { DEFAULT_TOAST_MS, MAX_TOAST_MS, TOAST_EXIT_MS } from './lib/toast';
 
 // Self-hosted fonts, no CDN, so the app works offline and the CSP can stay closed.
@@ -27,26 +27,35 @@ import '@fontsource/jetbrains-mono/700.css';
 
 import './input.css';
 
-// Resolve the theme before React's first render. useTheme applies it from an
-// effect, which lands *after* the first paint. Anything reading the class
-// during render would otherwise see light mode and bake in the wrong colours.
+// Resolve the theme before React's first render - useTheme applies it from an
+// effect, which lands after the first paint, and every mode is themeable now.
 (() => {
-    const stored = localStorage.getItem('theme') || 'system';
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    document.documentElement.classList.toggle(
-        'dark',
-        stored === 'dark' || stored === 'custom' || (stored === 'system' && prefersDark)
-    );
+    migrateLegacyTheme();
 
-    // The custom theme's colours too, and for the same reason: they are what
-    // that theme *is*, so the first paint has to already be in them.
-    if (stored !== 'custom') return;
-    try {
-        applyAppColors(JSON.parse(localStorage.getItem('appColors') || 'null'));
-    } catch {
-        // An unreadable palette leaves the variables at the app's own colours,
-        // which is a working app rather than a half-painted one.
-    }
+    const theme = localStorage.getItem('theme') || 'system';
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const dark = theme === 'dark' || (theme === 'system' && prefersDark);
+    document.documentElement.classList.toggle('dark', dark);
+
+    const readJSON = (key) => {
+        try {
+            return JSON.parse(localStorage.getItem(key) || 'null');
+        } catch {
+            return null;
+        }
+    };
+
+    // An unreadable stored palette leaves the variables at the app's own
+    // fallback colours (input.css's `:root` block), which is a working app
+    // rather than a half-painted one.
+    applyAppColors(resolveAppColors({
+        theme,
+        darkTint: localStorage.getItem('darkTint') || 'tokyo-night',
+        lightTint: localStorage.getItem('lightTint') || 'daybreak',
+        appColors: readJSON('appColors'),
+        lightAppColors: readJSON('lightAppColors'),
+        prefersDark,
+    }));
 })();
 
 // Screenshot viewers are separate BrowserWindows loading this same bundle;
