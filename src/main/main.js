@@ -5,6 +5,7 @@ const ipc = require('./ipc');
 const transport = require('./transport');
 const cloudSnapshot = require('./cloud-snapshot');
 const plugins = require('./plugins');
+const devtools = require('./devtools');
 
 let mainWindow = null;
 
@@ -52,6 +53,7 @@ function saveWindowState(window) {
 
 function createWindow() {
     const state = loadWindowState();
+    const devToolsEnabled = devtools.isAvailable();
 
     mainWindow = new BrowserWindow({
         width: state?.width || 1200,
@@ -93,6 +95,10 @@ function createWindow() {
              * the element available; it grants the guest nothing.
              */
             webviewTag: true,
+            // Off by default in a packaged build - see devtools.js. This is
+            // the real gate: it disables Chromium's own F12/Ctrl+Shift+I
+            // accelerator too, not just the menu item TitleBar.jsx hides.
+            devTools: devToolsEnabled,
         },
     });
 

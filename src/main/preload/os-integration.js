@@ -29,6 +29,10 @@ const startup = {
     setEnabled: (enabled) => ipcRenderer.invoke('startup-set-enabled', enabled),
 };
 
+const devtools = {
+    status: () => ipcRenderer.invoke('devtools-status'),
+};
+
 const dialog = {
     save: (options) => ipcRenderer.invoke('show-save-dialog', options || {}),
     open: (options) => ipcRenderer.invoke('show-open-dialog', options || {}),
@@ -59,4 +63,4 @@ const windowControls = {
     restart: () => ipcRenderer.send('app-restart'),
 };
 
-module.exports = { appearance, links, system, startup, dialog, clipboard, screenshot, window: windowControls };
+module.exports = { appearance, links, system, startup, devtools, dialog, clipboard, screenshot, window: windowControls };

@@ -71,6 +71,13 @@ function AppMenu() {
 
     const close = useCallback(() => setOpen(false), []);
 
+    // Off by default in a packaged build (see main/devtools.js); read once,
+    // since it can't change without a restart.
+    const [devToolsAvailable, setDevToolsAvailable] = useState(false);
+    useEffect(() => {
+        window.api.devtools?.status().then(status => setDevToolsAvailable(Boolean(status?.enabled)));
+    }, []);
+
     useEffect(() => {
         if (!open) return;
         const handleClick = (e) => {
@@ -94,7 +101,9 @@ function AppMenu() {
         { label: t('newTab.title'), shortcut: 'Ctrl+N', action: () => { close(); document.querySelector('.tab-add')?.click(); } },
         { type: 'separator' },
         { label: t('titleBar.reload'), shortcut: 'Ctrl+R', action: () => { close(); window.api.window.reload(); } },
-        { label: t('titleBar.devTools'), shortcut: 'Ctrl+Shift+I', action: () => { close(); window.api.window.toggleDevTools(); } },
+        ...(devToolsAvailable
+            ? [{ label: t('titleBar.devTools'), shortcut: 'Ctrl+Shift+I', action: () => { close(); window.api.window.toggleDevTools(); } }]
+            : []),
         { type: 'separator' },
         { label: t('titleBar.minimize'), action: () => { close(); window.api.window.minimize(); } },
         { label: t('titleBar.maximize'), action: () => { close(); window.api.window.maximize(); } },

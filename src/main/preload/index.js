@@ -17,7 +17,7 @@ const { monitor, cloudSnapshot } = require('./monitoring');
 const { sftp, transfers, remoteEdit, local } = require('./sftp');
 const { activity, sessionLog } = require('./audit');
 const {
-    appearance, links, system, startup, dialog, clipboard, screenshot, window,
+    appearance, links, system, startup, devtools, dialog, clipboard, screenshot, window,
 } = require('./os-integration');
 const { updates } = require('./updates');
 const { ai } = require('./assistant');
@@ -56,6 +56,7 @@ contextBridge.exposeInMainWorld('api', {
     links,
     system,
     startup,
+    devtools,
     dialog,
     clipboard,
     screenshot,

@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const screenshot = require('../screenshot');
 const startup = require('../startup');
+const devtools = require('../devtools');
 
 /**
  * Image formats the title bar will accept for a custom logo, and the MIME type
@@ -147,6 +148,8 @@ function register({ handle, getWindow }) {
     // can turn this off somewhere that is not this app.
     handle('startup-status', () => startup.status());
     handle('startup-set-enabled', (event, enabled) => startup.setEnabled(enabled));
+
+    handle('devtools-status', () => ({ enabled: devtools.isAvailable() }));
 
     /* ---------------- Window ----------------
      *
