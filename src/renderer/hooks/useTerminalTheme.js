@@ -642,6 +642,81 @@ function hexToRgba(hex, alpha) {
     return `rgba(${red}, ${green}, ${blue}, ${alpha})`;
 }
 
+const BRIGHT_COLOR_KEYS = {
+    black: 'brightBlack',
+    red: 'brightRed',
+    green: 'brightGreen',
+    yellow: 'brightYellow',
+    blue: 'brightBlue',
+    magenta: 'brightMagenta',
+    cyan: 'brightCyan',
+    white: 'brightWhite',
+};
+
+function hexToHsl(hex) {
+    const value = toHexColor(hex, '#000000');
+    const r = parseInt(value.slice(1, 3), 16) / 255;
+    const g = parseInt(value.slice(3, 5), 16) / 255;
+    const b = parseInt(value.slice(5, 7), 16) / 255;
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    const l = (max + min) / 2;
+    if (max === min) return { h: 0, s: 0, l };
+
+    const delta = max - min;
+    const s = l > 0.5 ? delta / (2 - max - min) : delta / (max + min);
+    let h;
+    switch (max) {
+        case r: h = (g - b) / delta + (g < b ? 6 : 0); break;
+        case g: h = (b - r) / delta + 2; break;
+        default: h = (r - g) / delta + 4; break;
+    }
+    return { h: h / 6, s, l };
+}
+
+function hslToHex(h, s, l) {
+    if (s === 0) {
+        const gray = Math.round(l * 255);
+        return `#${[gray, gray, gray].map(c => c.toString(16).padStart(2, '0')).join('')}`;
+    }
+
+    const hueToChannel = (p, q, t) => {
+        let tt = t;
+        if (tt < 0) tt += 1;
+        if (tt > 1) tt -= 1;
+        if (tt < 1 / 6) return p + (q - p) * 6 * tt;
+        if (tt < 1 / 2) return q;
+        if (tt < 2 / 3) return p + (q - p) * (2 / 3 - tt) * 6;
+        return p;
+    };
+
+    const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+    const p = 2 * l - q;
+    const channels = [hueToChannel(p, q, h + 1 / 3), hueToChannel(p, q, h), hueToChannel(p, q, h - 1 / 3)];
+    return `#${channels
+        .map(c => Math.round(Math.max(0, Math.min(1, c)) * 255).toString(16).padStart(2, '0'))
+        .join('')}`;
+}
+
+function deriveBrightColor(hex, key) {
+    const { h, s, l } = hexToHsl(hex);
+    const lift = key === 'black' ? 0.30 : 0.10;
+    const cap = key === 'black' ? 0.55 : 0.78;
+    // s === 0 means no real hue (hexToHsl defaults it to 0/red) - boosting
+    // saturation there would tint grey/black red instead of keeping it neutral.
+    const newS = s === 0 ? 0 : Math.min(1, s + 0.18);
+    return hslToHex(h, newS, Math.min(cap, l + lift));
+}
+
+// Doesn't override a theme that already hand-authors its own brightXxx.
+function withBrightColors(colors) {
+    const bright = {};
+    for (const [key, brightKey] of Object.entries(BRIGHT_COLOR_KEYS)) {
+        bright[brightKey] = colors[brightKey] || deriveBrightColor(colors[key], key);
+    }
+    return { ...colors, ...bright };
+}
+
 /** Drop anything unrecognised and fill the gaps, so a hand-edited or half-written
  *  stored theme still produces a terminal you can read. */
 export function sanitizeCustomTheme(colors) {
@@ -660,15 +735,15 @@ export function themeToCustomColors(themeId) {
 /** The theme object xterm is handed for whatever is currently selected. */
 export function resolveTerminalTheme(themeId, customColors) {
     if (themeId !== CUSTOM_THEME_ID) {
-        return TERMINAL_THEMES[themeId] || TERMINAL_THEMES[DEFAULT_THEME_ID];
+        return withBrightColors(TERMINAL_THEMES[themeId] || TERMINAL_THEMES[DEFAULT_THEME_ID]);
     }
 
     const colors = sanitizeCustomTheme(customColors);
-    return {
+    return withBrightColors({
         ...colors,
         cursorAccent: colors.background,
         selectionBackground: hexToRgba(colors.selectionBackground, SELECTION_ALPHA),
-    };
+    });
 }
 
 function readStoredTheme() {
