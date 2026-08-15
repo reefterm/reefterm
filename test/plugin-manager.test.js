@@ -61,11 +61,13 @@ afterEach(async () => {
     await Promise.all(managers.splice(0).map(m => m.shutdown()));
 });
 
-function writePlugin(pluginsRoot, id, { capabilities = [], code = 'module.exports = { activate: async () => {} };' } = {}) {
+function writePlugin(pluginsRoot, id, {
+    capabilities = [], uiExtensions = [], code = 'module.exports = { activate: async () => {} };',
+} = {}) {
     const dir = path.join(pluginsRoot, id);
     fs.mkdirSync(dir, { recursive: true });
     fs.writeFileSync(path.join(dir, 'plugin.json'), JSON.stringify({
-        id, name: id, version: '0.1.0', entry: 'index.js', capabilities,
+        id, name: id, version: '0.1.0', entry: 'index.js', capabilities, uiExtensions,
     }));
     fs.writeFileSync(path.join(dir, 'index.js'), code);
     return dir;
@@ -287,5 +289,145 @@ describe('manager: a new plugin cannot inherit another one\'s grant', () => {
         // The real one is completely unaffected: still running, still on
         // its own original grant.
         assert.strictEqual(list.find(e => e.id === 'com.example.trusted').state, 'running');
+    });
+});
+
+describe('manager: UI contributions', () => {
+    test('a plugin declaring only a uiExtensions sample still needs consent, named in pendingCapabilities', async () => {
+        const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'rt-test-plugins-dir-'));
+        const pluginsRoot = path.join(dir, 'plugins');
+        fs.mkdirSync(pluginsRoot, { recursive: true });
+        const sample = { type: 'button', label: 'x', onAction: 'x' };
+        writePlugin(pluginsRoot, 'com.example.wantsui', {
+            uiExtensions: [{ point: 'pane.headerAction', sample }],
+        });
+
+        const manager = freshManager({ pluginsRoot, grantsFile: path.join(dir, 'plugins.json') });
+        const list = await manager.init();
+
+        assert.strictEqual(list[0].state, 'pending-consent');
+        // Point *and* sample together, not the bare point name - see
+        // manager.js's extensionIdentity().
+        assert.deepStrictEqual(list[0].pendingCapabilities, [`pane.headerAction::${JSON.stringify(sample)}`]);
+        assert.strictEqual(list[0].uiExtensions[0].granted, false);
+    });
+
+    test('a plugin with zero pending capabilities but a pending uiExtensions point never actually starts', async () => {
+        // Regression test for a real bug: ensureRunning() used to check only
+        // capabilities, so a plugin needing nothing but uiExtensions consent
+        // would run for real - sandboxed process, contribute() calls and all
+        // - while list() still reported 'pending-consent', as if nothing had
+        // happened. Proven here by contribute() never having run (no
+        // capabilities exist to grant it a way to *tell* the test it ran),
+        // not just by re-checking the state label describeEntry() reports -
+        // that label is exactly what lied the first time this bug existed.
+        const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'rt-test-plugins-dir-'));
+        const pluginsRoot = path.join(dir, 'plugins');
+        fs.mkdirSync(pluginsRoot, { recursive: true });
+        writePlugin(pluginsRoot, 'com.example.uionly', {
+            capabilities: [],
+            uiExtensions: [{ point: 'pane.headerAction', sample: { type: 'button', label: 'x', onAction: 'x' } }],
+            code: `module.exports = { activate: async ({ contribute }) => {
+                await contribute('pane.headerAction', 'x', { type: 'button', label: 'x', onAction: 'x' });
+            } };`,
+        });
+
+        const manager = freshManager({ pluginsRoot, grantsFile: path.join(dir, 'plugins.json') });
+        await manager.init();
+
+        assert.strictEqual(manager.list()[0].state, 'pending-consent');
+        assert.deepStrictEqual(manager.listContributions(), []);
+    });
+
+    test('changing an already-granted point\'s sample re-triggers consent, even though the point name is unchanged', async () => {
+        const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'rt-test-plugins-dir-'));
+        const pluginsRoot = path.join(dir, 'plugins');
+        const grantsFile = path.join(dir, 'plugins.json');
+        fs.mkdirSync(pluginsRoot, { recursive: true });
+        writePlugin(pluginsRoot, 'com.example.reshapeui', {
+            uiExtensions: [{ point: 'statusBar.tile', sample: { type: 'tile', label: 'Hosts', value: 1 } }],
+        });
+
+        const manager = freshManager({ pluginsRoot, grantsFile });
+        await manager.init();
+        await manager.respondToConsent('com.example.reshapeui', { approved: true });
+        assert.strictEqual(manager.list()[0].state, 'running');
+
+        // Same point, richer sample - a tooltip with a CTA row appears where
+        // there was none before. The point name never changes.
+        writePlugin(pluginsRoot, 'com.example.reshapeui', {
+            uiExtensions: [{
+                point: 'statusBar.tile',
+                sample: {
+                    type: 'tile', label: 'Hosts', value: 1,
+                    tooltip: { rows: [{ type: 'cta', label: 'Open', url: 'https://example.com' }] },
+                },
+            }],
+        });
+
+        const list = manager.rescan();
+        const entry = list.find(e => e.id === 'com.example.reshapeui');
+        assert.strictEqual(entry.state, 'pending-consent');
+        assert.strictEqual(entry.uiExtensions[0].granted, false);
+    });
+
+    test('approving consent grants the declared extension point too, not just capabilities', async () => {
+        const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'rt-test-plugins-dir-'));
+        const pluginsRoot = path.join(dir, 'plugins');
+        fs.mkdirSync(pluginsRoot, { recursive: true });
+        writePlugin(pluginsRoot, 'com.example.approveui', {
+            capabilities: ['hosts.list'],
+            uiExtensions: [{ point: 'host.contextMenuItem' }],
+            code: `module.exports = { activate: async ({ call, contribute }) => {
+                await call('hosts.list');
+                await contribute('host.contextMenuItem', 'x', { type: 'menuItem', label: 'x', onAction: 'x' });
+            } };`,
+        });
+
+        const manager = freshManager({ pluginsRoot, grantsFile: path.join(dir, 'plugins.json') });
+        await manager.init();
+        await manager.respondToConsent('com.example.approveui', { approved: true });
+
+        const entry = manager.list()[0];
+        assert.strictEqual(entry.state, 'running');
+        assert.strictEqual(entry.uiExtensions[0].granted, true);
+        assert.deepStrictEqual(manager.listContributions(), [{
+            pluginId: 'com.example.approveui',
+            pointName: 'host.contextMenuItem',
+            id: 'x',
+            node: { type: 'menuItem', label: 'x', onAction: 'x' },
+        }]);
+    });
+
+    test('invokeAction() reaches a running, granted plugin\'s own registered handler', async () => {
+        const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'rt-test-plugins-dir-'));
+        const pluginsRoot = path.join(dir, 'plugins');
+        fs.mkdirSync(pluginsRoot, { recursive: true });
+        writePlugin(pluginsRoot, 'com.example.action', {
+            code: `module.exports = { activate: async ({ onAction }) => {
+                onAction('deploy', async (hostId) => 'deployed:' + hostId);
+            } };`,
+        });
+
+        const manager = freshManager({ pluginsRoot, grantsFile: path.join(dir, 'plugins.json') });
+        await manager.init();
+
+        const result = await manager.invokeAction('com.example.action', 'deploy', ['host-1']);
+        assert.strictEqual(result, 'deployed:host-1');
+    });
+
+    test('invokeAction() rejects for a disabled plugin without reaching its process', async () => {
+        const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'rt-test-plugins-dir-'));
+        const pluginsRoot = path.join(dir, 'plugins');
+        fs.mkdirSync(pluginsRoot, { recursive: true });
+        writePlugin(pluginsRoot, 'com.example.disabledaction', {
+            code: `module.exports = { activate: async ({ onAction }) => { onAction('x', async () => 'nope'); } };`,
+        });
+
+        const manager = freshManager({ pluginsRoot, grantsFile: path.join(dir, 'plugins.json') });
+        await manager.init();
+        await manager.setEnabled('com.example.disabledaction', false);
+
+        await assert.rejects(manager.invokeAction('com.example.disabledaction', 'x', []), /disabled/);
     });
 });

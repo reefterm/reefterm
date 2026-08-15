@@ -7,6 +7,9 @@ function register({ handle }) {
     handle('plugins-set-enabled', (event, { id, enabled }) => plugins.setEnabled(id, enabled));
     handle('plugins-list-builtins', () => plugins.builtins.list());
     handle('plugins-set-builtin-enabled', (event, { id, enabled }) => plugins.builtins.setEnabled(id, enabled));
+
+    handle('plugins-list-contributions', () => plugins.listContributions());
+    handle('plugins-invoke-action', (event, { id, actionId, args }) => plugins.invokeAction(id, actionId, args));
 }
 
 module.exports = { register };

@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { createPluginHost } = require('./host');
 const capabilitiesCatalog = require('./capabilities');
+const uiExtensionsCatalog = require('./ui-extensions');
 const discover = require('./discover');
 const grants = require('./grants');
 
@@ -60,7 +61,34 @@ function createPluginManager({ pluginsRoot, grantsFile }) {
     }
 
     function grantFor(id) {
-        return grantState[id] || { granted: [], enabled: true };
+        return grantState[id] || { granted: [], grantedExtensions: [], enabled: true };
+    }
+
+    /**
+     * What was actually approved for one uiExtensions entry - point *and*
+     * sample together, so a plugin quietly reshaping an already-granted
+     * point (a plain tile growing a tooltip with CTA rows, say) needs fresh
+     * consent, not just a new point appearing.
+     */
+    function extensionIdentity({ point, sample }) {
+        return `${point}::${JSON.stringify(sample || null)}`;
+    }
+
+    /**
+     * What this plugin still needs consent for. The one implementation both
+     * describeEntry() and ensureRunning() call, so what a settings page
+     * shows and what actually gates the process starting can never disagree
+     * - they used to, when ensureRunning() checked capabilities only and let
+     * a plugin needing nothing but uiExtensions consent run for real while
+     * still reporting "pending-consent".
+     */
+    function pendingConsent(entry, grant) {
+        const capabilities = grants.pendingCapabilities(grant.granted, entry.manifest.capabilities);
+        const extensions = grants.pendingCapabilities(
+            grant.grantedExtensions,
+            entry.manifest.uiExtensions.map(extensionIdentity)
+        );
+        return { capabilities, extensions };
     }
 
     /** Re-reads the plugins directory. Running plugins are left exactly as they are. */
@@ -75,7 +103,7 @@ function createPluginManager({ pluginsRoot, grantsFile }) {
         let changed = false;
         for (const entry of discovered.values()) {
             if (entry.ok && !grantState[entry.id]) {
-                grantState[entry.id] = { granted: [], enabled: true };
+                grantState[entry.id] = { granted: [], grantedExtensions: [], enabled: true };
                 changed = true;
             }
         }
@@ -87,17 +115,25 @@ function createPluginManager({ pluginsRoot, grantsFile }) {
     function describeEntry(entry) {
         const base = { id: entry.id };
         if (!entry.ok) {
-            return { ...base, state: 'invalid', error: entry.error, name: entry.id, capabilities: [] };
+            return { ...base, state: 'invalid', error: entry.error, name: entry.id, capabilities: [], uiExtensions: [] };
         }
 
         const { manifest } = entry;
         const grant = grantFor(entry.id);
-        const pending = grants.pendingCapabilities(grant.granted, manifest.capabilities);
+        const { capabilities: pendingCaps, extensions: pendingExt } = pendingConsent(entry, grant);
         const capabilities = manifest.capabilities.map(name => ({
             name,
             description: capabilitiesCatalog.describe(name),
-            granted: !pending.includes(name),
+            granted: !pendingCaps.includes(name),
         }));
+        const uiExtensions = manifest.uiExtensions.map(uiEntry => ({
+            point: uiEntry.point,
+            description: uiExtensionsCatalog.describe(uiEntry.point),
+            sample: uiEntry.sample,
+            granted: !pendingExt.includes(extensionIdentity(uiEntry)),
+        }));
+
+        const pending = [...pendingCaps, ...pendingExt];
 
         const shared = {
             ...base,
@@ -105,6 +141,7 @@ function createPluginManager({ pluginsRoot, grantsFile }) {
             description: manifest.description,
             version: manifest.version,
             capabilities,
+            uiExtensions,
             // Present whenever something is outstanding, regardless of
             // enabled state: a disabled plugin that would still need to ask
             // for something on re-enabling is worth a settings page saying
@@ -139,7 +176,8 @@ function createPluginManager({ pluginsRoot, grantsFile }) {
         if (!entry?.ok) return;
         const grant = grantFor(id);
         if (!grant.enabled) return;
-        if (grants.pendingCapabilities(grant.granted, entry.manifest.capabilities).length > 0) return;
+        const { capabilities, extensions } = pendingConsent(entry, grant);
+        if (capabilities.length > 0 || extensions.length > 0) return;
         if (pluginHost.status(id).state !== 'stopped') return; // starting, ready, or crashed: not ours to start again
 
         try {
@@ -173,6 +211,10 @@ function createPluginManager({ pluginsRoot, grantsFile }) {
         const grant = grantFor(id);
         if (approved) {
             grant.granted = [...new Set([...grant.granted, ...entry.manifest.capabilities])];
+            grant.grantedExtensions = [...new Set([
+                ...(grant.grantedExtensions || []),
+                ...entry.manifest.uiExtensions.map(extensionIdentity),
+            ])];
         } else {
             grant.enabled = false;
         }
@@ -207,6 +249,17 @@ function createPluginManager({ pluginsRoot, grantsFile }) {
         await pluginHost.stopAll();
     }
 
+    /**
+     * Rejects for a plugin whose contribution wasn't actually granted, even
+     * if the id and action name are otherwise valid - the same "checked
+     * again" posture as everything else a plugin reaches the app through.
+     */
+    function invokeAction(id, actionId, args) {
+        const grant = grantFor(id);
+        if (!grant.enabled) return Promise.reject(new Error(`Plugin "${id}" is disabled`));
+        return pluginHost.invokeAction(id, actionId, args);
+    }
+
     return {
         setNotifier,
         init,
@@ -215,6 +268,8 @@ function createPluginManager({ pluginsRoot, grantsFile }) {
         respondToConsent,
         setEnabled,
         shutdown,
+        listContributions: pluginHost.listContributions,
+        invokeAction,
     };
 }
 

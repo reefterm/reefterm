@@ -6,6 +6,12 @@ const plugins = {
     respondToConsent: (id, approved) => ipcRenderer.invoke('plugins-respond-consent', { id, approved }),
     setEnabled: (id, enabled) => ipcRenderer.invoke('plugins-set-enabled', { id, enabled }),
 
+    // onContributionChange fires per-plugin with that plugin's full current
+    // set, so a listener can patch its own copy rather than re-fetch everything.
+    listContributions: () => ipcRenderer.invoke('plugins-list-contributions'),
+    invokeAction: (id, actionId, args) => ipcRenderer.invoke('plugins-invoke-action', { id, actionId, args }),
+    onContributionChange: (callback) => subscribe('plugin-contribution', callback),
+
     // First-party features (see plugins/builtins.js). setEnabled here takes
     // effect on next launch, not immediately, unlike setEnabled above.
     builtins: {
