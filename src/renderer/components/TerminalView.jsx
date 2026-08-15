@@ -8,9 +8,11 @@ import { useTunnels } from '../hooks/useTunnels';
 import { useSshConnection } from '../hooks/useSshConnection';
 import { useTerminalEngine } from '../hooks/useTerminalEngine';
 import { useHeaderFit } from '../hooks/useHeaderFit';
+import usePluginContributions from '../hooks/usePluginContributions';
 import { toastOptions } from '../lib/toast';
 import { OsIcon, hostOs } from '../lib/os-icons';
 import { protocolLabel } from '../lib/protocols';
+import { toPaneAction, StatusTile } from '../lib/plugin-ui';
 import SegmentedControl from './ui/SegmentedControl';
 import MenuButton from './ui/MenuButton';
 import Tooltip from './ui/Tooltip';
@@ -150,6 +152,8 @@ function TerminalView({
     // IPMI is the only thing this pane is for.
     const [bmcOpened, setBmcOpened] = useState(bmcOnly);
     const { rootRef, fixedRef, compact, narrow, actionSlots } = useHeaderFit();
+    const { forPoint: pluginContributionsFor, invoke: invokePluginAction } = usePluginContributions();
+    const statusTiles = pluginContributionsFor('statusBar.tile');
     const { summary } = useTransfers(pane?.id);
     // Read here as well as in the panel, so the header badge shows what is
     // forwarding without the panel ever having been opened.
@@ -569,6 +573,11 @@ function TerminalView({
             terminalOnly: true,
             onSelect: () => handleScreenshot(),
         },
+        // Appended, not woven in: toPaneAction's `shed` already starts above
+        // every native action's own, so these fold first regardless of order.
+        ...pluginContributionsFor('pane.headerAction').map(
+            (contribution, index) => toPaneAction(contribution, invokePluginAction, index)
+        ),
         {
             // Already a dropdown. Folded away, its entries are spliced into the
             // burger rather than nested inside it: a submenu at this width would
@@ -1013,6 +1022,21 @@ function TerminalView({
                     display: viewMode === 'ssh' ? 'block' : 'none',
                 }}
             />
+
+            {/* A plugin's stat tiles, at the bottom of the SSH view only.
+                Absent from the DOM, not just empty, when nothing is contributed. */}
+            {viewMode === 'ssh' && statusTiles.length > 0 && (
+                <div className="h-8 shrink-0 flex items-center gap-4 px-3 overflow-x-auto
+                    border-t border-gray-200 dark:border-surface-control bg-white dark:bg-surface-raised">
+                    {statusTiles.map(contribution => (
+                        <StatusTile
+                            key={`${contribution.pluginId}:${contribution.id}`}
+                            contribution={contribution}
+                            invoke={invokePluginAction}
+                        />
+                    ))}
+                </div>
+            )}
 
             {/* SFTP View: mounted once opened, then hidden rather than torn
                 down so transfers and the browsing position survive a switch

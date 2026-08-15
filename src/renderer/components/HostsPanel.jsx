@@ -37,7 +37,9 @@ import { useCardDrag } from '../hooks/useCardDrag';
 import { useFlipOrder } from '../hooks/useFlipOrder';
 import useMonitor from '../hooks/useMonitor';
 import { useMarqueeSelection } from '../hooks/useMarqueeSelection';
+import usePluginContributions from '../hooks/usePluginContributions';
 import { CARD_GRID } from '../lib/layout';
+import { toContextMenuItem } from '../lib/plugin-ui';
 import {
     rootLabel,
     SORT_MANUAL,
@@ -190,6 +192,7 @@ function HostsPanel({
     // the states arrive as one push from main after every sweep, and a
     // subscription per card would be several hundred of them on a long list.
     const { statuses } = useMonitor();
+    const { forPoint: pluginContributionsFor, invoke: invokePluginAction } = usePluginContributions();
 
     /**
      * A dialog opened here belongs to this page, and goes when the page does.
@@ -867,6 +870,14 @@ function HostsPanel({
                 icon: <FolderTransferIcon size={ICON} />,
                 onClick: () => setMoving(new Set([cardKey('host', host.id)])),
             },
+            ...(pluginContributionsFor('host.contextMenuItem').length > 0
+                ? [
+                    { type: 'separator' },
+                    ...pluginContributionsFor('host.contextMenuItem').map(
+                        contribution => toContextMenuItem(contribution, invokePluginAction, [host.id])
+                    ),
+                ]
+                : []),
             { type: 'separator' },
             {
                 label: t('common.delete'),
@@ -875,7 +886,7 @@ function HostsPanel({
                 onClick: () => confirmDeleteHost(host),
             },
         ];
-    }, [connectAs, onEditHost, handleDuplicate, confirmDeleteHost, t]);
+    }, [connectAs, onEditHost, handleDuplicate, confirmDeleteHost, t, pluginContributionsFor, invokePluginAction]);
 
     const folderMenu = useCallback((folder) => [
         {
