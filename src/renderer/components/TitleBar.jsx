@@ -269,6 +269,18 @@ function SessionTab({
                 boxShadow: `inset 0 0 0 1px ${withAlpha(color.hex, active ? 0.5 : 0.28)}`,
             } : undefined}
             onClick={closing ? undefined : () => onSelect(tab.id)}
+            // Middle click closes the tab, the way every browser tab strip
+            // does it. mousedown must also be swallowed or the platform's
+            // autoscroll cursor kicks in before the click ever fires.
+            onMouseDown={closing ? undefined : (event) => {
+                if (event.button === 1) event.preventDefault();
+            }}
+            onAuxClick={closing ? undefined : (event) => {
+                if (event.button === 1) {
+                    event.preventDefault();
+                    onClose(tab.id);
+                }
+            }}
             // Double-click to rename, the way every tab strip that can be
             // renamed does it. The menu carries the same action for discovery.
             onDoubleClick={closing ? undefined : (event) => {
