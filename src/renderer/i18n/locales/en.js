@@ -142,6 +142,12 @@ export default {
     'newTab.hintClose': 'close tab',
 
     /* ---------------------------------------------------------------- *
+     * Builtin restart banner
+     * ---------------------------------------------------------------- */
+    'builtinRestartBanner.message': 'A built-in feature was turned on or off. Restart reefterm to apply it.',
+    'builtinRestartBanner.restartNow': 'Restart now',
+
+    /* ---------------------------------------------------------------- *
      * Title bar and the tab strip
      * ---------------------------------------------------------------- */
     'titleBar.reload': 'Reload',
@@ -882,6 +888,12 @@ export default {
     'settings.plugins.consent.deny': 'Deny',
     'settings.plugins.consent.footnote': 'Denying turns the plugin off rather than leaving it '
         + 'waiting; you can turn it back on later, which asks again for whatever is still needed.',
+
+    'settings.plugins.builtin.title': 'Built-in',
+    'settings.plugins.builtin.restartNote': 'Restart reefterm for a change here to take effect.',
+    'settings.plugins.builtin.pendingRestart': 'Pending restart',
+    'settings.plugins.builtin.enableAria': 'Enable {name}',
+    'settings.plugins.builtin.toggleFailed': 'Could not change that feature',
 
     /* ---------------------------------------------------------------- *
      * Settings: About

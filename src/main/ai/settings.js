@@ -68,7 +68,6 @@ const APPROVALS = new Set(['always', 'writes', 'never']);
 const COMMAND_MODES = new Set(['terminal', 'background']);
 
 const DEFAULTS = {
-    enabled: true,
     provider: 'claude-code',
     // Empty means whatever the installed agent is already set to use.
     // Inheriting is the right default for a feature whose selling point is
@@ -128,7 +127,6 @@ function sanitize(raw) {
         quickPrompts: [...DEFAULTS.quickPrompts],
     };
     if (raw && typeof raw === 'object') {
-        if ('enabled' in raw) next.enabled = Boolean(raw.enabled);
         if (providerRegistry().has(raw.provider)) next.provider = raw.provider;
         if (typeof raw.model === 'string') next.model = raw.model.trim().slice(0, 80);
         if (EFFORTS.has(raw.effort)) next.effort = raw.effort;

@@ -3,11 +3,17 @@
  * list rendered from window.api.plugins, an invalid plugin shown with its
  * error and no toggle, and the consent flow (Review -> approve/deny) driving
  * the real IPC calls plugins/manager.js expects.
+ *
+ * useBuiltinPlugins.js holds module-level singleton state (see its own
+ * header), so its __resetForTests() runs before every test here - without
+ * it, a builtins.list() mock set in one test's beforeEach would be
+ * shadowed by whatever the previous test already cached.
  */
 import { describe, test, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import PluginsSection from '../../../src/renderer/components/settings/PluginsSection.jsx';
+import { __resetForTests } from '../../../src/renderer/hooks/useBuiltinPlugins.js';
 
 function plugin(overrides = {}) {
     return {
@@ -21,8 +27,20 @@ function plugin(overrides = {}) {
     };
 }
 
+function builtin(overrides = {}) {
+    return {
+        id: 'com.reefterm.builtin.ai',
+        name: 'AI Assistant',
+        description: 'Chat with an AI agent.',
+        enabled: true,
+        pendingRestart: false,
+        ...overrides,
+    };
+}
+
 describe('PluginsSection', () => {
     beforeEach(() => {
+        __resetForTests();
         window.api = {
             plugins: {
                 list: vi.fn().mockResolvedValue([]),
@@ -32,6 +50,13 @@ describe('PluginsSection', () => {
                 onCrash: vi.fn(() => () => {}),
                 onExit: vi.fn(() => () => {}),
                 onStartFailed: vi.fn(() => () => {}),
+                builtins: {
+                    list: vi.fn().mockResolvedValue([]),
+                    setEnabled: vi.fn().mockResolvedValue({ success: true }),
+                },
+            },
+            window: {
+                restart: vi.fn(),
             },
         };
     });
@@ -124,5 +149,73 @@ describe('PluginsSection', () => {
         await user.click(await screen.findByRole('button', { name: /^deny$/i }));
 
         expect(window.api.plugins.respondToConsent).toHaveBeenCalledWith('com.example.demo', false);
+    });
+
+    test('the Builtin section renders above Installed, with a restart note', async () => {
+        window.api.plugins.builtins.list.mockResolvedValue([builtin()]);
+        window.api.plugins.list.mockResolvedValue([plugin()]);
+        render(<PluginsSection />);
+
+        const builtinHeading = await screen.findByText('Built-in');
+        const installedHeading = await screen.findByText('Installed');
+        expect(screen.getByText('AI Assistant')).toBeInTheDocument();
+        expect(screen.getByText(/restart reefterm/i)).toBeInTheDocument();
+        // DOCUMENT_POSITION_FOLLOWING: installedHeading comes after builtinHeading.
+        expect(builtinHeading.compareDocumentPosition(installedHeading) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    });
+
+    test('with no builtins, the Builtin section is not rendered at all', async () => {
+        window.api.plugins.builtins.list.mockResolvedValue([]);
+        render(<PluginsSection />);
+
+        await screen.findByText(/nothing found in the plugins folder/i);
+        expect(screen.queryByText('Built-in')).not.toBeInTheDocument();
+    });
+
+    test('toggling a builtin off calls plugins.builtins.setEnabled', async () => {
+        window.api.plugins.builtins.list.mockResolvedValue([builtin()]);
+        const user = userEvent.setup();
+        render(<PluginsSection />);
+
+        const toggle = await screen.findByRole('switch', { name: /enable ai assistant/i });
+        await user.click(toggle);
+
+        expect(window.api.plugins.builtins.setEnabled).toHaveBeenCalledWith('com.reefterm.builtin.ai', false);
+    });
+
+    test('a builtin with nothing pending shows no "Pending restart" label', async () => {
+        window.api.plugins.builtins.list.mockResolvedValue([builtin()]);
+        render(<PluginsSection />);
+
+        await screen.findByText('AI Assistant');
+        expect(screen.queryByText(/pending restart/i)).not.toBeInTheDocument();
+    });
+
+    test('a successful toggle that leaves the builtin pending shows the label, sourced from main', async () => {
+        window.api.plugins.builtins.list
+            .mockResolvedValueOnce([builtin()])
+            .mockResolvedValueOnce([builtin({ enabled: false, pendingRestart: true })]);
+        const user = userEvent.setup();
+        render(<PluginsSection />);
+
+        await user.click(await screen.findByRole('switch', { name: /enable ai assistant/i }));
+
+        expect(await screen.findByText(/pending restart/i)).toBeInTheDocument();
+    });
+
+    test('toggling back to the original value makes the label disappear again', async () => {
+        window.api.plugins.builtins.list
+            .mockResolvedValueOnce([builtin()])
+            .mockResolvedValueOnce([builtin({ enabled: false, pendingRestart: true })])
+            .mockResolvedValueOnce([builtin({ enabled: true, pendingRestart: false })]);
+        const user = userEvent.setup();
+        render(<PluginsSection />);
+
+        await user.click(await screen.findByRole('switch', { name: /enable ai assistant/i }));
+        await screen.findByText(/pending restart/i);
+
+        await user.click(await screen.findByRole('switch', { name: /enable ai assistant/i }));
+
+        await waitFor(() => expect(screen.queryByText(/pending restart/i)).not.toBeInTheDocument());
     });
 });

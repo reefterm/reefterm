@@ -5,6 +5,8 @@ function register({ handle }) {
     handle('plugins-rescan', () => plugins.rescan());
     handle('plugins-respond-consent', (event, { id, approved }) => plugins.respondToConsent(id, { approved }));
     handle('plugins-set-enabled', (event, { id, enabled }) => plugins.setEnabled(id, enabled));
+    handle('plugins-list-builtins', () => plugins.builtins.list());
+    handle('plugins-set-builtin-enabled', (event, { id, enabled }) => plugins.builtins.setEnabled(id, enabled));
 }
 
 module.exports = { register };

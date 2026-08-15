@@ -34,9 +34,16 @@ export const SETTINGS_CATEGORIES = [
     { id: 'about', icon: InformationCircleIcon },
 ];
 
-function SettingsNav({ active, onChange }) {
+function SettingsNav({ active, onChange, aiEnabled = true }) {
     const listRef = useRef(null);
     const t = useT();
+
+    // SETTINGS_CATEGORIES itself stays the full list (SettingsPanel.jsx's
+    // readCategory()/PAGES lookup still needs every id); only what this nav
+    // shows and walks is filtered.
+    const categories = aiEnabled
+        ? SETTINGS_CATEGORIES
+        : SETTINGS_CATEGORIES.filter(category => category.id !== 'assistant');
 
     /**
      * Arrow keys walk the list and wrap, with only the active item in the tab
@@ -49,13 +56,13 @@ function SettingsNav({ active, onChange }) {
 
         event.preventDefault();
 
-        const total = SETTINGS_CATEGORIES.length;
-        const current = SETTINGS_CATEGORIES.findIndex(category => category.id === active);
+        const total = categories.length;
+        const current = categories.findIndex(category => category.id === active);
         const next = (current + step + total) % total;
 
-        onChange(SETTINGS_CATEGORIES[next].id);
+        onChange(categories[next].id);
         listRef.current?.querySelectorAll('button')[next]?.focus();
-    }, [active, onChange]);
+    }, [active, onChange, categories]);
 
     return (
         <nav
@@ -64,7 +71,7 @@ function SettingsNav({ active, onChange }) {
             onKeyDown={handleKeyDown}
             className="sticky top-0 shrink-0 w-40 flex flex-col gap-0.5"
         >
-            {SETTINGS_CATEGORIES.map(({ id, icon: Icon }) => {
+            {categories.map(({ id, icon: Icon }) => {
                 const isActive = id === active;
 
                 return (

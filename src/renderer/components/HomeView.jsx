@@ -39,6 +39,7 @@ function HomeView({
     onTerminalSettingsChange,
     onTerminalSettingsReset,
     onDataImported,
+    aiEnabled,
     onNewHost,
     onEditHost,
     onDuplicateHost,
@@ -139,6 +140,7 @@ function HomeView({
                     onTerminalSettingsChange={onTerminalSettingsChange}
                     onTerminalSettingsReset={onTerminalSettingsReset}
                     onDataImported={onDataImported}
+                    aiEnabled={aiEnabled}
                 />
             )}
         </div>

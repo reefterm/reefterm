@@ -1,7 +1,10 @@
-const assistant = require('../ai');
 const activity = require('../activity');
 
 function register({ handle, notify }) {
+    // Required here, not at module load, so requiring this file doesn't
+    // pull in ai/index.js unless register() actually runs.
+    const assistant = require('../ai');
+
     /* ---------------- Assistant ---------------- */
 
     handle('ai-status', () => assistant.status());

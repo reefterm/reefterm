@@ -5,7 +5,6 @@ const monitor = require('../monitor');
 const cloudSnapshot = require('../cloud-snapshot');
 const updates = require('../updates');
 const remoteEdit = require('../remote-edit');
-const assistant = require('../ai');
 const tunnels = require('../tunnels');
 const vnc = require('../vnc');
 const rdp = require('../rdp');
@@ -32,8 +31,13 @@ const sftpIpc = require('./sftp');
 const auditIpc = require('./audit');
 const osIntegrationIpc = require('./os-integration');
 const updatesIpc = require('./updates');
-const assistantIpc = require('./assistant');
 const pluginsIpc = require('./plugins');
+const { AI_BUILTIN_ID } = require('../plugins/builtins');
+
+// require()'d lazily inside register(), only if the "ai" builtin is
+// enabled - so a disabled builtin is never loaded into this process at all.
+let assistant = null;
+let assistantIpc = null;
 
 /**
  * Channels that still answer while the app is locked: the unlock flow itself,
@@ -104,7 +108,11 @@ function register(getWindow) {
     updates.start(notify);
 
     remoteEdit.setNotifier(notify);
-    assistant.setNotifier(notify);
+    if (plugins.builtins.isEnabled(AI_BUILTIN_ID)) {
+        assistant = require('../ai');
+        assistantIpc = require('./assistant');
+        assistant.setNotifier(notify);
+    }
     tunnels.setNotifier(notify);
     vnc.setNotifier(notify);
     rdp.setNotifier(notify);
@@ -236,7 +244,7 @@ function register(getWindow) {
     auditIpc.register(ctx);
     osIntegrationIpc.register(ctx);
     updatesIpc.register(ctx);
-    assistantIpc.register(ctx);
+    if (assistantIpc) assistantIpc.register(ctx);
     pluginsIpc.register(ctx);
 }
 
@@ -257,8 +265,11 @@ function cancelPendingPrompts() {
     backupIpc.clearPending();
     // A tool call waiting on an approval nobody can give any more. Ending the
     // conversations denies them, which is the right answer once the window
-    // that would have said yes has gone.
-    assistant.shutdown();
+    // that would have said yes has gone. Checked on the module reference
+    // itself, not a fresh isEnabled(): this also runs on window-all-closed,
+    // where the process stays alive on macOS, so a mid-session toggle must
+    // not skip tearing down what's still actually resident.
+    if (assistant) assistant.shutdown();
 }
 
 module.exports = { register, cancelPendingPrompts };

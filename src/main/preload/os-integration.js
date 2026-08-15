@@ -55,6 +55,8 @@ const windowControls = {
     reload: () => ipcRenderer.send('reload-window'),
     toggleDevTools: () => ipcRenderer.send('open-devtools'),
     quit: () => ipcRenderer.send('force-quit'),
+    // A full process restart, not a renderer reload.
+    restart: () => ipcRenderer.send('app-restart'),
 };
 
 module.exports = { appearance, links, system, startup, dialog, clipboard, screenshot, window: windowControls };

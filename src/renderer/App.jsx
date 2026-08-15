@@ -12,6 +12,7 @@ import SessionScreen from './components/ui/SessionScreen';
 import SplitLayout from './components/panes/SplitLayout';
 import PanePicker from './components/panes/PanePicker';
 import AssistantPanel from './components/assistant/AssistantPanel';
+import BuiltinRestartBanner from './components/BuiltinRestartBanner';
 import { useTheme } from './hooks/useTheme';
 import { useSessions } from './hooks/useSessions';
 import { useTerminalTheme } from './hooks/useTerminalTheme';
@@ -75,6 +76,16 @@ function App() {
     const handleNavChange = useCallback((nav) => {
         if (nav === activeNavRef.current) setReachedForPage(count => count + 1);
         else setActiveNav(nav);
+    }, []);
+
+    // Read once at boot (plugins/builtins.js); optimistic default since a
+    // toggle only takes effect on next launch, not live.
+    const [aiEnabled, setAiEnabled] = useState(true);
+    useEffect(() => {
+        window.api.plugins?.builtins?.list().then((list) => {
+            const entry = list?.find(item => item.id === 'com.reefterm.builtin.ai');
+            if (entry) setAiEnabled(entry.enabled);
+        });
     }, []);
 
     // The assistant column. Its width is remembered because it is the kind of
@@ -305,6 +316,7 @@ function App() {
      * line.
      */
     useEffect(() => {
+        if (!aiEnabled) return undefined;
         const handler = (event) => {
             if (event.ctrlKey && event.shiftKey && !event.altKey && event.code === 'KeyA') {
                 event.preventDefault();
@@ -314,7 +326,7 @@ function App() {
         };
         document.addEventListener('keydown', handler, true);
         return () => document.removeEventListener('keydown', handler, true);
-    }, []);
+    }, [aiEnabled]);
 
     useEffect(() => {
         window.localStorage.setItem('assistant.width', String(assistantWidth));
@@ -344,6 +356,7 @@ function App() {
      * back rather than claiming success the moment the tab appears.
      */
     useEffect(() => {
+        if (!aiEnabled) return undefined;
         return window.api.ai.onAction(async ({ requestId, action, hostId, sessionId, data }) => {
             const respond = (result) => window.api.ai.respondToAction(requestId, result);
 
@@ -399,7 +412,7 @@ function App() {
                 respond({ success: false, message: error.message });
             }
         });
-    }, [hosts, handleConnect, paneConnections]);
+    }, [hosts, handleConnect, paneConnections, aiEnabled]);
 
     /**
      * A sheet belongs to the page it was opened from. Leaving that page (to
@@ -681,6 +694,8 @@ function App() {
                 />
             )}
 
+            {!fullscreenTabId && <BuiltinRestartBanner />}
+
             <div className="flex flex-1 min-h-0 app-no-drag" id="app-layout">
                 <Sidebar
                     activeNav={activeNav}
@@ -731,6 +746,7 @@ function App() {
                             onTerminalSettingsChange={setTerminalSettings}
                             onTerminalSettingsReset={resetTerminalSettings}
                             onDataImported={handleDataImported}
+                            aiEnabled={aiEnabled}
                             onNewHost={handleNewHost}
                             onEditHost={handleEditHost}
                             onDuplicateHost={handleDuplicateHost}
@@ -873,18 +889,21 @@ function App() {
 
                     Always here, open or shut, because the two states are one
                     column at two widths and it animates between them. Shut, it
-                    is the rail: the button and nothing else. */}
-                <AssistantPanel
-                    open={assistantOpen}
-                    sessions={assistantSessions}
-                    hosts={hosts}
-                    activeSessionId={activeSessionId}
-                    width={assistantWidth}
-                    onWidthChange={setAssistantWidth}
-                    onOpenSettings={handleOpenAssistantSettings}
-                    onOpen={() => setAssistantOpen(true)}
-                    onClose={() => setAssistantOpen(false)}
-                />
+                    is the rail: the button and nothing else. Mounting is a
+                    separate axis, gated on the AI builtin below. */}
+                {aiEnabled && (
+                    <AssistantPanel
+                        open={assistantOpen}
+                        sessions={assistantSessions}
+                        hosts={hosts}
+                        activeSessionId={activeSessionId}
+                        width={assistantWidth}
+                        onWidthChange={setAssistantWidth}
+                        onOpenSettings={handleOpenAssistantSettings}
+                        onOpen={() => setAssistantOpen(true)}
+                        onClose={() => setAssistantOpen(false)}
+                    />
+                )}
             </div>
 
             {/* Mounted only while open. The sheet animates itself out and calls

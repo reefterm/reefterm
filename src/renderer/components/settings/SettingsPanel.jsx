@@ -51,13 +51,17 @@ function SettingsPanel(props) {
     }, []);
 
     const Page = PAGES[category] || PAGES.general;
+    // A nav entry that disappeared (AI disabled, then restarted) can still be
+    // reachable through a stale localStorage category from before the
+    // restart - fall back rather than rendering a page nothing links to.
+    const EffectivePage = (category === 'assistant' && !props.aiEnabled) ? PAGES.general : Page;
 
     return (
         <div className="flex items-start gap-6" id="settings-panel">
-            <SettingsNav active={category} onChange={changeCategory} />
+            <SettingsNav active={category} onChange={changeCategory} aiEnabled={props.aiEnabled} />
 
             <div className="flex-1 min-w-0 max-w-3xl pb-8">
-                <Page {...props} />
+                <EffectivePage {...props} />
             </div>
         </div>
     );

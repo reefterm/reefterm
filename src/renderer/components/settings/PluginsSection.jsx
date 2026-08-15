@@ -6,6 +6,7 @@ import Toggle from './ui/Toggle';
 import Button from '../ui/Button';
 import PluginConsentDialog from './PluginConsentDialog';
 import usePlugins from '../../hooks/usePlugins';
+import useBuiltinPlugins from '../../hooks/useBuiltinPlugins';
 import { toastOptions } from '../../lib/toast';
 import { useT } from '../../i18n';
 
@@ -87,9 +88,43 @@ function PluginRow({ plugin, notice, onToggle, onReview }) {
     );
 }
 
+/** Simpler than PluginRow: no version, no state badge, no consent - just a name, a description and a toggle. */
+function BuiltinRow({ builtin, onToggle }) {
+    const t = useT();
+
+    return (
+        <div className="flex items-start gap-3 px-4 py-3">
+            <PuzzleIcon size={20} className="shrink-0 mt-0.5 text-gray-400 dark:text-neutral-500" strokeWidth={1.75} />
+
+            <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                        {builtin.name}
+                    </span>
+                    {builtin.pendingRestart && (
+                        <span className="text-xs font-medium text-amber-600 dark:text-amber-500">
+                            {t('settings.plugins.builtin.pendingRestart')}
+                        </span>
+                    )}
+                </div>
+                {builtin.description && (
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{builtin.description}</p>
+                )}
+            </div>
+
+            <Toggle
+                checked={builtin.enabled}
+                onChange={(next) => onToggle(builtin.id, next)}
+                ariaLabel={t('settings.plugins.builtin.enableAria', { name: builtin.name })}
+            />
+        </div>
+    );
+}
+
 export default function PluginsSection() {
     const t = useT();
     const { plugins, ready, notices, rescan, respondToConsent, setEnabled } = usePlugins();
+    const { builtins, ready: builtinsReady, setEnabled: setBuiltinEnabled } = useBuiltinPlugins();
     const [scanning, setScanning] = useState(false);
     const [reviewing, setReviewing] = useState(null);
 
@@ -128,10 +163,36 @@ export default function PluginsSection() {
         }
     };
 
+    const toggleBuiltin = async (id, enabled) => {
+        try {
+            await setBuiltinEnabled(id, enabled);
+        } catch (error) {
+            toast.error(error?.message || t('settings.plugins.builtin.toggleFailed'), toastOptions());
+        }
+    };
+
     if (!ready) return null;
 
     return (
         <>
+            {builtinsReady && builtins.length > 0 && (
+                <SettingCard className="!p-0 overflow-hidden">
+                    <div className="px-6 pt-6 pb-3">
+                        <h4 className="text-base font-semibold text-gray-900 dark:text-white">
+                            {t('settings.plugins.builtin.title')}
+                        </h4>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                            {t('settings.plugins.builtin.restartNote')}
+                        </p>
+                    </div>
+                    <div className="divide-y divide-gray-100 dark:divide-neutral-800 border-t border-gray-100 dark:border-neutral-800">
+                        {builtins.map(builtin => (
+                            <BuiltinRow key={builtin.id} builtin={builtin} onToggle={toggleBuiltin} />
+                        ))}
+                    </div>
+                </SettingCard>
+            )}
+
             <SettingCard className="!p-0 overflow-hidden">
                 <div className="flex items-center justify-between gap-4 px-6 pt-6 pb-3">
                     <div>

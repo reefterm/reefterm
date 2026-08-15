@@ -165,6 +165,13 @@ function register({ handle, getWindow }) {
     ipcMain.on('open-devtools', () => getWindow()?.webContents.toggleDevTools());
     ipcMain.on('reload-window', () => getWindow()?.reload());
     ipcMain.on('force-quit', () => app.quit());
+    // Unlike reload-window, this re-runs main.js from scratch, so it can
+    // pick up anything decided once at boot (e.g. plugins/builtins.js's
+    // require-gate).
+    ipcMain.on('app-restart', () => {
+        app.relaunch();
+        app.quit();
+    });
 }
 
 module.exports = { register };

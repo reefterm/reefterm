@@ -6,6 +6,13 @@ const plugins = {
     respondToConsent: (id, approved) => ipcRenderer.invoke('plugins-respond-consent', { id, approved }),
     setEnabled: (id, enabled) => ipcRenderer.invoke('plugins-set-enabled', { id, enabled }),
 
+    // First-party features (see plugins/builtins.js). setEnabled here takes
+    // effect on next launch, not immediately, unlike setEnabled above.
+    builtins: {
+        list: () => ipcRenderer.invoke('plugins-list-builtins'),
+        setEnabled: (id, enabled) => ipcRenderer.invoke('plugins-set-builtin-enabled', { id, enabled }),
+    },
+
     // A plugin's own stdout/stderr, already labelled and persisted to its
     // logs/plugin.log by the main process - this is only for a settings
     // page to tail it live, not the source of truth.

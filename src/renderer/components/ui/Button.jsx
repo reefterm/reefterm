@@ -48,6 +48,9 @@ const VARIANTS = {
     ghost: 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-surface-control '
         + 'hover:text-gray-900 dark:hover:text-white',
     danger: 'bg-red-600 text-white hover:bg-red-500 shadow-md',
+    // The one action a warning banner is offering - same weight as primary,
+    // amber instead of the app's default, matching ConfirmDialog's non-danger tone.
+    warning: 'bg-amber-500 text-white hover:bg-amber-400 shadow-md',
     dangerOutline: 'border border-red-300 dark:border-red-900/80 text-red-600 dark:text-red-400 '
         + 'hover:bg-red-600 hover:text-white hover:border-red-600 dark:hover:bg-red-600 dark:hover:text-white',
     // A destructive action among quiet ones: the same no-chrome-until-you-touch-it
