@@ -76,7 +76,7 @@ function PluginRow({ plugin, notice, onToggle, onReview }) {
                         {t('settings.plugins.review')}
                     </Button>
                 )}
-                {!invalid && (
+                {!invalid && plugin.state !== 'pending-consent' && (
                     <Toggle
                         checked={plugin.state !== 'disabled'}
                         onChange={(next) => onToggle(plugin.id, next)}
