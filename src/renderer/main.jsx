@@ -50,8 +50,12 @@ import './input.css';
 })();
 
 // Screenshot viewers are separate BrowserWindows loading this same bundle;
-// the hash tells us which capture to show instead of the main app.
+// the hash tells us which capture to show instead of the main app. They get
+// no boot splash - it's the main window's loading state, not theirs - so it
+// comes off immediately rather than waiting on Root()'s own dismiss effect,
+// which never runs down this path.
 const screenshotId = new URLSearchParams(window.location.hash.slice(1)).get('screenshot');
+if (screenshotId) document.getElementById('boot-splash')?.remove();
 
 /**
  * Holds the app behind the lock screen.
@@ -71,6 +75,17 @@ function Root() {
             // module, which treats an unreadable lock file as unset.
             .catch(() => setLocked(false));
     }, []);
+
+    // The static #boot-splash in index.html covers the same "don't know yet"
+    // gap this component already renders null for; dismissed here so it
+    // stays up exactly as long as that gap does, not just until JS parses.
+    useEffect(() => {
+        if (locked === null) return;
+        const splash = document.getElementById('boot-splash');
+        if (!splash) return;
+        splash.classList.add('boot-splash-hide');
+        setTimeout(() => splash.remove(), 200);
+    }, [locked]);
 
     // Re-locking from Settings unmounts App, dropping its tabs with it. The
     // sessions behind them are already torn down in main.

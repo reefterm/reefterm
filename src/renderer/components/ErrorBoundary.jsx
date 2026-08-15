@@ -28,6 +28,12 @@ class ErrorBoundary extends Component {
         // which the text below cannot.
         console.error('Unhandled render error:', error, info?.componentStack);
         this.setState({ info });
+
+        // The boot splash sits above everything (z-index 9999) until Root()
+        // dismisses it - a throw before that effect ever runs would otherwise
+        // leave this fallback invisible underneath it, exactly what this
+        // component exists to prevent.
+        document.getElementById('boot-splash')?.remove();
     }
 
     render() {
