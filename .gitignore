@@ -1,19 +1,17 @@
 node_modules/
-dist/
-resources/*.exe
 *.log
 
-# Bundled from src/main/preload/ by scripts/build-preload.js. Not committed:
-# a stale bundle would silently expose a different IPC surface than the
-# source describes, and the build is cheap enough to always run fresh
-# (see postinstall, and the start/dev/build scripts).
-/src/main/preload.js
+# built helpers
+resources/*.exe
 
-# Built installers, kept out of git on purpose. They are 140MB and up, and
-# GitHub rejects any single file over 100MiB, so they belong on a Release
-# rather than in history. updates.js reads the releases API to find them.
+# packages
+dist/
 releases/
 
-# Local working notes and agent config, not part of the project
-CLAUDE.md
+# agent config
 .claude/
+
+# Stale preload would expose a stale IPC surface and break the app, designed
+# to be built at runtime or package time.
+/src/main/preload.js
+
