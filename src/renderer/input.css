@@ -1058,8 +1058,29 @@ input[type="color"]::-webkit-color-swatch {
     animation: tooltip-in 0.12s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+/* The reverse of tooltip-in, for lib/plugin-ui.jsx's rich tile tooltip,
+   which stays mounted a beat after hide() to play this as an exit rather
+   than a disappearance. Declared after .tooltip-bubble so it wins when both
+   classes are present. */
+@keyframes tooltip-out {
+    from {
+        opacity: 1;
+        transform: none;
+    }
+
+    to {
+        opacity: 0;
+        transform: translate(var(--tip-x, 0), var(--tip-y, 0)) scale(0.96);
+    }
+}
+
+.tooltip-bubble-closing {
+    animation: tooltip-out 0.12s cubic-bezier(0.4, 0, 1, 1) both;
+}
+
 @media (prefers-reduced-motion: reduce) {
-    .tooltip-bubble {
+    .tooltip-bubble,
+    .tooltip-bubble-closing {
         animation-duration: 0.01ms;
     }
 }

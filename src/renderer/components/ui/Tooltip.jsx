@@ -278,3 +278,11 @@ export default function Tooltip({
         </span>
     );
 }
+
+/**
+ * The positioning primitive alone, for a caller that needs the same
+ * viewport-aware placement but can't use `TooltipBubble` - which is
+ * `pointer-events-none` by design, wrong for `lib/plugin-ui.jsx`'s tile
+ * tooltip, the one tooltip in the app that has to accept clicks.
+ */
+export { place, ENTRANCE, ARROW_EDGES, arrowStyle };
