@@ -5,6 +5,7 @@
     "main": "src/main/main.js",
     "packageManager": "pnpm@10.33.2",
     "scripts": {
+        "prepare": "husky",
         "postinstall": "patch-package && node scripts/build-preload.js",
         "start": "node scripts/build-preload.js && electron .",
         "lint": "eslint .",
@@ -174,6 +175,8 @@
     "author": "Reef Terminal Contributors",
     "license": "SEE LICENSE IN LICENSE",
     "devDependencies": {
+        "@commitlint/cli": "^21.2.2",
+        "@commitlint/config-conventional": "^21.2.2",
         "@eslint/js": "^9.19.0",
         "@testing-library/jest-dom": "^7.0.1",
         "@testing-library/react": "^16.3.2",
@@ -188,6 +191,7 @@
         "eslint-plugin-react": "^7.37.4",
         "eslint-plugin-react-hooks": "^5.1.0",
         "globals": "^15.14.0",
+        "husky": "^9.1.7",
         "jsdom": "^30.0.1",
         "patch-package": "^8.0.1",
         "postcss": "^8.5.6",
