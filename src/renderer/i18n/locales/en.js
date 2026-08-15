@@ -884,6 +884,7 @@ export default {
     'settings.plugins.consent.title': 'Allow {name}?',
     'settings.plugins.consent.subtitle': '{id}',
     'settings.plugins.consent.asksFor': 'This plugin is asking for',
+    'settings.plugins.consent.addsToInterface': 'Will add to your interface',
     'settings.plugins.consent.approve': 'Approve',
     'settings.plugins.consent.deny': 'Deny',
     'settings.plugins.consent.footnote': 'Denying turns the plugin off rather than leaving it '
