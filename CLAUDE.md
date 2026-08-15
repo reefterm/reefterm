@@ -106,3 +106,9 @@ the two sides drift.
   `varsIgnorePattern: '^_'`).
 - For anything beyond a small fix, the project's own contributing guidance (`.github/CONTRIBUTING.md`)
   says to raise the approach as an issue first — worth surfacing to the user if a task looks large.
+- Commit messages are Conventional Commits, enforced by commitlint on every `git commit`
+  (`.husky/commit-msg` + `commitlint.config.js`): `<type>(<scope>): <subject>`, imperative mood, no
+  trailing period. Types: `feat`, `fix`, `refactor`, `perf`, `test`, `docs`, `style`, `build`, `ci`,
+  `chore`, `revert`. Scope is the area touched (`plugins`, `ui`, `terminal`, `security`, `vault`, `sftp`,
+  `ipc`, `git`, ...) — omit it only when a change is genuinely repo-wide. One dense subject line; put
+  anything else in the body.
