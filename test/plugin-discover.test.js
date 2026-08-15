@@ -132,6 +132,42 @@ describe('discover: scan', () => {
         assert.strictEqual(found[0].id, 'com.example.good');
     });
 
+    test('a plugin targeting a valid extension point with a valid sample is found', () => {
+        const discover = freshDiscover();
+        const root = pluginsRoot();
+        writePlugin(root, 'com.example.uiext', {
+            uiExtensions: [{ point: 'pane.headerAction', sample: { type: 'button', label: 'x', onAction: 'x' } }],
+        });
+
+        const found = discover.scan(root);
+        assert.strictEqual(found[0].ok, true);
+        assert.deepStrictEqual(found[0].manifest.uiExtensions, [
+            { point: 'pane.headerAction', sample: { type: 'button', label: 'x', onAction: 'x' } },
+        ]);
+    });
+
+    test('a plugin targeting an unknown extension point is refused, naming it', () => {
+        const discover = freshDiscover();
+        const root = pluginsRoot();
+        writePlugin(root, 'com.example.badpoint', { uiExtensions: [{ point: 'does.not.exist' }] });
+
+        const found = discover.scan(root);
+        assert.strictEqual(found[0].ok, false);
+        assert.match(found[0].error, /does\.not\.exist/);
+    });
+
+    test('a plugin whose declared sample does not match its point\'s node shape is refused', () => {
+        const discover = freshDiscover();
+        const root = pluginsRoot();
+        writePlugin(root, 'com.example.badsample', {
+            uiExtensions: [{ point: 'pane.headerAction', sample: { type: 'button' } }], // missing label/onAction
+        });
+
+        const found = discover.scan(root);
+        assert.strictEqual(found[0].ok, false);
+        assert.match(found[0].error, /Invalid sample/);
+    });
+
     test('the reserved com.reefterm namespace is refused for a drop-in plugin', () => {
         const discover = freshDiscover();
         const root = pluginsRoot();

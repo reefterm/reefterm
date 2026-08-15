@@ -171,6 +171,50 @@ describe('manifest: readManifest', () => {
         assert.deepStrictEqual(result.manifest.capabilities, ['hosts.list']);
     });
 
+    test('uiExtensions is optional and defaults to an empty array', () => {
+        const dir = tempPluginDir('com.example.nouiext');
+        writeManifest(dir, { ...VALID_FIELDS, id: 'com.example.nouiext' });
+
+        const result = manifest.readManifest(dir);
+        assert.strictEqual(result.ok, true);
+        assert.deepStrictEqual(result.manifest.uiExtensions, []);
+    });
+
+    test('a well-formed uiExtensions entry, with and without a sample, reads cleanly', () => {
+        const dir = tempPluginDir('com.example.uiext');
+        writeManifest(dir, {
+            ...VALID_FIELDS,
+            id: 'com.example.uiext',
+            uiExtensions: [
+                { point: 'pane.headerAction', sample: { type: 'button', label: 'Containers', onAction: 'x' } },
+                { point: 'host.contextMenuItem' },
+            ],
+        });
+
+        const result = manifest.readManifest(dir);
+        assert.strictEqual(result.ok, true);
+        assert.deepStrictEqual(result.manifest.uiExtensions, [
+            { point: 'pane.headerAction', sample: { type: 'button', label: 'Containers', onAction: 'x' } },
+            { point: 'host.contextMenuItem', sample: null },
+        ]);
+    });
+
+    test('uiExtensions must be an array of { point, sample? } objects', () => {
+        const dir = tempPluginDir('com.example.baduiext');
+        writeManifest(dir, { ...VALID_FIELDS, id: 'com.example.baduiext', uiExtensions: 'pane.headerAction' });
+        assert.strictEqual(manifest.readManifest(dir).ok, false);
+
+        const dir2 = tempPluginDir('com.example.baduiext2');
+        writeManifest(dir2, { ...VALID_FIELDS, id: 'com.example.baduiext2', uiExtensions: [{ sample: {} }] });
+        assert.strictEqual(manifest.readManifest(dir2).ok, false);
+
+        const dir3 = tempPluginDir('com.example.baduiext3');
+        writeManifest(dir3, {
+            ...VALID_FIELDS, id: 'com.example.baduiext3', uiExtensions: [{ point: 'x', sample: 'not-an-object' }],
+        });
+        assert.strictEqual(manifest.readManifest(dir3).ok, false);
+    });
+
     test('an entry path is resolved relative to the plugin\'s own directory', () => {
         const dir = tempPluginDir('com.example.nested');
         writeManifest(dir, { ...VALID_FIELDS, id: 'com.example.nested', entry: 'src/index.js' });

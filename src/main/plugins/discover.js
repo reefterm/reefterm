@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const manifest = require('./manifest');
 const capabilities = require('./capabilities');
+const uiExtensions = require('./ui-extensions');
 
 /**
  * Scans a plugins directory and reports what it found, one entry per
@@ -38,6 +39,30 @@ function scan(pluginsRoot) {
                 dir,
                 ok: false,
                 error: `Requests an unknown capability "${unknownCapability}"`,
+            });
+            continue;
+        }
+
+        const badExtension = result.manifest.uiExtensions.find(({ point }) => !uiExtensions.has(point));
+        if (badExtension) {
+            found.push({
+                id: result.manifest.id,
+                dir,
+                ok: false,
+                error: `Targets an unknown extension point "${badExtension.point}"`,
+            });
+            continue;
+        }
+        const badSample = result.manifest.uiExtensions
+            .filter(({ sample }) => sample)
+            .map(({ point, sample }) => ({ point, error: uiExtensions.validateNode(point, sample) }))
+            .find(({ error }) => error);
+        if (badSample) {
+            found.push({
+                id: result.manifest.id,
+                dir,
+                ok: false,
+                error: `Invalid sample for extension point "${badSample.point}": ${badSample.error}`,
             });
             continue;
         }

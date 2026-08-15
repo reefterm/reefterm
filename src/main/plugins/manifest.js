@@ -86,6 +86,17 @@ function readManifest(pluginDir, { allowReservedNamespace = false } = {}) {
     if (!Array.isArray(raw.capabilities) || raw.capabilities.some(name => typeof name !== 'string' || !name)) {
         return { ok: false, error: 'plugin.json\'s "capabilities" must be an array of non-empty strings' };
     }
+    const rawUiExtensions = raw.uiExtensions === undefined ? [] : raw.uiExtensions;
+    if (!Array.isArray(rawUiExtensions) || rawUiExtensions.some(entry => (
+        !entry || typeof entry !== 'object'
+        || typeof entry.point !== 'string' || !entry.point
+        || (entry.sample !== undefined && (typeof entry.sample !== 'object' || entry.sample === null))
+    ))) {
+        return {
+            ok: false,
+            error: 'plugin.json\'s "uiExtensions" must be an array of { point: string, sample?: object }',
+        };
+    }
     if (raw.id !== id) {
         return { ok: false, error: `plugin.json declares id "${raw.id}", but is installed as "${id}"` };
     }
@@ -104,6 +115,7 @@ function readManifest(pluginDir, { allowReservedNamespace = false } = {}) {
             description: typeof raw.description === 'string' ? raw.description : '',
             entryPath,
             capabilities: [...new Set(raw.capabilities)],
+            uiExtensions: rawUiExtensions.map(({ point, sample }) => ({ point, sample: sample || null })),
         },
     };
 }
