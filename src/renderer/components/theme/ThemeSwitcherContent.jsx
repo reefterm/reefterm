@@ -2,8 +2,21 @@ import { Cancel01Icon, ComputerIcon, Moon02Icon, Sun03Icon } from 'hugeicons-rea
 import Tooltip from '../ui/Tooltip';
 import PaletteSwatch from '../ui/PaletteSwatch';
 import { PANE_HEADER_HEIGHT } from '../../lib/layout';
-import { APP_COLOR_PRESETS, CUSTOM_TINT_ID, LIGHT_APP_COLOR_PRESETS } from '../../lib/app-colors';
-import { CUSTOM_THEME_ID, TERMINAL_THEMES, TERMINAL_THEME_PRESETS } from '../../hooks/useTerminalTheme';
+import {
+    APP_COLOR_PRESETS,
+    CUSTOM_TINT_ID,
+    DEFAULT_APP_COLORS,
+    DEFAULT_LIGHT_APP_COLORS,
+    LIGHT_APP_COLOR_PRESETS,
+    sanitizeAppColors,
+} from '../../lib/app-colors';
+import {
+    CUSTOM_THEME_ID,
+    DARK_TERMINAL_THEME_PRESETS,
+    LIGHT_TERMINAL_THEME_PRESETS,
+    TERMINAL_THEMES,
+    recommendTerminalTheme,
+} from '../../hooks/useTerminalTheme';
 import { useT } from '../../i18n';
 
 /**
@@ -102,10 +115,9 @@ function TerminalSwatch({ background, foreground, active, label, srLabel, onClic
     );
 }
 
-const TERMINAL_OPTIONS = TERMINAL_THEME_PRESETS.map(option => ({
-    ...option,
-    ...TERMINAL_THEMES[option.id],
-}));
+const withColors = (option) => ({ ...option, ...TERMINAL_THEMES[option.id] });
+const DARK_TERMINAL_OPTIONS = DARK_TERMINAL_THEME_PRESETS.map(withColors);
+const LIGHT_TERMINAL_OPTIONS = LIGHT_TERMINAL_THEME_PRESETS.map(withColors);
 
 export default function ThemeSwitcherContent({
     theme,
@@ -130,6 +142,17 @@ export default function ThemeSwitcherContent({
     const tintPresets = resolvedDark ? APP_COLOR_PRESETS : LIGHT_APP_COLOR_PRESETS;
     const customColors = resolvedDark ? appColors : lightAppColors;
     const onTintChange = resolvedDark ? onDarkTintChange : onLightTintChange;
+
+    // Computed but not yet surfaced here - the badge that showed it had a
+    // real layout bug, pulled out to redo properly rather than ship broken.
+    const tintActiveColor = tint === CUSTOM_TINT_ID
+        ? sanitizeAppColors(customColors, resolvedDark ? DEFAULT_APP_COLORS : DEFAULT_LIGHT_APP_COLORS).active
+        : tintPresets.find(preset => preset.id === tint)?.colors.active;
+    const _recommendedTerminalId = recommendTerminalTheme({
+        tintId: tint === CUSTOM_TINT_ID ? null : tint,
+        activeColor: tintActiveColor,
+        dark: resolvedDark,
+    });
 
     return (
         <>
@@ -215,28 +238,63 @@ export default function ThemeSwitcherContent({
                         text-gray-400 dark:text-gray-600">
                         {t('themeSwitcher.terminalTheme')}
                     </h3>
-                    <div className="grid grid-cols-6 gap-2">
-                        {TERMINAL_OPTIONS.map(option => (
+
+                    <div className="space-y-3">
+                        <div>
+                            <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wide
+                                text-gray-400/80 dark:text-gray-600/80">
+                                {t('themeSwitcher.terminalThemeDark')}
+                            </p>
+                            <div className="grid grid-cols-6 gap-2">
+                                {DARK_TERMINAL_OPTIONS.map(option => (
+                                    <TerminalSwatch
+                                        key={option.id}
+                                        background={option.background}
+                                        foreground={option.foreground}
+                                        active={terminalTheme === option.id}
+                                        label={option.label}
+                                        srLabel={t('themeSwitcher.terminalThemeOption', { theme: option.label })}
+                                        onClick={() => onTerminalThemeChange(option.id)}
+                                    />
+                                ))}
+                            </div>
+                        </div>
+
+                        <div>
+                            <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wide
+                                text-gray-400/80 dark:text-gray-600/80">
+                                {t('themeSwitcher.terminalThemeLight')}
+                            </p>
+                            <div className="grid grid-cols-6 gap-2">
+                                {LIGHT_TERMINAL_OPTIONS.map(option => (
+                                    <TerminalSwatch
+                                        key={option.id}
+                                        background={option.background}
+                                        foreground={option.foreground}
+                                        active={terminalTheme === option.id}
+                                        label={option.label}
+                                        srLabel={t('themeSwitcher.terminalThemeOption', { theme: option.label })}
+                                        onClick={() => onTerminalThemeChange(option.id)}
+                                    />
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Its own row rather than tucked into Dark or Light -
+                            a custom palette can be any colour, so it would
+                            misrepresent whichever section it sat in. */}
+                        <div className="grid grid-cols-6 gap-2">
                             <TerminalSwatch
-                                key={option.id}
-                                background={option.background}
-                                foreground={option.foreground}
-                                active={terminalTheme === option.id}
-                                label={option.label}
-                                srLabel={t('themeSwitcher.terminalThemeOption', { theme: option.label })}
-                                onClick={() => onTerminalThemeChange(option.id)}
+                                background={customTerminalTheme.background}
+                                foreground={customTerminalTheme.foreground}
+                                active={terminalTheme === CUSTOM_THEME_ID}
+                                label={t('settings.terminal.custom')}
+                                srLabel={t('themeSwitcher.terminalThemeOption', {
+                                    theme: t('settings.terminal.custom'),
+                                })}
+                                onClick={() => onTerminalThemeChange(CUSTOM_THEME_ID)}
                             />
-                        ))}
-                        <TerminalSwatch
-                            background={customTerminalTheme.background}
-                            foreground={customTerminalTheme.foreground}
-                            active={terminalTheme === CUSTOM_THEME_ID}
-                            label={t('settings.terminal.custom')}
-                            srLabel={t('themeSwitcher.terminalThemeOption', {
-                                theme: t('settings.terminal.custom'),
-                            })}
-                            onClick={() => onTerminalThemeChange(CUSTOM_THEME_ID)}
-                        />
+                        </div>
                     </div>
                 </div>
             </div>

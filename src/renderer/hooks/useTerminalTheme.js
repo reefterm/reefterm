@@ -514,52 +514,150 @@ export const TERMINAL_THEMES = {
         cyan: '#86e1fc',
         white: '#c8d3f5',
     },
+
+    // Light siblings of a dark theme above (paired by id). Each ANSI colour is
+    // darkened just far enough to clear ~3:1 contrast on the light background,
+    // matched to the weakest contrast already shipping in solarized-light/
+    // gruvbox-light/"light" above rather than W3C body-text guidance, since
+    // these are terminal accents, not paragraphs.
+    'catppuccin-latte': {
+        background: '#eff1f5',
+        foreground: '#4c4f69',
+        cursor: '#dc8a78',
+        selectionBackground: 'rgba(172, 176, 190, 0.35)',
+        black: '#5c5f77',
+        red: '#d20f39',
+        green: '#40a02b',
+        yellow: '#bb7718',
+        blue: '#1e66f5',
+        magenta: '#8839ef',
+        cyan: '#179299',
+        white: '#acb0be',
+    },
+    'rose-pine-dawn': {
+        background: '#faf4ed',
+        foreground: '#575279',
+        cursor: '#797593',
+        selectionBackground: 'rgba(121, 117, 147, 0.18)',
+        // Dawn has no ink darker than `text` to give `black` of its own, so it
+        // reuses it - the reverse of every other slot pairing here, where
+        // `black` is the dark/readable one and `white` is the barely-there
+        // dim tone, matching solarized-light/gruvbox-light/github-light above.
+        black: '#575279',
+        red: '#b4637a',
+        green: '#286983',
+        yellow: '#be7614',
+        blue: '#56949f',
+        magenta: '#907aa9',
+        cyan: '#d06b67',
+        white: '#f2e9e1',
+    },
+    'nord-snow': {
+        background: '#eceff4',
+        foreground: '#4c566a',
+        cursor: '#5e81ac',
+        selectionBackground: 'rgba(76, 86, 106, 0.15)',
+        black: '#3b4252',
+        red: '#bf616a',
+        green: '#6d8e50',
+        yellow: '#ab7c1d',
+        blue: '#5f87b0',
+        magenta: '#a4759b',
+        cyan: '#408da3',
+        white: '#d8dee9',
+    },
+    'one-light': {
+        background: '#fafafa',
+        foreground: '#383a42',
+        cursor: '#4078f2',
+        selectionBackground: 'rgba(56, 58, 66, 0.08)',
+        black: '#383a42',
+        red: '#e45649',
+        green: '#50a14f',
+        yellow: '#c18401',
+        blue: '#4078f2',
+        magenta: '#a626a4',
+        cyan: '#0184bc',
+        white: '#a0a1a7',
+    },
+    'ayu-light': {
+        background: '#fafafa',
+        foreground: '#5c6773',
+        cursor: '#ff9940',
+        selectionBackground: 'rgba(92, 103, 115, 0.12)',
+        black: '#5c6773',
+        red: '#ee5a5a',
+        green: '#739900',
+        yellow: '#c27a0e',
+        blue: '#1e91e3',
+        magenta: '#a37acc',
+        cyan: '#389b7a',
+        white: '#828c99',
+    },
 };
 
 /**
- * Display order and names for the built-ins. Kept next to the palettes so the
- * picker grid and the custom editor's "start from" list cannot drift apart.
+ * Display order and names for the built-in dark themes. Kept next to the
+ * palettes so the picker grid and the custom editor's "start from" list
+ * cannot drift apart.
+ *
+ * Ordered by `background`'s hue, same wheel as `APP_COLOR_PRESETS` in
+ * lib/app-colors.js - background rather than an accent colour because that's
+ * what actually fills the swatch tile someone is scanning.
  */
-export const TERMINAL_THEME_PRESETS = [
-    { id: 'tokyo-night', label: 'Tokyo Night' },
+export const DARK_TERMINAL_THEME_PRESETS = [
     // Stored as `default` since before it was one, and still the id in anyone's
     // settings who picked it. The name is what it has always been made of.
     { id: 'default', label: 'VS Code Dark' },
-    { id: 'monokai', label: 'Monokai' },
-    { id: 'monokai-pro', label: 'Monokai Pro' },
-    { id: 'dracula', label: 'Dracula' },
-    { id: 'nord', label: 'Nord' },
-    { id: 'aurora', label: 'Aurora' },
-    { id: 'solarized', label: 'Solarized' },
-    { id: 'solarized-light', label: 'Solarized Light' },
     { id: 'gruvbox', label: 'Gruvbox' },
-    { id: 'gruvbox-light', label: 'Gruvbox Light' },
-    { id: 'everforest', label: 'Everforest' },
-    { id: 'kanagawa', label: 'Kanagawa' },
-    { id: 'moonlight', label: 'Moonlight' },
-    { id: 'night-owl', label: 'Night Owl' },
-    { id: 'palenight', label: 'Palenight' },
-    { id: 'material-ocean', label: 'Material Ocean' },
-    { id: 'oceanic-next', label: 'Oceanic Next' },
-    { id: 'one-dark', label: 'One Dark' },
-    { id: 'tomorrow-night', label: 'Tomorrow Night' },
-    { id: 'github-dark', label: 'GitHub Dark' },
-    { id: 'github-light', label: 'GitHub Light' },
-    { id: 'ayu-dark', label: 'Ayu Dark' },
-    { id: 'catppuccin', label: 'Catppuccin' },
-    { id: 'rose-pine', label: 'Rosé Pine' },
-    { id: 'iceberg', label: 'Iceberg' },
-    { id: 'zenburn', label: 'Zenburn' },
-    { id: 'cobalt2', label: 'Cobalt2' },
-    { id: 'horizon', label: 'Horizon' },
-    { id: 'andromeda', label: 'Andromeda' },
-    { id: 'ocean', label: 'Ocean' },
-    { id: 'sunset', label: 'Sunset' },
-    { id: 'cyberpunk', label: 'Cyberpunk' },
-    { id: 'synthwave', label: 'Synthwave' },
     { id: 'matrix', label: 'Matrix' },
-    { id: 'light', label: 'Light' },
+    { id: 'zenburn', label: 'Zenburn' },
+    { id: 'monokai', label: 'Monokai' },
+    { id: 'tomorrow-night', label: 'Tomorrow Night' },
+    { id: 'monokai-pro', label: 'Monokai Pro' },
+    { id: 'solarized', label: 'Solarized' },
+    { id: 'oceanic-next', label: 'Oceanic Next' },
+    { id: 'cobalt2', label: 'Cobalt2' },
+    { id: 'everforest', label: 'Everforest' },
+    { id: 'night-owl', label: 'Night Owl' },
+    { id: 'ocean', label: 'Ocean' },
+    { id: 'github-dark', label: 'GitHub Dark' },
+    { id: 'ayu-dark', label: 'Ayu Dark' },
+    { id: 'nord', label: 'Nord' },
+    { id: 'one-dark', label: 'One Dark' },
+    { id: 'andromeda', label: 'Andromeda' },
+    { id: 'aurora', label: 'Aurora' },
+    { id: 'horizon', label: 'Horizon' },
+    { id: 'material-ocean', label: 'Material Ocean' },
+    { id: 'palenight', label: 'Palenight' },
+    { id: 'iceberg', label: 'Iceberg' },
+    { id: 'dracula', label: 'Dracula' },
+    { id: 'moonlight', label: 'Moonlight' },
+    { id: 'tokyo-night', label: 'Tokyo Night' },
+    { id: 'catppuccin', label: 'Catppuccin' },
+    { id: 'cyberpunk', label: 'Cyberpunk' },
+    { id: 'kanagawa', label: 'Kanagawa' },
+    { id: 'rose-pine', label: 'Rosé Pine' },
+    { id: 'synthwave', label: 'Synthwave' },
+    { id: 'sunset', label: 'Sunset' },
 ];
+
+/** The light half, same hue ordering as the dark list above. */
+export const LIGHT_TERMINAL_THEME_PRESETS = [
+    { id: 'light', label: 'Light' },
+    { id: 'github-light', label: 'GitHub Light' },
+    { id: 'one-light', label: 'One Light' },
+    { id: 'ayu-light', label: 'Ayu Light' },
+    { id: 'rose-pine-dawn', label: 'Dawn' },
+    { id: 'solarized-light', label: 'Solarized Light' },
+    { id: 'gruvbox-light', label: 'Gruvbox Light' },
+    { id: 'nord-snow', label: 'Nord Snow' },
+    { id: 'catppuccin-latte', label: 'Latte' },
+];
+
+/** The full built-in list, dark then light - what a flat picker (the custom
+ *  editor's "start from" dropdown) wants when it isn't sectioning by mode. */
+export const TERMINAL_THEME_PRESETS = [...DARK_TERMINAL_THEME_PRESETS, ...LIGHT_TERMINAL_THEME_PRESETS];
 
 /**
  * The colours the custom theme is made of, in the order the editor lists them.
@@ -744,6 +842,65 @@ export function resolveTerminalTheme(themeId, customColors) {
         cursorAccent: colors.background,
         selectionBackground: hexToRgba(colors.selectionBackground, SELECTION_ALPHA),
     });
+}
+
+/**
+ * Where an app tint and a terminal theme are drawn from the very same named
+ * palette, that pairing beats anything a hue search could land on by chance -
+ * "Rosé Pine" the app tint means "Rosé Pine" the terminal theme, not just
+ * whatever happens to be nearby on the wheel.
+ */
+const NAMED_TINT_PAIRS = {
+    'tokyo-night': 'tokyo-night',
+    'nord': 'nord',
+    'dracula': 'dracula',
+    'catppuccin': 'catppuccin',
+    'rose-pine': 'rose-pine',
+    'gruvbox': 'gruvbox',
+    'everforest': 'everforest',
+    'solarized': 'solarized',
+    'ocean': 'ocean',
+    'monokai': 'monokai',
+    'one-dark': 'one-dark',
+    'ayu': 'ayu-dark',
+    'kanagawa': 'kanagawa',
+    'synthwave': 'synthwave',
+    'catppuccin-latte': 'catppuccin-latte',
+    'rose-pine-dawn': 'rose-pine-dawn',
+    'gruvbox-light': 'gruvbox-light',
+    'solarized-light': 'solarized-light',
+    'nord-snow': 'nord-snow',
+    'one-light': 'one-light',
+    'ayu-light': 'ayu-light',
+};
+
+function hueDistance(a, b) {
+    const diff = Math.abs(a - b) % 360;
+    return diff > 180 ? 360 - diff : diff;
+}
+
+/**
+ * The terminal theme to suggest for a given app tint: an exact named pairing
+ * if one exists, otherwise whichever built-in of the right mode has the
+ * closest background hue to the tint's `active` step - the same metric the
+ * dark/light preset lists above are sorted by, so this is really just "find
+ * where the tint would slot into that wheel and recommend its neighbour."
+ */
+export function recommendTerminalTheme({ tintId, activeColor, dark }) {
+    const named = tintId && NAMED_TINT_PAIRS[tintId];
+    if (named && TERMINAL_THEMES[named]) return named;
+    if (!activeColor) return null;
+
+    const targetHue = hexToHsl(activeColor).h * 360;
+    const candidates = dark ? DARK_TERMINAL_THEME_PRESETS : LIGHT_TERMINAL_THEME_PRESETS;
+
+    let best = null;
+    for (const candidate of candidates) {
+        const hue = hexToHsl(TERMINAL_THEMES[candidate.id].background).h * 360;
+        const distance = hueDistance(hue, targetHue);
+        if (!best || distance < best.distance) best = { id: candidate.id, distance };
+    }
+    return best?.id ?? null;
 }
 
 function readStoredTheme() {

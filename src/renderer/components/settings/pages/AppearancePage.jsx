@@ -203,7 +203,7 @@ export default function AppearancePage({
                 >
                     <div
                         className="grid gap-3 grid-cols-[repeat(auto-fill,minmax(104px,1fr))]
-                            max-h-[22rem] overflow-y-auto pr-1 -mr-1"
+                            max-h-[24rem] overflow-y-auto pr-1 -mr-1 pb-1 -mb-1"
                         id="app-palette-selector"
                     >
                         {presets.map((option) => (

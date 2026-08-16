@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import toast from 'react-hot-toast';
+import { SparklesIcon } from 'hugeicons-react';
 import SettingsPage from '../ui/SettingsPage';
 import SettingCard from '../ui/SettingCard';
 import SettingRow, { DIVIDED } from '../ui/SettingRow';
@@ -10,8 +11,10 @@ import Select from '../../ui/Select';
 import CustomThemeDialog from '../CustomThemeDialog';
 import {
     CUSTOM_THEME_ID,
+    DARK_TERMINAL_THEME_PRESETS,
+    LIGHT_TERMINAL_THEME_PRESETS,
     TERMINAL_THEMES,
-    TERMINAL_THEME_PRESETS,
+    recommendTerminalTheme,
     sanitizeCustomTheme,
 } from '../../../hooks/useTerminalTheme';
 import {
@@ -21,17 +24,22 @@ import {
     LINK_ACTIVATIONS,
     resolveFontFamily,
 } from '../../../hooks/useTerminalSettings';
+import {
+    APP_COLOR_PRESETS,
+    CUSTOM_TINT_ID,
+    DEFAULT_APP_COLORS,
+    DEFAULT_LIGHT_APP_COLORS,
+    LIGHT_APP_COLOR_PRESETS,
+    sanitizeAppColors,
+} from '../../../lib/app-colors';
 import { MODIFIER_KEY } from '../../../lib/platform';
 import { toastOptions } from '../../../lib/toast';
 import { useT } from '../../../i18n';
 
-const TERMINAL_THEME_OPTIONS = TERMINAL_THEME_PRESETS.map(option => ({
-    ...option,
-    ...TERMINAL_THEMES[option.id],
-}));
-
-// Themes light enough to vanish against the card need an outline of their own.
-const LIGHT_THEMES = new Set(['light', 'github-light', 'solarized-light', 'gruvbox-light']);
+const withColors = (option) => ({ ...option, ...TERMINAL_THEMES[option.id] });
+const DARK_TERMINAL_OPTIONS = DARK_TERMINAL_THEME_PRESETS.map(withColors);
+const LIGHT_TERMINAL_OPTIONS = LIGHT_TERMINAL_THEME_PRESETS.map(withColors);
+const TERMINAL_THEME_OPTIONS = [...DARK_TERMINAL_OPTIONS, ...LIGHT_TERMINAL_OPTIONS];
 
 /** The fake terminal on each tile: three lines of text over the background. */
 function ThemeSwatch({ background, foreground, bordered, children }) {
@@ -77,6 +85,11 @@ const labelClass = (selected) => `text-xs text-center leading-tight ${selected
 const SAMPLE = 'if (x != 0) => ~/.ssh/config';
 
 export default function TerminalPage({
+    darkTint,
+    lightTint,
+    appColors,
+    lightAppColors,
+    resolvedDark,
     terminalTheme,
     customTerminalTheme,
     terminalSettings = DEFAULT_TERMINAL_SETTINGS,
@@ -97,6 +110,24 @@ export default function TerminalPage({
     const themeColors = customSelected
         ? customColors
         : (TERMINAL_THEMES[terminalTheme] || TERMINAL_THEMES.dark || {});
+
+    // What the app's own chrome is tinted with right now, read the same way
+    // AppearancePage reads it - `resolvedDark` rather than `theme`, so System
+    // follows the OS live instead of guessing from the mode's name.
+    const tintId = resolvedDark ? darkTint : lightTint;
+    const tintActiveColor = tintId === CUSTOM_TINT_ID
+        ? sanitizeAppColors(
+            resolvedDark ? appColors : lightAppColors,
+            resolvedDark ? DEFAULT_APP_COLORS : DEFAULT_LIGHT_APP_COLORS,
+        ).active
+        : (resolvedDark ? APP_COLOR_PRESETS : LIGHT_APP_COLOR_PRESETS)
+            .find(preset => preset.id === tintId)?.colors.active;
+    const recommendedId = recommendTerminalTheme({
+        tintId: tintId === CUSTOM_TINT_ID ? null : tintId,
+        activeColor: tintActiveColor,
+        dark: resolvedDark,
+    });
+    const recommendedTheme = TERMINAL_THEME_OPTIONS.find(option => option.id === recommendedId) || null;
 
     const chosenFont = terminalFonts.find(font => font.id === terminalSettings.fontFamily);
     const set = (patch) => onTerminalSettingsChange?.(patch);
@@ -368,76 +399,136 @@ export default function TerminalPage({
                     title={t('settings.terminal.colors')}
                     description={t('settings.terminal.colorsDesc')}
                 >
-                    {/* Reflows on the column's own width rather than a fixed
-                        count: at the 900px minimum window the content pane is
-                        narrow enough that four fixed columns collide. The list
-                        scrolls so the settings below it stay in reach. */}
-                    <div
-                        className="grid gap-3 grid-cols-[repeat(auto-fill,minmax(104px,1fr))]
-                            max-h-[26rem] overflow-y-auto pr-1 -mr-1"
-                        id="terminal-theme-selector"
-                    >
-                        {TERMINAL_THEME_OPTIONS.map((option) => (
+                    <div className="space-y-3">
+                        {/* Hidden once it's already what's selected - recommending
+                            the thing already on screen is just noise. */}
+                        {recommendedTheme && recommendedTheme.id !== terminalTheme && (
                             <button
-                                key={option.id}
-                                className={tileClass(terminalTheme === option.id)}
-                                data-terminal-theme={option.id}
+                                type="button"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs
+                                    font-semibold border border-surface-active bg-surface-control/60
+                                    text-gray-700 dark:text-gray-300 transition-colors
+                                    hover:bg-surface-control"
                                 onClick={() => {
-                                    onTerminalThemeChange(option.id);
+                                    onTerminalThemeChange(recommendedTheme.id);
                                     toast.success(
-                                        t('settings.terminal.themeChanged', { theme: option.label }),
+                                        t('settings.terminal.themeChanged', { theme: recommendedTheme.label }),
                                         toastOptions(),
                                     );
                                 }}
                             >
-                                <ThemeSwatch
-                                    background={option.background}
-                                    foreground={option.foreground}
-                                    bordered={LIGHT_THEMES.has(option.id)}
-                                />
-                                <span className={labelClass(terminalTheme === option.id)}>
-                                    {option.label}
-                                </span>
+                                <SparklesIcon size={14} strokeWidth={1.5} />
+                                {t('settings.terminal.recommended', { theme: recommendedTheme.label })}
                             </button>
-                        ))}
+                        )}
 
-                        {/* The user's own palette, shown with its ANSI colours so
-                            it is recognisable rather than just "Custom". */}
-                        <button
-                            className={tileClass(customSelected)}
-                            data-terminal-theme={CUSTOM_THEME_ID}
-                            onClick={() => {
-                                onTerminalThemeChange(CUSTOM_THEME_ID);
-                                toast.success(
-                                    t('settings.terminal.themeChanged', {
-                                        theme: t('settings.terminal.custom'),
-                                    }),
-                                    toastOptions(),
-                                );
-                            }}
+                        {/* Reflows on the column's own width rather than a fixed
+                            count: at the 900px minimum window the content pane is
+                            narrow enough that four fixed columns collide. `pb-1
+                            -mb-1`/`pr-1 -mr-1` keep the selection ring from being
+                            clipped by the scroll box's own edge on the last row
+                            or rightmost column. */}
+                        <div
+                            className="max-h-[26rem] overflow-y-auto pr-1 -mr-1 pb-1 -mb-1 space-y-4"
+                            id="terminal-theme-selector"
                         >
-                            <ThemeSwatch
-                                background={customColors.background}
-                                foreground={customColors.foreground}
-                            >
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
-                                    {['red', 'yellow', 'green', 'cyan', 'blue', 'magenta'].map(key => (
-                                        <div
-                                            key={key}
-                                            style={{
-                                                height: '6px',
-                                                width: '6px',
-                                                borderRadius: '999px',
-                                                backgroundColor: customColors[key],
+                            <div>
+                                <h4 className="mb-2 text-xs font-bold uppercase tracking-wide
+                                    text-gray-400 dark:text-gray-500">
+                                    {t('settings.terminal.themesDark')}
+                                </h4>
+                                <div className="grid gap-3 grid-cols-[repeat(auto-fill,minmax(104px,1fr))]">
+                                    {DARK_TERMINAL_OPTIONS.map((option) => (
+                                        <button
+                                            key={option.id}
+                                            className={tileClass(terminalTheme === option.id)}
+                                            data-terminal-theme={option.id}
+                                            onClick={() => {
+                                                onTerminalThemeChange(option.id);
+                                                toast.success(
+                                                    t('settings.terminal.themeChanged', { theme: option.label }),
+                                                    toastOptions(),
+                                                );
                                             }}
-                                        />
+                                        >
+                                            <ThemeSwatch background={option.background} foreground={option.foreground} />
+                                            <span className={labelClass(terminalTheme === option.id)}>
+                                                {option.label}
+                                            </span>
+                                        </button>
                                     ))}
                                 </div>
-                            </ThemeSwatch>
-                            <span className={labelClass(customSelected)}>
-                                {t('settings.terminal.custom')}
-                            </span>
-                        </button>
+                            </div>
+
+                            <div>
+                                <h4 className="mb-2 text-xs font-bold uppercase tracking-wide
+                                    text-gray-400 dark:text-gray-500">
+                                    {t('settings.terminal.themesLight')}
+                                </h4>
+                                <div className="grid gap-3 grid-cols-[repeat(auto-fill,minmax(104px,1fr))]">
+                                    {LIGHT_TERMINAL_OPTIONS.map((option) => (
+                                        <button
+                                            key={option.id}
+                                            className={tileClass(terminalTheme === option.id)}
+                                            data-terminal-theme={option.id}
+                                            onClick={() => {
+                                                onTerminalThemeChange(option.id);
+                                                toast.success(
+                                                    t('settings.terminal.themeChanged', { theme: option.label }),
+                                                    toastOptions(),
+                                                );
+                                            }}
+                                        >
+                                            <ThemeSwatch background={option.background} foreground={option.foreground} bordered />
+                                            <span className={labelClass(terminalTheme === option.id)}>
+                                                {option.label}
+                                            </span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Its own row rather than tucked into Dark or Light -
+                                a custom palette can be any colour, so it would
+                                misrepresent whichever section it sat in. */}
+                            <div className="grid gap-3 grid-cols-[repeat(auto-fill,minmax(104px,1fr))]">
+                                <button
+                                    className={tileClass(customSelected)}
+                                    data-terminal-theme={CUSTOM_THEME_ID}
+                                    onClick={() => {
+                                        onTerminalThemeChange(CUSTOM_THEME_ID);
+                                        toast.success(
+                                            t('settings.terminal.themeChanged', {
+                                                theme: t('settings.terminal.custom'),
+                                            }),
+                                            toastOptions(),
+                                        );
+                                    }}
+                                >
+                                    <ThemeSwatch
+                                        background={customColors.background}
+                                        foreground={customColors.foreground}
+                                    >
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+                                            {['red', 'yellow', 'green', 'cyan', 'blue', 'magenta'].map(key => (
+                                                <div
+                                                    key={key}
+                                                    style={{
+                                                        height: '6px',
+                                                        width: '6px',
+                                                        borderRadius: '999px',
+                                                        backgroundColor: customColors[key],
+                                                    }}
+                                                />
+                                            ))}
+                                        </div>
+                                    </ThemeSwatch>
+                                    <span className={labelClass(customSelected)}>
+                                        {t('settings.terminal.custom')}
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </SettingRow>
 
