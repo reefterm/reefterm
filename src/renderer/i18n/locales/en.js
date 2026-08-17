@@ -418,6 +418,7 @@ export default {
     'themeSwitcher.appThemeOption': 'App theme: {theme}',
     'themeSwitcher.appTintOption': 'App tint: {tint}',
     'themeSwitcher.terminalThemeOption': 'Terminal theme: {theme}',
+    'themeSwitcher.terminalThemeRecommended': 'Recommended match',
 
     /* ---------------------------------------------------------------- *
      * Settings: Terminal

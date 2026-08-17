@@ -1,4 +1,4 @@
-import { Cancel01Icon, ComputerIcon, Moon02Icon, Sun03Icon } from 'hugeicons-react';
+import { Cancel01Icon, ComputerIcon, Moon02Icon, StarIcon, Sun03Icon } from 'hugeicons-react';
 import Tooltip from '../ui/Tooltip';
 import PaletteSwatch from '../ui/PaletteSwatch';
 import { PANE_HEADER_HEIGHT } from '../../lib/layout';
@@ -86,32 +86,57 @@ const labelClass = (selected) => `text-[10px] text-center leading-tight truncate
     ? 'font-bold text-gray-900 dark:text-white'
     : 'font-medium text-gray-600 dark:text-gray-400'}`;
 
-function TerminalSwatch({ background, foreground, active, label, srLabel, onClick }) {
+function TerminalSwatch({ background, foreground, active, recommended, label, srLabel, onClick }) {
+    const t = useT();
     return (
-        <Tooltip label={label} placement="top">
-            <button
-                type="button"
-                aria-label={srLabel}
-                aria-pressed={active}
-                onClick={onClick}
-                className={`w-full aspect-square rounded-lg border-2 transition-colors
-                    flex items-center justify-center overflow-hidden
-                    ${active
-                        ? 'border-gray-900 dark:border-white'
-                        : 'border-transparent hover:border-surface-hover'}`}
-                style={{ backgroundColor: background }}
-            >
-                {/* "Tt" rather than a plain dot, so the sample reads as the
-                    theme's text colour rather than an unlabelled marker. */}
+        <div className="relative">
+            {/* Raw gray-900/white matching the active ring below, not a
+                `bg-surface-*` token - a tinted surface colour can land close
+                to the swatch underneath, and the badge only works if its
+                contrast survives regardless of the current tint. */}
+            {recommended && (
                 <span
                     aria-hidden="true"
-                    className="text-[11px] font-bold leading-none select-none"
-                    style={{ color: foreground }}
+                    className="absolute -top-1.5 -right-1.5 z-10 w-4 h-4 rounded-full
+                        bg-gray-900 dark:bg-white
+                        shadow-[0_1px_3px_rgba(0,0,0,0.4)] dark:shadow-[0_1px_3px_rgba(0,0,0,0.6)]
+                        flex items-center justify-center pointer-events-none"
                 >
-                    Tt
+                    <StarIcon size={10} fill="currentColor" className="text-white dark:text-gray-900" />
                 </span>
-            </button>
-        </Tooltip>
+            )}
+            <Tooltip
+                label={label}
+                hint={recommended ? t('themeSwitcher.terminalThemeRecommended') : undefined}
+                placement="top"
+                className="w-full"
+            >
+                <button
+                    type="button"
+                    aria-label={recommended
+                        ? `${srLabel} — ${t('themeSwitcher.terminalThemeRecommended')}`
+                        : srLabel}
+                    aria-pressed={active}
+                    onClick={onClick}
+                    className={`w-full aspect-square rounded-lg border-2 transition-colors
+                        flex items-center justify-center overflow-hidden
+                        ${active
+                            ? 'border-gray-900 dark:border-white'
+                            : 'border-transparent hover:border-surface-hover'}`}
+                    style={{ backgroundColor: background }}
+                >
+                    {/* "Tt" rather than a plain dot, so the sample reads as the
+                        theme's text colour rather than an unlabelled marker. */}
+                    <span
+                        aria-hidden="true"
+                        className="text-[11px] font-bold leading-none select-none"
+                        style={{ color: foreground }}
+                    >
+                        Tt
+                    </span>
+                </button>
+            </Tooltip>
+        </div>
     );
 }
 
@@ -143,12 +168,10 @@ export default function ThemeSwitcherContent({
     const customColors = resolvedDark ? appColors : lightAppColors;
     const onTintChange = resolvedDark ? onDarkTintChange : onLightTintChange;
 
-    // Computed but not yet surfaced here - the badge that showed it had a
-    // real layout bug, pulled out to redo properly rather than ship broken.
     const tintActiveColor = tint === CUSTOM_TINT_ID
         ? sanitizeAppColors(customColors, resolvedDark ? DEFAULT_APP_COLORS : DEFAULT_LIGHT_APP_COLORS).active
         : tintPresets.find(preset => preset.id === tint)?.colors.active;
-    const _recommendedTerminalId = recommendTerminalTheme({
+    const recommendedTerminalId = recommendTerminalTheme({
         tintId: tint === CUSTOM_TINT_ID ? null : tint,
         activeColor: tintActiveColor,
         dark: resolvedDark,
@@ -252,6 +275,7 @@ export default function ThemeSwitcherContent({
                                         background={option.background}
                                         foreground={option.foreground}
                                         active={terminalTheme === option.id}
+                                        recommended={option.id === recommendedTerminalId}
                                         label={option.label}
                                         srLabel={t('themeSwitcher.terminalThemeOption', { theme: option.label })}
                                         onClick={() => onTerminalThemeChange(option.id)}
@@ -272,6 +296,7 @@ export default function ThemeSwitcherContent({
                                         background={option.background}
                                         foreground={option.foreground}
                                         active={terminalTheme === option.id}
+                                        recommended={option.id === recommendedTerminalId}
                                         label={option.label}
                                         srLabel={t('themeSwitcher.terminalThemeOption', { theme: option.label })}
                                         onClick={() => onTerminalThemeChange(option.id)}
