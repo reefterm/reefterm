@@ -5,6 +5,8 @@ const capabilitiesCatalog = require('./capabilities');
 const uiExtensionsCatalog = require('./ui-extensions');
 const discover = require('./discover');
 const grants = require('./grants');
+const credentials = require('./credentials');
+const store = require('../store');
 
 /**
  * Ties discovery, persisted consent and the sandboxed host together into
@@ -20,7 +22,7 @@ const grants = require('./grants');
  */
 
 /** Every state list()/describeEntry() can report, in the order they are checked. */
-function createPluginManager({ pluginsRoot, grantsFile }) {
+function createPluginManager({ pluginsRoot, grantsFile, credentialsFile }) {
     const pluginHost = createPluginHost();
     capabilitiesCatalog.registerAll(pluginHost);
 
@@ -28,6 +30,8 @@ function createPluginManager({ pluginsRoot, grantsFile }) {
     let discovered = new Map();
     /** id -> { granted: string[], enabled: boolean }, persisted to grantsFile. */
     let grantState = grants.load(grantsFile);
+    /** id -> { default: Entry, groups: { [group]: Entry } }, persisted to credentialsFile. See credentials.js. */
+    let credentialState = credentials.load(credentialsFile);
 
     let notify = () => {};
     function setNotifier(fn) {
@@ -260,6 +264,45 @@ function createPluginManager({ pluginsRoot, grantsFile }) {
         return pluginHost.invokeAction(id, actionId, args);
     }
 
+    /**
+     * The full credential-mapping state, for a settings page to draw from.
+     * Safe to send to the renderer as-is: it holds only `keyId` references
+     * into the user's own keychain, never key material, the same as a saved
+     * host's own `keychainKeyId` field already does.
+     */
+    function getCredentialConfig() {
+        return credentialState;
+    }
+
+    /**
+     * Sets one plugin's mapping for a group (or its own default, when
+     * `group` is empty) - the one thing a settings page is for. A "key"
+     * entry naming a key that does not actually exist in the keychain is
+     * refused rather than silently falling back to prompt later, at connect
+     * time, when the reason would be much less obvious.
+     */
+    function setCredentialMapping(id, group, entry) {
+        if (entry?.method === 'key') {
+            const keyId = typeof entry.keyId === 'string' ? entry.keyId.trim() : '';
+            if (!keyId || !store.getKeys().some(key => key.id === keyId)) {
+                return { success: false, message: 'That key is not in your keychain' };
+            }
+        }
+        credentialState = credentials.setMapping(credentialState, id, group, entry);
+        credentials.save(credentialsFile, credentialState);
+        return { success: true };
+    }
+
+    /**
+     * How `(pluginId, group)` should authenticate - the one thing the
+     * connect path (ipc/hosts.js) actually calls. The plugin that
+     * contributed the host is never told the answer; only the connection
+     * layer sees it, and only long enough to dial with it.
+     */
+    function resolveCredentialAuth(id, group) {
+        return credentials.resolve(credentialState, id, group);
+    }
+
     return {
         setNotifier,
         init,
@@ -270,6 +313,9 @@ function createPluginManager({ pluginsRoot, grantsFile }) {
         shutdown,
         listContributions: pluginHost.listContributions,
         invokeAction,
+        getCredentialConfig,
+        setCredentialMapping,
+        resolveCredentialAuth,
     };
 }
 

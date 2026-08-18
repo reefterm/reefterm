@@ -1,12 +1,16 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 import { Refresh01Icon, PuzzleIcon, FolderOpenIcon } from 'hugeicons-react';
 import SettingCard from './ui/SettingCard';
 import Toggle from './ui/Toggle';
 import Button from '../ui/Button';
 import PluginConsentDialog from './PluginConsentDialog';
+import PluginConnectionDefaults from './PluginConnectionDefaults';
 import usePlugins from '../../hooks/usePlugins';
 import useBuiltinPlugins from '../../hooks/useBuiltinPlugins';
+import usePluginContributions from '../../hooks/usePluginContributions';
+import usePluginCredentials from '../../hooks/usePluginCredentials';
+import { useKeychain } from '../../hooks/useKeychain';
 import { toastOptions } from '../../lib/toast';
 import { useT } from '../../i18n';
 
@@ -32,7 +36,7 @@ function StateBadge({ state }) {
     );
 }
 
-function PluginRow({ plugin, notice, onToggle, onReview }) {
+function PluginRow({ plugin, notice, onToggle, onReview, externalGroups, credentialMapping, keys, onSetCredentialMapping }) {
     const t = useT();
     const invalid = plugin.state === 'invalid';
 
@@ -68,6 +72,14 @@ function PluginRow({ plugin, notice, onToggle, onReview }) {
                         {t(`settings.plugins.notice.${notice.type}`, { message: notice.message })}
                     </p>
                 )}
+
+                <PluginConnectionDefaults
+                    pluginId={plugin.id}
+                    groups={externalGroups}
+                    mapping={credentialMapping}
+                    keys={keys}
+                    onSetMapping={onSetCredentialMapping}
+                />
             </div>
 
             <div className="shrink-0 flex items-center gap-2">
@@ -127,6 +139,30 @@ export default function PluginsSection() {
     const { builtins, ready: builtinsReady, setEnabled: setBuiltinEnabled } = useBuiltinPlugins();
     const [scanning, setScanning] = useState(false);
     const [reviewing, setReviewing] = useState(null);
+
+    // Which groups each plugin has actually offered (see HostsPanel's
+    // `hosts.externalHost` point) and the credential each is set to connect
+    // with - both read here so a settings row can be drawn without either
+    // hook re-fetching per plugin.
+    const { forPoint: pluginContributionsFor } = usePluginContributions();
+    const { config: credentialConfig, setMapping: setCredentialMapping } = usePluginCredentials();
+    const { keys, loadData: loadKeys } = useKeychain();
+    useEffect(() => { loadKeys(); }, [loadKeys]);
+
+    // Any plugin that has contributed at least one external host gets the
+    // "Default" row (it is the only setting a plugin that never bothers with
+    // groups needs); a plugin whose hosts do carry a `group` also gets one
+    // row per distinct group actually seen. A plugin id present with an
+    // empty set means "has hosts, none of them grouped" - still worth a row.
+    const hostsByPlugin = useMemo(() => {
+        const map = new Map();
+        for (const contribution of pluginContributionsFor('hosts.externalHost')) {
+            if (!map.has(contribution.pluginId)) map.set(contribution.pluginId, new Set());
+            const group = String(contribution.node?.group || '').trim();
+            if (group) map.get(contribution.pluginId).add(group);
+        }
+        return map;
+    }, [pluginContributionsFor]);
 
     const runRescan = async () => {
         setScanning(true);
@@ -225,6 +261,10 @@ export default function PluginsSection() {
                                 notice={notices.get(plugin.id)}
                                 onToggle={toggle}
                                 onReview={setReviewing}
+                                externalGroups={hostsByPlugin.has(plugin.id) ? [...hostsByPlugin.get(plugin.id)].sort() : null}
+                                credentialMapping={credentialConfig[plugin.id]}
+                                keys={keys}
+                                onSetCredentialMapping={setCredentialMapping}
                             />
                         ))}
                     </div>

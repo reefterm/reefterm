@@ -226,15 +226,18 @@ function App() {
     });
 
     /**
-     * An address typed into a picker rather than a host chosen from one.
+     * An address typed into a picker rather than a host chosen from one - or
+     * a plugin's own contributed host, via `source: { pluginId, group }` (see
+     * HostsPanel's onQuickConnect), which tells main which credential
+     * mapping to resolve instead of always prompting.
      *
      * Main parses it and hands back a host record that lives for this app run
      * only; from there it is an ordinary connection, opened by id like any
      * other, and the pane asks for the login while it dials. Answers null when
      * the address will not do, having said so.
      */
-    const openAddress = useCallback(async (address) => {
-        const result = await window.api.hosts.quickConnect(address);
+    const openAddress = useCallback(async (address, source) => {
+        const result = await window.api.hosts.quickConnect(address, source);
         if (result?.success && result.host) return result.host;
 
         toast.error(result?.message || 'Could not read that address', { style: getToastStyle() });
@@ -794,6 +797,10 @@ function App() {
                             onDuplicateHost={handleDuplicateHost}
                             onDeleteHost={handleDeleteHost}
                             onConnect={handleConnect}
+                            onQuickConnect={async (address, source) => {
+                                const host = await openAddress(address, source);
+                                if (host) handleConnect(host);
+                            }}
                             onNewFolder={handleNewFolder}
                             onCreateFolder={handleCreateFolder}
                             onEditFolder={handleEditFolder}

@@ -914,6 +914,13 @@ export default {
     'settings.plugins.consent.footnote': 'Denying turns the plugin off rather than leaving it '
         + 'waiting; you can turn it back on later, which asks again for whatever is still needed.',
 
+    'settings.plugins.credentials.title': 'Connection defaults',
+    'settings.plugins.credentials.default': 'Default',
+    'settings.plugins.credentials.defaultHint': 'Used for ungrouped hosts, and any group below with no setting of its own.',
+    'settings.plugins.credentials.prompt': 'Always ask',
+    'settings.plugins.credentials.agent': 'Use my SSH agent',
+    'settings.plugins.credentials.key': 'Use key: {name}',
+
     'settings.plugins.builtin.title': 'Built-in',
     'settings.plugins.builtin.restartNote': 'Restart reefterm for a change here to take effect.',
     'settings.plugins.builtin.pendingRestart': 'Pending restart',

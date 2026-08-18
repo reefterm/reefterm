@@ -10,6 +10,9 @@ function register({ handle }) {
 
     handle('plugins-list-contributions', () => plugins.listContributions());
     handle('plugins-invoke-action', (event, { id, actionId, args }) => plugins.invokeAction(id, actionId, args));
+
+    handle('plugins-get-credential-config', () => plugins.getCredentialConfig());
+    handle('plugins-set-credential-mapping', (event, { id, group, entry }) => plugins.setCredentialMapping(id, group, entry));
 }
 
 module.exports = { register };

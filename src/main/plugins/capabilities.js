@@ -24,12 +24,75 @@ function define(name, description, handler) {
     CATALOG.set(name, { description, handler });
 }
 
+/** A host in its public shape, minus the folderId - redundant once it is the thing being nested under. */
+function publicHostInFolder(host) {
+    const { folderId: _folderId, ...rest } = tools.publicHost(host);
+    return rest;
+}
+
+/**
+ * Every host and folder under `parentId`, recursively - the same tree the
+ * sidebar itself draws from `folderId`/`parentId`, so a plugin sees the
+ * user's own filing rather than a flat dump it has to regroup itself.
+ */
+function buildFolderNode(parentId, folders, hostsByFolder) {
+    return {
+        hosts: (hostsByFolder.get(parentId) || []).map(publicHostInFolder),
+        folders: folders
+            .filter(folder => (folder.parentId || '') === parentId)
+            .map(folder => ({
+                id: folder.id,
+                name: folder.name,
+                ...buildFolderNode(folder.id, folders, hostsByFolder),
+            })),
+    };
+}
+
 define(
     'hosts.list',
-    'See your saved hosts (name, address, tags - never a password or key)',
+    'See your saved hosts (name, address, tags - never a password or key), '
+        + 'nested by folder, or pass a folder id for just that folder\'s contents',
+    async (folderId) => {
+        const hosts = await store.getHosts();
+        const folders = await store.getFolders();
+
+        const hostsByFolder = new Map();
+        for (const host of hosts) {
+            const key = host.folderId || '';
+            if (!hostsByFolder.has(key)) hostsByFolder.set(key, []);
+            hostsByFolder.get(key).push(host);
+        }
+
+        const requested = String(folderId || '').trim();
+        if (!requested) return buildFolderNode('', folders, hostsByFolder);
+
+        const folder = folders.find(f => f.id === requested);
+        if (!folder) throw new Error(`No folder with id "${requested}"`);
+        return { id: folder.id, name: folder.name, ...buildFolderNode(folder.id, folders, hostsByFolder) };
+    }
+);
+
+define(
+    'hosts.tags',
+    'See the distinct tags used across your saved hosts',
     async () => {
         const hosts = await store.getHosts();
-        return hosts.map(tools.publicHost);
+        const tags = new Set();
+        for (const host of hosts) {
+            for (const tag of host.tags || []) tags.add(tag);
+        }
+        return [...tags].sort();
+    }
+);
+
+define(
+    'snippets.list',
+    'See your saved command snippets (name, commands, tags - snippets never hold secrets)',
+    async () => {
+        const snippets = await store.getSnippets();
+        return snippets.map(({ id, name, kind, steps, chain, command, description, tags, hostIds, runImmediately }) => (
+            { id, name, kind, steps, chain, command, description, tags, hostIds, runImmediately }
+        ));
     }
 );
 

@@ -12,6 +12,12 @@ const plugins = {
     invokeAction: (id, actionId, args) => ipcRenderer.invoke('plugins-invoke-action', { id, actionId, args }),
     onContributionChange: (callback) => subscribe('plugin-contribution', callback),
 
+    // The credential mapping a settings page reads and edits (see
+    // plugins/credentials.js): which saved key or agent, if any, a plugin's
+    // host group should connect with. The plugin itself never sees this.
+    getCredentialConfig: () => ipcRenderer.invoke('plugins-get-credential-config'),
+    setCredentialMapping: (id, group, entry) => ipcRenderer.invoke('plugins-set-credential-mapping', { id, group, entry }),
+
     // First-party features (see plugins/builtins.js). setEnabled here takes
     // effect on next launch, not immediately, unlike setEnabled above.
     builtins: {

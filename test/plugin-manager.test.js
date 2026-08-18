@@ -46,12 +46,13 @@ function freshManagerModule() {
 }
 
 const managers = [];
-function freshManager({ pluginsRoot, grantsFile } = {}) {
+function freshManager({ pluginsRoot, grantsFile, credentialsFile } = {}) {
     const { createPluginManager } = freshManagerModule();
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'rt-test-plugins-dir-'));
     const manager = createPluginManager({
         pluginsRoot: pluginsRoot || path.join(dir, 'plugins'),
         grantsFile: grantsFile || path.join(dir, 'plugins.json'),
+        credentialsFile: credentialsFile || path.join(dir, 'plugin-credentials.json'),
     });
     managers.push(manager);
     return manager;
@@ -429,5 +430,63 @@ describe('manager: UI contributions', () => {
         await manager.setEnabled('com.example.disabledaction', false);
 
         await assert.rejects(manager.invokeAction('com.example.disabledaction', 'x', []), /disabled/);
+    });
+});
+
+describe('manager: plugin credential mapping', () => {
+    test('an unmapped plugin resolves to prompt', () => {
+        const manager = freshManager();
+        assert.deepStrictEqual(manager.resolveCredentialAuth('com.example.a', 'prod'), { method: 'prompt' });
+    });
+
+    test('setCredentialMapping refuses a "key" entry naming a key that is not in the keychain', () => {
+        const manager = freshManager();
+        const result = manager.setCredentialMapping('com.example.a', 'prod', { method: 'key', keyId: 'no-such-key' });
+        assert.strictEqual(result.success, false);
+        assert.deepStrictEqual(manager.resolveCredentialAuth('com.example.a', 'prod'), { method: 'prompt' });
+    });
+
+    test('setCredentialMapping accepts a real keychain key, and it resolves back out', () => {
+        const { createPluginManager, store } = freshManagerModule();
+        const key = store.saveKey({ name: 'deploy', type: 'ed25519', privateKey: 'not-a-real-key' });
+
+        const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'rt-test-plugins-dir-'));
+        const manager = createPluginManager({
+            pluginsRoot: path.join(dir, 'plugins'),
+            grantsFile: path.join(dir, 'plugins.json'),
+            credentialsFile: path.join(dir, 'plugin-credentials.json'),
+        });
+        managers.push(manager);
+
+        const result = manager.setCredentialMapping('com.example.a', 'prod', { method: 'key', keyId: key.id });
+        assert.strictEqual(result.success, true);
+        assert.deepStrictEqual(manager.resolveCredentialAuth('com.example.a', 'prod'), { method: 'key', keyId: key.id });
+    });
+
+    test('setCredentialMapping with an empty group sets the plugin-wide default', () => {
+        const manager = freshManager();
+        manager.setCredentialMapping('com.example.a', '', { method: 'agent' });
+        assert.deepStrictEqual(manager.resolveCredentialAuth('com.example.a', 'anything'), { method: 'agent' });
+    });
+
+    test('getCredentialConfig reports the mapping a settings page just wrote', () => {
+        const manager = freshManager();
+        manager.setCredentialMapping('com.example.a', 'prod', { method: 'agent' });
+        assert.deepStrictEqual(manager.getCredentialConfig(), {
+            'com.example.a': { default: { method: 'prompt' }, groups: { prod: { method: 'agent' } } },
+        });
+    });
+
+    test('the mapping survives a restart, the same way a grant does', () => {
+        const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'rt-test-plugins-dir-'));
+        const credentialsFile = path.join(dir, 'plugin-credentials.json');
+        const grantsFile = path.join(dir, 'plugins.json');
+        const pluginsRoot = path.join(dir, 'plugins');
+
+        const first = freshManager({ pluginsRoot, grantsFile, credentialsFile });
+        first.setCredentialMapping('com.example.a', 'prod', { method: 'agent' });
+
+        const second = freshManager({ pluginsRoot, grantsFile, credentialsFile });
+        assert.deepStrictEqual(second.resolveCredentialAuth('com.example.a', 'prod'), { method: 'agent' });
     });
 });

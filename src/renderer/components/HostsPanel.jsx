@@ -18,6 +18,7 @@ import {
 } from 'hugeicons-react';
 import HostCard from './HostCard';
 import FolderCard from './FolderCard';
+import ExternalHostGroup from './hosts/ExternalHostGroup';
 import HostsToolbar from './hosts/HostsToolbar';
 import HostsBreadcrumb from './hosts/HostsBreadcrumb';
 import SelectionBar from './hosts/SelectionBar';
@@ -29,6 +30,7 @@ import EmptyFrame from './ui/EmptyFrame';
 import ConfirmDialog from './ui/ConfirmDialog';
 import Tag from './ui/Tag';
 import { toastOptions } from '../lib/toast';
+import { formatAddress } from '../lib/address';
 import { useT } from '../i18n';
 import { hostOs } from '../lib/os-icons';
 import { hostKind, protocolLabel } from '../lib/protocols';
@@ -38,6 +40,7 @@ import { useFlipOrder } from '../hooks/useFlipOrder';
 import useMonitor from '../hooks/useMonitor';
 import { useMarqueeSelection } from '../hooks/useMarqueeSelection';
 import usePluginContributions from '../hooks/usePluginContributions';
+import usePlugins from '../hooks/usePlugins';
 import { CARD_GRID } from '../lib/layout';
 import { toContextMenuItem } from '../lib/plugin-ui';
 import {
@@ -122,6 +125,7 @@ function HostsPanel({
     onDuplicateHost,
     onDeleteHost,
     onConnect,
+    onQuickConnect,
     onNewFolder,
     onCreateFolder,
     onEditFolder,
@@ -193,6 +197,7 @@ function HostsPanel({
     // subscription per card would be several hundred of them on a long list.
     const { statuses } = useMonitor();
     const { forPoint: pluginContributionsFor, invoke: invokePluginAction } = usePluginContributions();
+    const { plugins: installedPlugins } = usePlugins();
 
     /**
      * A dialog opened here belongs to this page, and goes when the page does.
@@ -246,6 +251,61 @@ function HostsPanel({
      * for either of them, which is why they share one flag.
      */
     const filtering = searching || filteringByTag;
+
+    /**
+     * A plugin's own hosts, grouped by the plugin that contributed them and
+     * never mixed into `visibleFolders`/`visibleHosts` below: those two drive
+     * selection, drag-and-drop, arranging and deletion, none of which apply
+     * here since nothing here was ever saved. Shown only at the root and only
+     * outside a search, the same as a plugin's own top-level folder would be
+     * if it had one - narrowing these into "the ones matching your search"
+     * would need the same tag/name matching visibleHosts already does, for a
+     * feature request nobody has made yet.
+     */
+    const externalGroups = useMemo(() => {
+        if (currentFolderId || filtering) return [];
+        const names = new Map(installedPlugins.map(plugin => [plugin.id, plugin.name || plugin.id]));
+        const byPlugin = new Map();
+        for (const contribution of pluginContributionsFor('hosts.externalHost')) {
+            const bucket = byPlugin.get(contribution.pluginId) || [];
+            bucket.push(contribution);
+            byPlugin.set(contribution.pluginId, bucket);
+        }
+        return [...byPlugin.entries()].map(([pluginId, list]) => ({
+            pluginId,
+            pluginName: names.get(pluginId) || pluginId,
+            hosts: list,
+        }));
+    }, [currentFolderId, filtering, installedPlugins, pluginContributionsFor]);
+
+    // Dialled the same way a typed address is - never written to the vault -
+    // but naming which plugin and group this came from, so main can resolve
+    // it against a credential mapping the user set in Plugin settings
+    // (plugins/credentials.js) instead of always falling back to a password
+    // prompt. See App.jsx's own openAddress.
+    const handleExternalConnect = useCallback((node, pluginId) => {
+        const address = formatAddress({ username: node.username, host: node.host, port: node.port });
+        onQuickConnect?.(address, { pluginId, group: node.group || '' });
+    }, [onQuickConnect]);
+
+    /**
+     * Promote a plugin's own host into a real saved one. Opened through the
+     * ordinary editor rather than saved directly, so nothing is written until
+     * the user has actually looked at it and pressed Save - the plugin never
+     * gets a write path into the vault, only ever a prefill for a form the
+     * user is the one to submit. No `id` on the draft is what tells the
+     * editor (and handleSaveHost) this is a create, not an edit.
+     */
+    const handleSaveExternalAsHost = useCallback((node) => {
+        onEditHost({
+            name: node.label || '',
+            protocol: 'ssh',
+            host: node.host,
+            port: node.port || 22,
+            username: node.username || '',
+            tags: node.tags || [],
+        });
+    }, [onEditHost]);
 
     const path = useMemo(() => folderPath(allFolders, currentFolderId), [allFolders, currentFolderId]);
 
@@ -1199,6 +1259,20 @@ function HostsPanel({
                                 onConnect={() => onConnect(host)}
                                 onTagClick={handleTagClick}
                                 {...dragState('host', host)}
+                            />
+                        ))}
+                    </div>
+                )}
+
+                {externalGroups.length > 0 && (
+                    <div className="flex flex-col gap-4 mt-4 pt-4 border-t border-gray-900/[0.06] dark:border-white/[0.06]">
+                        {externalGroups.map(group => (
+                            <ExternalHostGroup
+                                key={group.pluginId}
+                                pluginName={group.pluginName}
+                                hosts={group.hosts}
+                                onConnect={(node) => handleExternalConnect(node, group.pluginId)}
+                                onSaveAsHost={handleSaveExternalAsHost}
                             />
                         ))}
                     </div>

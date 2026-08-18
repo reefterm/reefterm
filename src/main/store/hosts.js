@@ -359,14 +359,33 @@ function findHost(hostId) {
  * The same address asked for twice is the same record, so a second tab to a
  * machine already reached does not ask for the login again, and both panes go
  * on sharing it the way two panes on a saved host do.
+ *
+ * `auth` is how a plugin's external host connects without ever having chosen
+ * the credential itself (see plugins/credentials.js's `resolve()`, which is
+ * the only thing allowed to produce one of these): `{ method: 'agent' }` or
+ * `{ method: 'key', keyId }`. Omitted, or anything else, is the ordinary
+ * "ask for a password" address every quick connect has always been - the one
+ * thing a typed address on its own can mean, with no login configured
+ * anywhere to reuse.
  */
-function openQuickConnect(address) {
+function openQuickConnect(address, auth = {}) {
     const host = String(address?.host || '').trim();
     if (!host) return null;
 
     const username = String(address?.username || '').trim();
     const port = Number(address?.port) || defaultPort('ssh');
-    const asked = `${username} ${host} ${port}`;
+
+    const method = auth?.method === 'agent' || auth?.method === 'key' ? auth.method : 'password';
+    const keyId = method === 'key' ? String(auth.keyId || '').trim() : '';
+    // A "key" auth naming nothing to connect with is not a request this can
+    // honour; falling back to a password prompt here would silently ask for
+    // something the caller never meant to ask for.
+    if (method === 'key' && !keyId) return null;
+
+    // Part of what a repeat ask is matched against, alongside who/where/which
+    // port: the same address dialled with a different credential is not the
+    // same connection, and must not hand back a record built for the other one.
+    const asked = `${method}:${keyId} ${username} ${host} ${port}`;
 
     for (const record of quickConnects.values()) {
         if (record.asked === asked) return redactHost(record);
@@ -385,10 +404,8 @@ function openQuickConnect(address) {
         host,
         port,
         username,
-        // Nothing is configured, which is exactly what an address on its own
-        // means. The connection layer asks on the pane that is dialling.
-        authMethod: 'password',
-        password: '',
+        authMethod: method === 'key' ? 'keychain' : method,
+        ...(method === 'key' ? { keychainKeyId: keyId } : { password: '' }),
     };
     record.name = core.describeAddress(record);
 
@@ -498,7 +515,13 @@ function resolveCredentials(hostId) {
     // has asked for it and its host key has been accepted. Cleared as soon as
     // there is a password to reuse, which is what makes the reconnect after a
     // dropped link silent. See openQuickConnect and ssh.js.
-    if (host.ephemeral) credentials.promptCredentials = !host.password;
+    //
+    // Only for a password address, though: one built with a real credential
+    // (an agent, or a keychain key - see openQuickConnect's `auth`) has
+    // something to authenticate with already and dials exactly like a saved
+    // host would, through the ordinary auth handler below rather than the
+    // ask-as-you-go one this flag switches on.
+    if (host.ephemeral && credentials.authMethod === 'password') credentials.promptCredentials = !host.password;
 
     if (credentials.authMethod === 'keychain') {
         const key = store.keys.find(k => k.id === host.keychainKeyId);

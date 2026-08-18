@@ -17,6 +17,7 @@ const { createBuiltinsManager } = require('./builtins');
 const manager = createPluginManager({
     pluginsRoot: path.join(app.getPath('userData'), 'plugins'),
     grantsFile: path.join(app.getPath('userData'), 'plugins.json'),
+    credentialsFile: path.join(app.getPath('userData'), 'plugin-credentials.json'),
 });
 
 const builtins = createBuiltinsManager({

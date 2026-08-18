@@ -175,6 +175,55 @@ describe('store: quick connect', () => {
         store.forgetQuickConnects();
         assert.strictEqual(store.resolveCredentials(record.id), null);
     });
+
+    test('with no auth, or an unrecognised one, the record is the ordinary ask-for-a-password address', () => {
+        const { store } = freshStore();
+        const record = store.openQuickConnect({ host: '10.0.0.9', username: 'root', port: 22 });
+        const creds = store.resolveCredentials(record.id);
+        assert.strictEqual(creds.authMethod, 'password');
+        assert.strictEqual(creds.promptCredentials, true);
+    });
+
+    test('agent auth resolves with no prompt and no secret to type', () => {
+        const { store } = freshStore();
+        const record = store.openQuickConnect({ host: '10.0.0.9', username: 'root', port: 22 }, { method: 'agent' });
+        const creds = store.resolveCredentials(record.id);
+        assert.strictEqual(creds.authMethod, 'agent');
+        assert.strictEqual(creds.promptCredentials, undefined);
+    });
+
+    test('key auth pulls the key from the keychain and resolves with no prompt', () => {
+        const { store } = freshStore();
+        const key = store.saveKey({ name: 'deploy', type: 'ED25519', privateKey: 'PRIVATE', passphrase: '' });
+        const record = store.openQuickConnect({ host: '10.0.0.9', username: 'root', port: 22 }, { method: 'key', keyId: key.id });
+
+        const creds = store.resolveCredentials(record.id);
+        assert.strictEqual(creds.authMethod, 'key');
+        assert.strictEqual(creds.privateKey, 'PRIVATE');
+        assert.strictEqual(creds.promptCredentials, undefined);
+    });
+
+    test('key auth naming no key is refused rather than falling back to a password prompt', () => {
+        const { store } = freshStore();
+        assert.strictEqual(store.openQuickConnect({ host: '10.0.0.9', username: 'root', port: 22 }, { method: 'key' }), null);
+    });
+
+    test('the same address dialled with two different credentials is two different ephemeral records', () => {
+        const { store } = freshStore();
+        const key = store.saveKey({ name: 'deploy', type: 'ED25519', privateKey: 'PRIVATE', passphrase: '' });
+        const asPassword = store.openQuickConnect({ host: '10.0.0.9', username: 'root', port: 22 });
+        const asAgent = store.openQuickConnect({ host: '10.0.0.9', username: 'root', port: 22 }, { method: 'agent' });
+        const asKey = store.openQuickConnect({ host: '10.0.0.9', username: 'root', port: 22 }, { method: 'key', keyId: key.id });
+
+        assert.notStrictEqual(asPassword.id, asAgent.id);
+        assert.notStrictEqual(asPassword.id, asKey.id);
+        assert.notStrictEqual(asAgent.id, asKey.id);
+
+        // And asking the same way twice still reuses the one record, exactly
+        // as it always has for a plain address.
+        const asAgentAgain = store.openQuickConnect({ host: '10.0.0.9', username: 'root', port: 22 }, { method: 'agent' });
+        assert.strictEqual(asAgent.id, asAgentAgain.id);
+    });
 });
 
 /* ---------------- resolveCredentials ---------------- */

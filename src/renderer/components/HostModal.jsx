@@ -372,7 +372,7 @@ function HostModal({ host, dismiss, onClose, onSave, keys = [], hosts = [], allT
 
     return (
         <Sheet
-            title={host ? 'Edit host' : 'New host'}
+            title={host?.id ? 'Edit host' : 'New host'}
             subtitle="Where to connect, how to authenticate, and what to do once you are in."
             dismiss={dismiss}
             onClose={onClose}

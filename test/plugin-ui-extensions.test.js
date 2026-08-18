@@ -21,6 +21,11 @@ describe('ui-extensions: the catalog', () => {
         assert.match(uiExtensions.describe('statusBar.tile'), /status bar/);
     });
 
+    test('hosts.externalHost is registered with a description', () => {
+        assert.strictEqual(uiExtensions.has('hosts.externalHost'), true);
+        assert.match(uiExtensions.describe('hosts.externalHost'), /never mixed into your saved hosts/);
+    });
+
     test('an unknown point is not in the catalog', () => {
         assert.strictEqual(uiExtensions.has('does.not.exist'), false);
         assert.strictEqual(uiExtensions.describe('does.not.exist'), '');
@@ -106,6 +111,51 @@ describe('ui-extensions: validateNode', () => {
             type: 'tile', label: 'Hosts', value: 3, onAction: '',
         });
         assert.match(error, /"onAction"/);
+    });
+
+    test('a well-formed host for hosts.externalHost is valid, with or without optional fields', () => {
+        assert.strictEqual(uiExtensions.validateNode('hosts.externalHost', {
+            type: 'host', label: 'db-1', host: '10.0.0.5',
+        }), '');
+        assert.strictEqual(uiExtensions.validateNode('hosts.externalHost', {
+            type: 'host', label: 'db-1', host: '10.0.0.5', port: 2222, username: 'deploy',
+            icon: 'server', tags: ['warpgate', 'prod'],
+        }), '');
+    });
+
+    test('a host needs a label and a non-empty host string', () => {
+        assert.match(uiExtensions.validateNode('hosts.externalHost', { type: 'host', host: '10.0.0.5' }), /"label"/);
+        assert.match(uiExtensions.validateNode('hosts.externalHost', { type: 'host', label: 'db-1' }), /"host"/);
+        assert.match(uiExtensions.validateNode('hosts.externalHost', { type: 'host', label: 'db-1', host: '  ' }), /"host"/);
+    });
+
+    test('a host\'s port, when present, must be an integer in range', () => {
+        assert.match(uiExtensions.validateNode('hosts.externalHost', {
+            type: 'host', label: 'db-1', host: '10.0.0.5', port: 0,
+        }), /"port"/);
+        assert.match(uiExtensions.validateNode('hosts.externalHost', {
+            type: 'host', label: 'db-1', host: '10.0.0.5', port: 99999,
+        }), /"port"/);
+        assert.match(uiExtensions.validateNode('hosts.externalHost', {
+            type: 'host', label: 'db-1', host: '10.0.0.5', port: '22',
+        }), /"port"/);
+    });
+
+    test('a host has no onAction of its own - connecting it is not something a plugin defines', () => {
+        const error = uiExtensions.validateNode('hosts.externalHost', {
+            type: 'host', label: 'db-1', host: '10.0.0.5', onAction: 'somethingElse',
+        });
+        // Unknown extra fields are simply not read by the shape check, the
+        // same as every other node type - it is the renderer that never looks
+        // for onAction on this node, not this validator refusing the field.
+        assert.strictEqual(error, '');
+    });
+
+    test('a host\'s tags, when present, must be an array of strings', () => {
+        const error = uiExtensions.validateNode('hosts.externalHost', {
+            type: 'host', label: 'db-1', host: '10.0.0.5', tags: ['prod', 3],
+        });
+        assert.match(error, /"tags"/);
     });
 });
 

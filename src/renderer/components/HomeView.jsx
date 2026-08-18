@@ -54,6 +54,7 @@ function HomeView({
     onDuplicateHost,
     onDeleteHost,
     onConnect,
+    onQuickConnect,
     onNewFolder,
     onCreateFolder,
     onEditFolder,
@@ -86,6 +87,7 @@ function HomeView({
                     onDuplicateHost={onDuplicateHost}
                     onDeleteHost={onDeleteHost}
                     onConnect={onConnect}
+                    onQuickConnect={onQuickConnect}
                     onNewFolder={onNewFolder}
                     onCreateFolder={onCreateFolder}
                     onEditFolder={onEditFolder}

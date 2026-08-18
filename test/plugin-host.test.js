@@ -338,6 +338,30 @@ describe('plugin host: UI contributions', () => {
         }]);
     });
 
+    test('a plugin can contribute an external host, and it clears on stop', async () => {
+        const host = freshHost();
+        const entry = writeScript(`
+            module.exports = {
+                activate: async ({ contribute }) => {
+                    await contribute('hosts.externalHost', 'db-1', {
+                        type: 'host', label: 'db-1', host: '10.0.0.5', port: 2222, username: 'deploy',
+                    });
+                },
+            };
+        `);
+        await host.start({ id: 'a', entryFile: entry, capabilities: [] });
+
+        assert.deepStrictEqual(host.listContributions(), [{
+            pluginId: 'a',
+            pointName: 'hosts.externalHost',
+            id: 'db-1',
+            node: { type: 'host', label: 'db-1', host: '10.0.0.5', port: 2222, username: 'deploy' },
+        }]);
+
+        await host.stop('a');
+        assert.deepStrictEqual(host.listContributions(), []);
+    });
+
     test('an invalid contribution is rejected with a clear reason, and never appears in the list', async () => {
         const host = freshHost();
         const entry = writeScript(`

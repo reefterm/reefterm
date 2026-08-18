@@ -54,6 +54,16 @@ describe('PluginsSection', () => {
                     list: vi.fn().mockResolvedValue([]),
                     setEnabled: vi.fn().mockResolvedValue({ success: true }),
                 },
+                // Connection-defaults machinery (PluginConnectionDefaults):
+                // which hosts a plugin has contributed, and how each group is
+                // set to authenticate.
+                listContributions: vi.fn().mockResolvedValue([]),
+                onContributionChange: vi.fn(() => () => {}),
+                getCredentialConfig: vi.fn().mockResolvedValue({}),
+                setCredentialMapping: vi.fn().mockResolvedValue({ success: true }),
+            },
+            keys: {
+                list: vi.fn().mockResolvedValue([]),
             },
             window: {
                 restart: vi.fn(),
@@ -201,6 +211,50 @@ describe('PluginsSection', () => {
         await user.click(await screen.findByRole('switch', { name: /enable ai assistant/i }));
 
         expect(await screen.findByText(/pending restart/i)).toBeInTheDocument();
+    });
+
+    test('a plugin with no contributed hosts shows no Connection defaults section', async () => {
+        window.api.plugins.list.mockResolvedValue([plugin()]);
+        render(<PluginsSection />);
+
+        await screen.findByText('Demo Plugin');
+        expect(screen.queryByText('Connection defaults')).not.toBeInTheDocument();
+    });
+
+    test('a plugin with only ungrouped hosts still gets a Default row', async () => {
+        window.api.plugins.list.mockResolvedValue([plugin()]);
+        window.api.plugins.listContributions.mockResolvedValue([{
+            pluginId: 'com.example.demo', pointName: 'hosts.externalHost', id: 'db-1',
+            node: { type: 'host', label: 'db-1', host: '10.0.0.5' },
+        }]);
+        render(<PluginsSection />);
+
+        expect(await screen.findByText('Connection defaults')).toBeInTheDocument();
+        expect(screen.getByText('Default')).toBeInTheDocument();
+        expect(screen.queryByText('prod-db')).not.toBeInTheDocument();
+    });
+
+    test('a plugin with a grouped host gets a row for the group too, and picking a key writes the mapping', async () => {
+        window.api.plugins.list.mockResolvedValue([plugin()]);
+        window.api.plugins.listContributions.mockResolvedValue([{
+            pluginId: 'com.example.demo', pointName: 'hosts.externalHost', id: 'db-1',
+            node: { type: 'host', label: 'db-1', host: '10.0.0.5', group: 'prod-db' },
+        }]);
+        window.api.keys.list.mockResolvedValue([{ id: 'key-1', name: 'deploy' }]);
+        const user = userEvent.setup();
+        render(<PluginsSection />);
+
+        await screen.findByText('Connection defaults');
+
+        // The Select's trigger takes the group name as its own accessible
+        // name, so this reaches the "prod-db" row's dropdown specifically,
+        // not the "Default" row's.
+        await user.click(await screen.findByRole('button', { name: 'prod-db' }));
+        await user.click(await screen.findByRole('option', { name: 'Use key: deploy' }));
+
+        expect(window.api.plugins.setCredentialMapping).toHaveBeenCalledWith(
+            'com.example.demo', 'prod-db', { method: 'key', keyId: 'key-1' },
+        );
     });
 
     test('toggling back to the original value makes the label disappear again', async () => {

@@ -22,8 +22,13 @@ const hosts = {
      * host is an ordinary redacted record that exists for this app run
      * only. Connect it by id like any other; nothing is written to disk,
      * and the login is asked for on the pane while it dials.
+     *
+     * `source: { pluginId, group }` is only for a plugin's own contributed
+     * host (see HostsPanel's `hosts.externalHost` group): it tells main
+     * which credential mapping to resolve (plugins/credentials.js), never a
+     * credential itself. Omit it for an ordinary typed address.
      */
-    quickConnect: (address) => ipcRenderer.invoke('host-quick-connect', String(address || '')),
+    quickConnect: (address, source) => ipcRenderer.invoke('host-quick-connect', String(address || ''), source),
 };
 
 const folders = {

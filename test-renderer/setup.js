@@ -8,3 +8,10 @@ import '@testing-library/jest-dom/vitest';
 afterEach(() => {
     cleanup();
 });
+
+// jsdom implements no layout at all, so it has nothing to scroll and never
+// defined this. ui/Select.jsx calls it on the active row whenever the list's
+// open, which is any test that opens one.
+if (typeof Element !== 'undefined' && !Element.prototype.scrollIntoView) {
+    Element.prototype.scrollIntoView = () => {};
+}

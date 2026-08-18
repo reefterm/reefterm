@@ -37,6 +37,12 @@ define('statusBar.tile', {
     accepts: ['tile'],
 });
 
+define('hosts.externalHost', {
+    description: "A host of the plugin's own, shown in a labelled group of its own on the Hosts screen "
+        + '(never mixed into your saved hosts) and dialled the same way a typed address is',
+    accepts: ['host'],
+});
+
 /** Non-empty string, no control characters, under a sane display length. */
 function isLabel(value, maxLength = 60) {
     return typeof value === 'string' && value.length > 0 && value.length <= maxLength;
@@ -135,6 +141,24 @@ const NODE_SHAPES = {
         if (node.icon !== undefined && typeof node.icon !== 'string') return '"icon" must be a string';
         if (node.onAction !== undefined && !isLabel(node.onAction, 200)) return '"onAction" must be a non-empty action id';
         if (node.tooltip !== undefined) return validateTooltip(node.tooltip);
+        return '';
+    },
+    // No onAction: unlike a button or a menu item, clicking one of these always
+    // does exactly one thing (dial it, the same way a typed address is dialled)
+    // rather than something the plugin gets to define. And no password, key or
+    // any other credential field exists on this shape at all - connecting one
+    // asks the user the same way an address typed into the picker does.
+    host(node) {
+        if (!isLabel(node.label)) return '"label" must be a non-empty string (60 chars or fewer)';
+        if (typeof node.host !== 'string' || !node.host.trim()) return '"host" must be a non-empty string';
+        if (node.port !== undefined && (!Number.isInteger(node.port) || node.port < 1 || node.port > 65535)) {
+            return '"port" must be an integer between 1 and 65535';
+        }
+        if (node.username !== undefined && typeof node.username !== 'string') return '"username" must be a string';
+        if (node.icon !== undefined && typeof node.icon !== 'string') return '"icon" must be a string';
+        if (node.tags !== undefined && !(Array.isArray(node.tags) && node.tags.every(tag => typeof tag === 'string'))) {
+            return '"tags" must be an array of strings';
+        }
         return '';
     },
 };
