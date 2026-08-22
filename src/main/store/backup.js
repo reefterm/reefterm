@@ -103,7 +103,7 @@ function importAll(payload, { overwrite = false } = {}) {
     const store = core.load();
 
     const prepareSecrets = (raw, fields = core.SECRET_FIELDS) => {
-        const { hasPassword, hasPrivateKey, hasPassphrase, hasVncPassword, ...rest } = raw || {};
+        const { hasPassword: _hasPassword, hasPrivateKey: _hasPrivateKey, hasPassphrase: _hasPassphrase, hasVncPassword: _hasVncPassword, ...rest } = raw || {};
         const record = { ...rest };
         for (const field of fields) {
             record[field] = raw?.[field] ? core.encryptSecret(raw[field]) : '';

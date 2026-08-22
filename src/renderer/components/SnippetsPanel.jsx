@@ -157,7 +157,7 @@ function SnippetsPanel({ isActive = true, reachedForPage = 0, allHosts = [] }) {
 
     const handleDuplicate = useCallback(async (snippet) => {
         // Without the id it saves as a new record rather than overwriting.
-        const { id, ...rest } = snippet;
+        const { id: _id, ...rest } = snippet;
         await save({ ...rest, name: `${snippet.name} copy` });
         toast.success(`Duplicated “${snippet.name}”`, toastOptions({ duration: 2200 }));
     }, [save]);

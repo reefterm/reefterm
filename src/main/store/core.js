@@ -234,7 +234,7 @@ function migrateV1(entries) {
         if (!entry || typeof entry !== 'object') continue;
 
         if (entry.type === 'folder' || entry.isFolder) {
-            const { isFolder, type, ...folder } = entry;
+            const { isFolder: _isFolder, type: _type, ...folder } = entry;
             migrated.folders.push(folder);
         } else if (entry.type === 'keychain') {
             // v1 overwrote each key's algorithm with the 'keychain' tag; it is
@@ -246,7 +246,7 @@ function migrateV1(entries) {
                 passphrase: encryptSecret(entry.passphrase),
             });
         } else {
-            const { type, ...host } = entry;
+            const { type: _type, ...host } = entry;
             migrated.hosts.push({
                 ...host,
                 password: encryptSecret(entry.password),

@@ -311,7 +311,7 @@ export default function useAssistant({
         return () => { cancelled = true; };
         // Deliberately once: a scope change moves the existing conversation
         // rather than starting a new one, which is handled below.
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+         
     }, [enabled]);
 
     /* The live stream. */
@@ -330,7 +330,7 @@ export default function useAssistant({
         window.api.ai.setScope(conversationId, targetRef.current);
         // `targetKey` is the target, flattened to something a dependency list
         // can compare. See the note where it is built.
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+         
     }, [conversationId, targetKey]);
 
     const send = useCallback(async (text) => {

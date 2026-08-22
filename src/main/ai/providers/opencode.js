@@ -6,7 +6,6 @@ const { spawnSync } = require('child_process');
 const spawn = require('cross-spawn');
 const { app } = require('electron');
 
-const catalog = require('../tools');
 const mcpHost = require('../mcp-host');
 
 /**

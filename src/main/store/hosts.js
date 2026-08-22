@@ -10,7 +10,7 @@ const { resolveProxyChain } = require('./proxies');
 
 /** Strip secrets before anything crosses the IPC boundary. */
 function redactHost(host) {
-    const { password, privateKey, passphrase, vncPassword, rdpPassword, bmcPassword, ...rest } = host;
+    const { password, privateKey, passphrase: _passphrase, vncPassword, rdpPassword, bmcPassword, ...rest } = host;
     return {
         ...rest,
         hasPassword: Boolean(password),
@@ -57,7 +57,7 @@ function saveHost(host) {
     const existing = index >= 0 ? store.hosts[index] : {};
 
     // Never trust redaction flags coming back from the renderer.
-    const { hasPassword, hasPrivateKey, hasVncPassword, hasRdpPassword, hasBmcPassword, ...incoming } = host;
+    const { hasPassword: _hasPassword, hasPrivateKey: _hasPrivateKey, hasVncPassword: _hasVncPassword, hasRdpPassword: _hasRdpPassword, hasBmcPassword: _hasBmcPassword, ...incoming } = host;
     const record = core.mergeSecrets({ ...existing, ...incoming, id }, incoming, existing);
 
     // Tunnels carry no secrets, but they do come from the renderer and drive
@@ -219,7 +219,7 @@ function duplicateHost(hostId) {
     const source = store.hosts.find(h => h.id === hostId);
     if (!source) return null;
 
-    const { lastConnectedAt, ...rest } = source;
+    const { lastConnectedAt: _lastConnectedAt, ...rest } = source;
     const record = {
         ...rest,
         id: `host-${Date.now()}`,

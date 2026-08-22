@@ -26,7 +26,7 @@ function saveKey(key) {
 
     // `type` stays the key algorithm (ED25519/RSA/...); records are separated
     // by collection now, so nothing needs a discriminator tag.
-    const { hasPrivateKey, hasPassphrase, ...incoming } = key;
+    const { hasPrivateKey: _hasPrivateKey, hasPassphrase: _hasPassphrase, ...incoming } = key;
     const record = core.mergeSecrets({ ...existing, ...incoming, id }, incoming, existing);
 
     if (index >= 0) store.keys[index] = record;

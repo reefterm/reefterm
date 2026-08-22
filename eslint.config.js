@@ -28,7 +28,7 @@ module.exports = [
     {
         // Root-level tooling config that's plain CommonJS (no package.json
         // "type": "module", so these run as CJS under plain Node).
-        files: ['tailwind.config.js', 'postcss.config.js', 'eslint.config.js'],
+        files: ['tailwind.config.js', 'postcss.config.js', 'eslint.config.js', 'commitlint.config.js'],
         languageOptions: {
             sourceType: 'commonjs',
             globals: { ...globals.node },

@@ -35,7 +35,7 @@ function saveProxy(proxy) {
     const existing = index >= 0 ? store.proxies[index] : {};
 
     // Never trust the redaction flag coming back from the renderer.
-    const { hasPassword, ...incoming } = proxy;
+    const { hasPassword: _hasPassword, ...incoming } = proxy;
 
     // Normalised before the secret is merged, so the record written is the same
     // shape the client will be handed whatever the editor sent.

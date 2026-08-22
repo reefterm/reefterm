@@ -48,7 +48,7 @@ function load() {
     if (binding || bindingError) return binding;
 
     try {
-        // eslint-disable-next-line global-require
+         
         binding = require('serialport');
     } catch (error) {
         bindingError = /cannot find module/i.test(error.message)
