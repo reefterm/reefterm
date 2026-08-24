@@ -1,3 +1,4 @@
+const { randomUUID } = require('crypto');
 const { normalizeProxy, describeProxy, MAX_PROXY_HOPS } = require('../proxy-config');
 const activity = require('../activity');
 const core = require('./core');
@@ -30,7 +31,7 @@ function getProxies() {
 
 function saveProxy(proxy) {
     const store = core.load();
-    const id = proxy.id || `proxy-${Date.now()}`;
+    const id = proxy.id || `proxy-${randomUUID()}`;
     const index = store.proxies.findIndex(entry => entry.id === id);
     const existing = index >= 0 ? store.proxies[index] : {};
 
@@ -122,7 +123,7 @@ function duplicateProxy(proxyId) {
 
     const record = {
         ...source,
-        id: `proxy-${Date.now()}`,
+        id: `proxy-${randomUUID()}`,
         name: `${source.name || 'Proxy'} copy`,
     };
 

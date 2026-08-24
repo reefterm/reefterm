@@ -1,3 +1,4 @@
+const { randomUUID } = require('crypto');
 const { normalizeTunnels } = require('../tunnel-config');
 const { normalizeDesktop } = require('../desktop-config');
 const { normalizeBmc } = require('../bmc-config');
@@ -52,7 +53,7 @@ function saveHost(host) {
     }
 
     const store = core.load();
-    const id = host.id || `host-${Date.now()}`;
+    const id = host.id || `host-${randomUUID()}`;
     const index = store.hosts.findIndex(h => h.id === id);
     const existing = index >= 0 ? store.hosts[index] : {};
 
@@ -222,7 +223,7 @@ function duplicateHost(hostId) {
     const { lastConnectedAt: _lastConnectedAt, ...rest } = source;
     const record = {
         ...rest,
-        id: `host-${Date.now()}`,
+        id: `host-${randomUUID()}`,
         name: `${source.name || 'Host'} copy`,
     };
 

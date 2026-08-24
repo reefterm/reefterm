@@ -1,3 +1,4 @@
+const { randomUUID } = require('crypto');
 const activity = require('../activity');
 const core = require('./core');
 
@@ -11,7 +12,7 @@ function getFolders() {
 
 function saveFolder(folder) {
     const store = core.load();
-    const id = folder.id || `folder-${Date.now()}`;
+    const id = folder.id || `folder-${randomUUID()}`;
     const index = store.folders.findIndex(f => f.id === id);
     const existing = index >= 0 ? store.folders[index] : {};
     const record = { ...existing, ...folder, id };

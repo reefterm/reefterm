@@ -1,3 +1,4 @@
+const { randomUUID } = require('crypto');
 const activity = require('../activity');
 const core = require('./core');
 
@@ -20,7 +21,7 @@ function getKeys() {
 
 function saveKey(key) {
     const store = core.load();
-    const id = key.id || `key-${Date.now()}`;
+    const id = key.id || `key-${randomUUID()}`;
     const index = store.keys.findIndex(k => k.id === id);
     const existing = index >= 0 ? store.keys[index] : {};
 
